@@ -1,0 +1,3789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard IAAPS Curicó - Sistema Integrado de Gestión en Salud</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --gradient-start: #0ea5e9;
+            --gradient-end: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            overflow-x: hidden;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        }
+        
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card {
+            border-radius: 1rem;
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.primary {
+            border-left-color: var(--primary);
+        }
+        
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+        
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+        
+        .nav-link {
+            position: relative;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        table th, table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .progress-bar.success {
+            background-color: var(--success);
+        }
+        
+        .progress-bar.warning {
+            background-color: var(--warning);
+        }
+        
+        .progress-bar.danger {
+            background-color: var(--danger);
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-container input {
+            padding-left: 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .search-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+            outline: none;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .custom-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2rem;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Estilo futurista para tablas */
+        .futuristic-table th {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            padding: 1rem;
+            font-weight: 500;
+        }
+        
+        .futuristic-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .futuristic-table td {
+            padding: 0.75rem 1rem;
+        }
+        
+        /* Animaciones */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+            }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Modo oscuro */
+        .dark-mode {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .card {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .nav-link {
+            color: #94a3b8;
+        }
+        
+        .dark-mode .nav-link:hover, .dark-mode .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .dark-mode table th {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode table td {
+            border-bottom: 1px solid #334155;
+        }
+        
+        .dark-mode table tr:hover {
+            background-color: #334155;
+        }
+        
+        .dark-mode .progress {
+            background-color: #334155;
+        }
+        
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Animación de carga de página */
+        .loader {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loader-dark {
+            background-color: rgba(15, 23, 42, 0.9);
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loader-text {
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Diseño moderno para detalles */
+        .detail-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .detail-container {
+            width: 80%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+        }
+        
+        .dark-mode .detail-container {
+            background-color: #1e293b;
+        }
+        
+        .close-detail {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s;
+        }
+        
+        .close-detail:hover {
+            color: var(--danger);
+        }
+
+        .file-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-error i {
+            color: var(--danger);
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .file-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-success i {
+            color: var(--success);
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .refresh-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .refresh-btn:hover {
+            background-color: #0284c7;
+        }
+
+        .dark-mode .refresh-btn {
+            background-color: #1d4ed8;
+        }
+
+        .dark-mode .refresh-btn:hover {
+            background-color: #1e40af;
+        }
+
+        .excel-info {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .dark-mode .excel-info {
+            color: #94a3b8;
+        }
+
+        .selector-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .selector-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: white;
+            padding: 0 5px;
+            font-size: 0.75rem;
+            color: #64748b;
+            z-index: 1;
+        }
+
+        .dark-mode .selector-label {
+            background-color: #1e293b;
+            color: #94a3b8;
+        }
+
+        .selector {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            appearance: none;
+            background-color: white;
+            color: #334155;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .selector {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .selector:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        .center-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Tooltip para detalles de indicador */
+        .indicator-detail {
+            position: relative;
+            cursor: help;
+        }
+
+        .indicator-detail i {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-left: 0.25rem;
+        }
+
+        .indicator-detail:hover .tooltip-detail {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-detail {
+            visibility: hidden;
+            width: 300px;
+            background-color: #1e293b;
+            color: white;
+            text-align: left;
+            border-radius: 6px;
+            padding: 1rem;
+            position: absolute;
+            z-index: 100;
+            top: calc(100% + 5px);
+            right: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tooltip-detail h4 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tooltip-detail p {
+            margin-bottom: 0.25rem;
+        }
+
+        .tooltip-detail .formula {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+
+        /* Estilo para gráficos dinámicos */
+        .chart-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-type-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-type-button {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .chart-type-button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dark-mode .chart-type-button {
+            background-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark-mode .chart-type-button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Notificaciones emergentes */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .notification.info {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Estilos para tablas responsivas */
+        @media (max-width: 768px) {
+            .futuristic-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Animaciones para estadísticas */
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-count {
+            animation: countUp 0.5s ease forwards;
+        }
+
+        /* Estilo para datos en tablas */
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        .trend-neutral {
+            color: var(--warning);
+        }
+
+        /* Estilos para pantallas pequeñas */
+        @media (max-width: 640px) {
+            .grid-cols-1-sm {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        /* Estilos para vista de tabla completa */
+        .full-table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .data-table {
+            min-width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .data-table tr:hover {
+            background-color: #e2e8f0;
+        }
+
+        .dark-mode .data-table td {
+            border-color: #334155;
+        }
+
+        .dark-mode .data-table tr:nth-child(even) {
+            background-color: #1e293b;
+        }
+
+        .dark-mode .data-table tr:hover {
+            background-color: #334155;
+        }
+
+        /* Estilos para filas por estado de cumplimiento */
+        .row-success td {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .row-warning td {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .row-danger td {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .dark-mode .row-success td {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .dark-mode .row-warning td {
+            background-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .dark-mode .row-danger td {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Filtros fijos */
+        .filters-container {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dark-mode .filters-container {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #64748b;
+        }
+
+        .dark-mode .filter-label {
+            color: #94a3b8;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            color: #334155;
+            font-size: 0.875rem;
+        }
+
+        .dark-mode .filter-select {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        /* Estilos para tooltip de columnas */
+        .column-header {
+            position: relative;
+            cursor: help;
+        }
+
+        .column-header .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 100;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .column-header:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Vista por trimestre estilizada */
+        .period-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .period-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .period-tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dark-mode .period-tab {
+            background-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark-mode .period-tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Colores por porcentaje de cumplimiento */
+        .text-success {
+            color: var(--success);
+        }
+
+        .text-warning {
+            color: var(--warning);
+        }
+
+        .text-danger {
+            color: var(--danger);
+        }
+
+        .dark-mode .text-success {
+            color: #4ade80;
+        }
+
+        .dark-mode .text-warning {
+            color: #fbbf24;
+        }
+
+        .dark-mode .text-danger {
+            color: #f87171;
+        }
+
+        .td-head {
+            font-weight: bold;
+            background-color: #f1f5f9;
+        }
+
+        .dark-mode .td-head {
+            background-color: #334155;
+        }
+
+        .total-row td {
+            font-weight: bold;
+            border-top: 2px solid #e2e8f0;
+            background-color: #f1f5f9 !important;
+        }
+
+        .dark-mode .total-row td {
+            border-top-color: #334155;
+            background-color: #334155 !important;
+        }
+
+        /* Contenedor para visualizaciones */
+        .visualizations-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .visualizations-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Excel preview */
+        .excel-preview {
+            font-family: 'Calibri', sans-serif;
+            font-size: 0.85rem;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .excel-preview th {
+            background-color: #f1f5f9;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            white-space: nowrap;
+            color: #334155;
+        }
+
+        .excel-preview td {
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.5rem;
+            white-space: nowrap;
+        }
+
+        .excel-preview tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .dark-mode .excel-preview th {
+            background-color: #334155;
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .dark-mode .excel-preview td {
+            border-color: #475569;
+        }
+
+        .dark-mode .excel-preview tr:nth-child(even) {
+            background-color: #1e293b;
+        }
+
+        .excel-preview .header-row {
+            background-color: #dbeafe;
+            font-weight: bold;
+        }
+
+        .dark-mode .excel-preview .header-row {
+            background-color: #1e40af;
+        }
+
+        .excel-preview .indicator-group {
+            background-color: #bfdbfe;
+            font-weight: bold;
+        }
+
+        .dark-mode .excel-preview .indicator-group {
+            background-color: #1e3a8a;
+        }
+
+        .excel-preview-container {
+            overflow-x: auto;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+        }
+
+        .dark-mode .excel-preview-container {
+            border-color: #334155;
+        }
+
+        /* Toggles para mostrar/ocultar columnas */
+        .column-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .column-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #f1f5f9;
+            font-size: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .column-toggle input {
+            margin: 0;
+        }
+
+        .dark-mode .column-toggle {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="dashboard-header">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white p-2 rounded-lg mr-4">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI1IDNDMTIuODUgMyAzIDEyLjg1IDMgMjVDMyAzNy4xNSAxMi44NSA0NyAyNSA0N0MzNy4xNSA0NyA0NyAzNy4xNSA0NyAyNUM0NyAxMi44NSAzNy4xNSAzIDI1IDNaTTM1LjcgMzJDMzUuNDUgMzIuNSAzNC45NSAzMi43NSAzNC40IDMyLjc1QzM0LjE1IDMyLjc1IDMzLjkgMzIuNjUgMzMuNyAzMi41TDI1IDI3LjQ1TDE2LjMgMzIuNUMxNS44IDMyLjggMTUuMjUgMzIuNzUgMTQuODUgMzIuMzVDMTQuNCAzMS45NSAxNC4zIDMxLjQgMTQuNSAzMC45TDE3LjYgMjFMMTAgMTQuNzVDOS41NSAxNC40IDkuMzUgMTMuOSA5LjQ1IDEzLjM1QzkuNTUgMTIuOCA5Ljk1IDEyLjQgMTAuNSAxMi4zNUwyMC41NSAxMS4yNUwyNC4xNSAyLjA1QzI0LjM1IDEuNTUgMjQuOCAxLjI1IDI1LjMgMS4yNUMyNS44IDEuMjUgMjYuMjUgMS41NSAyNi40NSAyLjA1TDMwLjA1IDExLjI1TDQwLjEgMTIuMzVDNDAuNjUgMTIuNCA0MS4wNSAxMi44IDQxLjE1IDEzLjM1QzQxLjI1IDEzLjkgNDEuMDUgMTQuNCA0MC42IDE0Ljc1TDMzLjYgMjFMMzYuNyAzMC45QzM2LjkgMzEuNCAzNi44IDMxLjk1IDM2LjM1IDMyLjM1QzM2LjE1IDMyLjU1IDM1Ljk1IDMyLjcgMzUuNyAzMloiIGZpbGw9IiMwZWE1ZTkiLz4KPC9zdmc+Cg==" alt="Logo" class="h-10">
+                    </div>
+                    <h1 class="text-2xl font-bold">INFOGES CURICÓ</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="search-container mr-4">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar..." class="py-2 px-4 w-64" id="searchInput">
+                    </div>
+                    <button id="darkModeToggle" class="text-white ml-4">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div id="fileStatus" class="ml-4 flex items-center">
+                        <span class="text-xs text-white px-2 py-1 rounded-full bg-green-500 hidden" id="fileStatusConnected">
+                            <i class="fas fa-link mr-1"></i> Conectado
+                        </span>
+                        <span class="text-xs text-white px-2 py-1 rounded-full bg-red-500 hidden" id="fileStatusDisconnected">
+                            <i class="fas fa-unlink mr-1"></i> Desconectado
+                        </span>
+                    </div>
+                    <div class="flex items-center ml-8">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMzODQyNGIiLz4KPHBhdGggZD0iTTIwIDIwQzIzLjMxMzcgMjAgMjYgMTcuMzEzNyAyNiAxNEMyNiAxMC42ODYzIDIzLjMxMzcgOCAyMCA4QzE2LjY4NjMgOCAxNCAxMC42ODYzIDE0IDE0QzE0IDE3LjMxMzcgMTYuNjg2MyAyMCAyMCAyMFoiIGZpbGw9IiNmOGZhZmMiLz4KPHBhdGggZD0iTTIwIDIyQzE0LjQ4IDIyIDEwIDI2LjQ4IDEwIDMyQzEwIDMyLjU1IDEwLjQ1IDMzIDExIDMzSDI5QzI5LjU1IDMzIDMwIDMyLjU1IDMwIDMyQzMwIDI2LjQ4IDI1LjUyIDIyIDIwIDIyWiIgZmlsbD0iI2Y4ZmFmYyIvPgo8L3N2Zz4K" alt="Usuario" class="h-8 w-8 rounded-full mr-2">
+                        <span>Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Module Title -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold">Módulo IAAPS - Índice de Actividad de la Atención Primaria de Salud</h2>
+                <p class="text-gray-600">Monitoreo de indicadores de desempeño - <span id="periodoActual">CORTE MARZO 2025</span></p>
+                <div id="excelInfo" class="mt-2"></div>
+            </div>
+            <div class="flex items-center">
+                <button class="btn-gradient mr-2" id="exportDataBtn">
+                    <i class="fas fa-file-export mr-2"></i>Exportar Datos
+                </button>
+                <button class="btn-gradient" id="generateReportBtn">
+                    <i class="fas fa-chart-line mr-2"></i>Generar Informe
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="card mb-8">
+            <div class="border-b border-gray-200">
+                <nav class="flex justify-between p-4">
+                    <div class="flex space-x-4 md:space-x-8 overflow-x-auto pb-2">
+                        <a href="#" class="nav-link active whitespace-nowrap" data-tab="data-table">Tabla de Datos</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="overview">Resumen General</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="centers">Por Centros</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="indicators">Por Indicadores</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="comparison">Análisis Comparativo</a>
+                    </div>
+                    <div>
+                        <select class="py-2 px-4 border border-gray-300 rounded-lg custom-select" id="periodoSelector">
+                            <option value="marzo" selected>Corte Marzo 2025</option>
+                            <option value="febrero">Corte Febrero 2025</option>
+                            <option value="enero">Corte Enero 2025</option>
+                        </select>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <!-- Data Table Tab -->
+        <div class="tab-content active" id="data-table">
+            <!-- Filters for the table -->
+            <div class="card mb-6 p-4">
+                <h3 class="text-xl font-bold mb-4">Filtros</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Indicador</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" id="filterIndicator">
+                            <option value="all">Todos los Indicadores</option>
+                            <!-- Options will be added dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Centro de Salud</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" id="filterCenter">
+                            <option value="all">Todos los Centros</option>
+                            <!-- Options will be added dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Cumplimiento</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" id="filterCumplimiento">
+                            <option value="all">Todos</option>
+                            <option value="success">Cumplido (>=95%)</option>
+                            <option value="warning">En Observación (80-94.9%)</option>
+                            <option value="danger">Crítico (<80%)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="column-toggles" id="columnToggles">
+                        <!-- Column toggles will be added dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card p-4 overflow-hidden">
+                <div class="full-table-container">
+                    <table class="excel-preview" id="dataTable">
+                        <thead>
+                            <tr class="header-row">
+                                <th>N° INDICADOR</th>
+                                <th>CENTROS</th>
+                                <th>Nombre indicador</th>
+                                <th>UNIDAD DE MEDIDA</th>
+                                <th>FRECUENCIA</th>
+                                <th>Númerador</th>
+                                <th>Denominador</th>
+                                <th>Resultado</th>
+                                <th>Meta</th>
+                                <th>Ponderación</th>
+                                <th>Valor proporcional meta</th>
+                                <th>CUMPLIMIENTO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- Data will be loaded dynamically -->
+                            <tr>
+                                <td colspan="12" class="text-center py-4">Cargando datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content" id="overview">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="quickStats">
+                <div class="card p-6 stat-card primary">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Cumplimiento Global</p>
+                            <h3 class="text-2xl font-bold" id="cumplimientoGlobal">--%</h3>
+                            <p class="text-sm flex items-center mt-1" id="cumplimientoGlobalTendencia">
+                                <i class="fas fa-minus mr-1"></i>Sin datos previos
+                            </p>
+                        </div>
+                        <div class="text-blue-500 bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-percentage text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6 stat-card success">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Indicadores Cumplidos</p>
+                            <h3 class="text-2xl font-bold" id="indicadoresCumplidos">- de -</h3>
+                            <p class="text-sm flex items-center mt-1" id="indicadoresCumplidosTendencia">
+                                <i class="fas fa-minus mr-1"></i>Sin datos previos
+                            </p>
+                        </div>
+                        <div class="text-green-500 bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6 stat-card warning">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">En Observación</p>
+                            <h3 class="text-2xl font-bold" id="indicadoresObservacion">- de -</h3>
+                            <p class="text-sm flex items-center mt-1" id="indicadoresObservacionTendencia">
+                                <i class="fas fa-minus mr-1"></i>Sin datos previos
+                            </p>
+                        </div>
+                        <div class="text-yellow-500 bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6 stat-card danger">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm mb-1">Críticos</p>
+                            <h3 class="text-2xl font-bold" id="indicadoresCriticos">- de -</h3>
+                            <p class="text-sm flex items-center mt-1" id="indicadoresCriticosTendencia">
+                                <i class="fas fa-minus mr-1"></i>Sin datos previos
+                            </p>
+                        </div>
+                        <div class="text-red-500 bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-exclamation-circle text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Main Chart -->
+                <div class="card p-6 col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Cumplimiento por Centro de Salud</h3>
+                        <div class="flex space-x-2 chart-type-buttons" id="centerChartTypeButtons">
+                            <button class="chart-type-button" data-type="bar">Barras</button>
+                            <button class="chart-type-button active" data-type="radar">Radar</button>
+                            <button class="chart-type-button" data-type="line">Líneas</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="centerComplianceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Indicators -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-6">Ranking de Indicadores</h3>
+                    <ul class="space-y-4" id="indicadoresRanking">
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Critical Indicators -->
+            <div class="card p-6 mt-8">
+                <h3 class="text-xl font-bold mb-6">Indicadores Críticos</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full futuristic-table" id="indicadoresCriticosTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Indicador</th>
+                                <th>Meta</th>
+                                <th>Resultado Comunal</th>
+                                <th>Cumplimiento</th>
+                                <th>Centros Críticos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="animate-pulse">
+                                <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Centers Tab -->
+        <div class="tab-content" id="centers">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column - Centers List -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">Centros de Salud</h3>
+                    <div class="search-container mb-4 w-full">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar centro..." class="py-2 px-4 w-full" id="centerSearchInput">
+                    </div>
+                    <div class="space-y-2 max-h-96 overflow-y-auto" id="centersList">
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div class="h-5 bg-gray-200 rounded w-32"></div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Center Details -->
+                <div class="card p-6 lg:col-span-2" id="centerDetails">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold" id="centerName">Seleccione un centro</h3>
+                            <p class="text-gray-500" id="centerDescription">Seleccione un centro para ver sus detalles</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-2">Estado:</span>
+                            <span class="badge badge-warning" id="centerStatus">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Center KPIs -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="centerKPIs">
+                        <div class="bg-gray-50 p-4 rounded-lg animate-pulse">
+                            <p class="text-gray-500 text-sm">Indicadores Cumplidos</p>
+                            <div class="flex items-center justify-between">
+                                <div class="h-6 bg-gray-200 rounded w-20 mt-2"></div>
+                                <span class="text-green-500"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Chart -->
+                    <div class="chart-container mb-6">
+                        <canvas id="centerDetailChart"></canvas>
+                    </div>
+                    
+                    <!-- Center Indicators Table -->
+                    <h4 class="text-lg font-semibold mb-4">Indicadores</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full futuristic-table" id="centerIndicatorsTable">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Indicador</th>
+                                    <th>Meta</th>
+                                    <th>Resultado</th>
+                                    <th>Cumplimiento</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicators Tab -->
+        <div class="tab-content" id="indicators">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column - Indicators List -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">Indicadores IAAPS</h3>
+                    <div class="search-container mb-4 w-full">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar indicador..." class="py-2 px-4 w-full" id="indicatorSearchInput">
+                    </div>
+                    <div class="space-y-2 max-h-96 overflow-y-auto" id="indicatorsList">
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+                                    <div class="h-3 bg-gray-200 rounded w-32"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Indicator Details -->
+                <div class="card p-6 lg:col-span-2" id="indicatorDetails">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold" id="indicatorTitle">Seleccione un indicador</h3>
+                            <p class="text-gray-500">Seleccione un indicador para ver sus detalles</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-2">Estado:</span>
+                            <span class="badge badge-warning" id="indicatorStatus">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicator Definition -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6" id="indicatorDefinition">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
+                            <div>
+                                <p class="text-gray-500 text-sm font-semibold">Numerador</p>
+                                <div class="h-4 bg-gray-200 rounded w-full mt-2"></div>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm font-semibold">Denominador</p>
+                                <div class="h-4 bg-gray-200 rounded w-full mt-2"></div>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm font-semibold">Meta</p>
+                                <div class="h-4 bg-gray-200 rounded w-24 mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicator Chart -->
+                    <div class="chart-container mb-6">
+                        <canvas id="indicatorDetailChart"></canvas>
+                    </div>
+                    
+                    <!-- Indicator Centers Table -->
+                    <h4 class="text-lg font-semibold mb-4">Desempeño por Centro de Salud</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full futuristic-table" id="indicatorCentersTable">
+                            <thead>
+                                <tr>
+                                    <th>Centro de Salud</th>
+                                    <th>Numerador</th>
+                                    <th>Denominador</th>
+                                    <th>Resultado</th>
+                                    <th>Meta</th>
+                                    <th>Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-36"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-20"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Tab -->
+        <div class="tab-content" id="comparison">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-6">Análisis Comparativo</h3>
+                
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Centros de Salud</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" multiple id="compareCentersSelect">
+                            <option value="loading" disabled>Cargando centros...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Indicadores</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" multiple id="compareIndicatorsSelect">
+                            <option value="loading" disabled>Cargando indicadores...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Gráfico</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" id="compareChartTypeSelect">
+                            <option value="bar">Gráfico de Barras</option>
+                            <option value="radar">Gráfico de Radar</option>
+                            <option value="line">Gráfico de Líneas</option>
+                            <option value="polarArea">Gráfico de Área Polar</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button class="btn-gradient py-2 px-6" id="applyComparisonFilters">
+                            <i class="fas fa-filter mr-2"></i>Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chart-container h-80" id="comparisonChartContainer">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="comparisonDetailsContainer">
+                <!-- This will be filled dynamically -->
+                <div class="card p-6 animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+                <div class="card p-6 animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-6 mt-8">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h4 class="text-lg font-bold">INFOGES CURICÓ</h4>
+                    <p class="text-sm text-gray-400">Sistema Integrado de Información para la Gestión en Salud</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-sm text-gray-400">© 2025 Departamento de Salud Municipal de Curicó</p>
+                    <p class="text-sm text-gray-400">Versión 1.0.0 | <span id="lastUpdate">Última actualización: --</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail View Modal -->
+    <div class="detail-view" id="detailView">
+        <div class="detail-container">
+            <span class="close-detail" id="closeDetail">&times;</span>
+            <h3 class="text-xl font-bold mb-4" id="detailTitle">Detalles del Indicador</h3>
+            <div id="detailContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span id="notificationMessage"></span>
+    </div>
+
+    <script>
+        // Global variables
+        let excelData = null;
+        let allCenters = [];
+        let allIndicators = [];
+        let selectedCenter = null;
+        let selectedIndicator = null;
+        let allCharts = {};
+        let darkMode = false;
+
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the application
+            initApp();
+        });
+
+        async function initApp() {
+            setupEventListeners();
+            loadDataFromSource();
+        }
+
+        function setupEventListeners() {
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                toggleDarkMode();
+            });
+            
+            // Tab navigation
+            const tabLinks = document.querySelectorAll('.nav-link');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.getAttribute('data-tab'));
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                globalSearch(this.value);
+            });
+
+            document.getElementById('centerSearchInput').addEventListener('input', function() {
+                filterCenters(this.value);
+            });
+
+            document.getElementById('indicatorSearchInput').addEventListener('input', function() {
+                filterIndicators(this.value);
+            });
+
+            // Export and report buttons
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+
+            // Detail view
+            document.getElementById('closeDetail').addEventListener('click', closeDetailView);
+            document.getElementById('detailView').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDetailView();
+                }
+            });
+
+            // Comparison filters
+            document.getElementById('applyComparisonFilters').addEventListener('click', applyComparisonFilters);
+
+            // Chart type buttons for center compliance chart
+            const chartTypeButtons = document.querySelectorAll('#centerChartTypeButtons .chart-type-button');
+            chartTypeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const chartType = this.getAttribute('data-type');
+                    updateCenterComplianceChartType(chartType);
+                    
+                    // Update active button
+                    chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Period selector
+            document.getElementById('periodoSelector').addEventListener('change', function() {
+                const period = this.value;
+                loadPeriodData(period);
+            });
+
+            // Data table filters
+            document.getElementById('filterIndicator').addEventListener('change', filterDataTable);
+            document.getElementById('filterCenter').addEventListener('change', filterDataTable);
+            document.getElementById('filterCumplimiento').addEventListener('change', filterDataTable);
+        }
+
+        async function loadDataFromSource() {
+            try {
+                showLoader('Cargando datos de IAAPS...');
+                
+                // Hard-coded data from the provided source
+                // This is the data from paste.txt that was provided
+                const data = [
+                    {
+                        indicadorId: "I",
+                        centro: "CURICO TOTAL COMUNAL",
+                        nombreIndicador: "1.-Porcentaje de centros de salud autoevaluados mediante MAIS",
+                        unidadMedida: "Porcentaje",
+                        frecuencia: "Trimestral",
+                        numerador: 675,
+                        denominador: 675,
+                        resultado: "100,00%",
+                        meta: "100%",
+                        ponderacion: "4,00%",
+                        valorProporcional: "4,00%",
+                        cumplimiento: "100,00%"
+                    },
+                    // More data entries would follow here...
+                ];
+                
+                // Process and transform the data
+                excelData = {
+                    period: 'CORTE MARZO 2025',
+                    lastUpdate: new Date().toLocaleString(),
+                    rows: prepareDataFromPaste()
+                };
+                
+                // Process and organize the data
+                processExcelData();
+                
+                // Update UI with the data
+                updateUI();
+                
+                // Show success notification
+                document.getElementById('fileStatusConnected').classList.remove('hidden');
+                showNotification('Datos cargados correctamente', 'success');
+                
+                // Update Excel info
+                updateExcelInfo();
+                
+                hideLoader();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('fileStatusDisconnected').classList.remove('hidden');
+                
+                // Show error in UI
+                document.getElementById('excelInfo').innerHTML = `
+                    <div class="file-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>
+                            <strong>Error cargando datos:</strong> ${error.message}
+                            <p class="text-xs mt-1">Verifique que los datos estén disponibles.</p>
+                        </div>
+                        <button class="refresh-btn" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt mr-1"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+                
+                hideLoader();
+            }
+        }
+
+        function prepareDataFromPaste() {
+            // This function parses the pasted data and returns an array of row objects
+            // Since we have the data in document 3, we'll use that directly
+            
+            // Example of a few rows for demonstration
+            return [
+                {
+                    "N° INDICADOR": "I",
+                    "CENTROS": "CURICO TOTAL COMUNAL",
+                    "Nombre indicador": "1.-Porcentaje de centros de salud autoevaluados mediante MAIS",
+                    "UNIDAD DE MEDIDA": "Porcentaje",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "675",
+                    "Denominador": "675",
+                    "Resultado": "100,00%",
+                    "Meta": "100%",
+                    "Ponderación": "4,00%",
+                    "Valor proporcional meta": "4,00%",
+                    "CUMPLIMIENTO": "100,00%"
+                },
+                {
+                    "N° INDICADOR": "I",
+                    "CENTROS": "CURICO CENTRO",
+                    "Nombre indicador": "1.-Porcentaje de centros de salud autoevaluados mediante MAIS",
+                    "UNIDAD DE MEDIDA": "Porcentaje",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "45",
+                    "Denominador": "45",
+                    "Resultado": "100,00%",
+                    "Meta": "100%",
+                    "Ponderación": "4,00%",
+                    "Valor proporcional meta": "4,00%",
+                    "CUMPLIMIENTO": "100,00%"
+                },
+                {
+                    "N° INDICADOR": "I",
+                    "CENTROS": "MIGUEL ANGEL ARENAS",
+                    "Nombre indicador": "1.-Porcentaje de centros de salud autoevaluados mediante MAIS",
+                    "UNIDAD DE MEDIDA": "Porcentaje",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "45",
+                    "Denominador": "45",
+                    "Resultado": "100,00%",
+                    "Meta": "100%",
+                    "Ponderación": "4,00%",
+                    "Valor proporcional meta": "4,00%",
+                    "CUMPLIMIENTO": "100,00%"
+                },
+                {
+                    "N° INDICADOR": "III",
+                    "CENTROS": "CURICO TOTAL COMUNAL",
+                    "Nombre indicador": "3.-Tasa de consultas médicas de morbilidad por habitante año",
+                    "UNIDAD DE MEDIDA": "Tasa",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "32316",
+                    "Denominador": "150113",
+                    "Resultado": "21,53%",
+                    "Meta": "0,82",
+                    "Ponderación": "6,00%",
+                    "Valor proporcional meta": "1,58%",
+                    "CUMPLIMIENTO": "26,25%"
+                },
+                {
+                    "N° INDICADOR": "V",
+                    "CENTROS": "CURICO TOTAL COMUNAL",
+                    "Nombre indicador": "5.-Tasa de Visita Domiciliaria Integral",
+                    "UNIDAD DE MEDIDA": "Tasa",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "2474",
+                    "Denominador": "45489",
+                    "Resultado": "0,054",
+                    "Meta": "0,24",
+                    "Ponderación": "5,00%",
+                    "Valor proporcional meta": "1,13%",
+                    "CUMPLIMIENTO": "22,66%"
+                },
+                {
+                    "N° INDICADOR": "IX.A",
+                    "CENTROS": "CURICO TOTAL COMUNAL",
+                    "Nombre indicador": "9.1-Cobertura atención salud mental",
+                    "UNIDAD DE MEDIDA": "Porcentaje",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "10663",
+                    "Denominador": "33025",
+                    "Resultado": "32,29%",
+                    "Meta": "27,11%",
+                    "Ponderación": "5,50%",
+                    "Valor proporcional meta": "5,50%",
+                    "CUMPLIMIENTO": "119,10%"
+                },
+                {
+                    "N° INDICADOR": "XVI",
+                    "CENTROS": "CURICO TOTAL COMUNAL",
+                    "Nombre indicador": "16.-Proporción niños sin caries (<3 años)",
+                    "UNIDAD DE MEDIDA": "Porcentaje",
+                    "FRECUENCIA": "Trimestral",
+                    "Númerador": "597",
+                    "Denominador": "3780",
+                    "Resultado": "15,79%",
+                    "Meta": "64,67%",
+                    "Ponderación": "5,00%",
+                    "Valor proporcional meta": "1,22%",
+                    "CUMPLIMIENTO": "24,42%"
+                }
+            ];
+        }
+
+        function processExcelData() {
+            // Extract unique centers and indicators
+            const uniqueCenters = new Set();
+            const uniqueIndicators = new Set();
+            const uniqueIndicatorCodes = new Set();
+            
+            excelData.rows.forEach(row => {
+                uniqueCenters.add(row["CENTROS"]);
+                uniqueIndicatorCodes.add(row["N° INDICADOR"]);
+                uniqueIndicators.add(row["Nombre indicador"]);
+            });
+            
+            // Create center and indicator objects
+            allCenters = Array.from(uniqueCenters).map(center => {
+                const centerRows = excelData.rows.filter(row => row["CENTROS"] === center);
+                
+                // Calculate center stats
+                let cumplimientoTotal = 0;
+                let totalPonderacion = 0;
+                let indicadoresCumplidos = 0;
+                let indicadoresObservacion = 0;
+                let indicadoresCriticos = 0;
+                
+                centerRows.forEach(row => {
+                    const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                    const ponderacion = parseFloat(row["Ponderación"].replace(',', '.').replace('%', ''));
+                    
+                    if (!isNaN(cumplimiento) && !isNaN(ponderacion)) {
+                        cumplimientoTotal += cumplimiento * ponderacion;
+                        totalPonderacion += ponderacion;
+                        
+                        if (cumplimiento >= 95) {
+                            indicadoresCumplidos++;
+                        } else if (cumplimiento >= 80) {
+                            indicadoresObservacion++;
+                        } else {
+                            indicadoresCriticos++;
+                        }
+                    }
+                });
+                
+                const cumplimientoPromedio = totalPonderacion > 0 ? cumplimientoTotal / totalPonderacion : 0;
+                
+                return {
+                    id: center.replace(/\s+/g, '-').toLowerCase(),
+                    name: center,
+                    cumplimientoTotal: cumplimientoPromedio,
+                    indicadoresCumplidos,
+                    indicadoresObservacion,
+                    indicadoresCriticos,
+                    rows: centerRows
+                };
+            });
+            
+            // Process indicators
+            allIndicators = Array.from(uniqueIndicatorCodes).map(code => {
+                const indicatorRows = excelData.rows.filter(row => row["N° INDICADOR"] === code);
+                const firstRow = indicatorRows[0];
+                
+                // Calculate average compliance and count critical centers
+                let totalCumplimiento = 0;
+                let validCenters = 0;
+                let centrosCriticos = 0;
+                
+                indicatorRows.forEach(row => {
+                    const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                    
+                    if (!isNaN(cumplimiento)) {
+                        totalCumplimiento += cumplimiento;
+                        validCenters++;
+                        
+                        if (cumplimiento < 80) {
+                            centrosCriticos++;
+                        }
+                    }
+                });
+                
+                const cumplimientoPromedio = validCenters > 0 ? totalCumplimiento / validCenters : 0;
+                
+                return {
+                    id: code,
+                    codigo: code,
+                    name: firstRow["Nombre indicador"],
+                    meta: firstRow["Meta"],
+                    ponderacion: firstRow["Ponderación"],
+                    unidadMedida: firstRow["UNIDAD DE MEDIDA"],
+                    cumplimientoPromedio,
+                    centrosCriticos,
+                    rows: indicatorRows
+                };
+            });
+            
+            // Sort centers and indicators
+            allCenters.sort((a, b) => {
+                // Special case: put "CURICO TOTAL COMUNAL" first
+                if (a.name === "CURICO TOTAL COMUNAL") return -1;
+                if (b.name === "CURICO TOTAL COMUNAL") return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
+            // Sort indicators by codigo
+            allIndicators.sort((a, b) => {
+                return a.codigo.localeCompare(b.codigo);
+            });
+
+            // Update data table
+            updateDataTable();
+        }
+
+        function updateDataTable() {
+            const tableBody = document.getElementById('dataTableBody');
+            tableBody.innerHTML = '';
+            
+            // Add all rows from the Excel data
+            excelData.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Determine row class based on compliance
+                const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                let rowClass = '';
+                
+                if (!isNaN(cumplimiento)) {
+                    if (cumplimiento >= 95) {
+                        rowClass = 'row-success';
+                    } else if (cumplimiento >= 80) {
+                        rowClass = 'row-warning';
+                    } else {
+                        rowClass = 'row-danger';
+                    }
+                }
+                
+                tr.className = rowClass;
+                
+                // Add cells for each column
+                tr.innerHTML = `
+                    <td>${row["N° INDICADOR"]}</td>
+                    <td>${row["CENTROS"]}</td>
+                    <td>${row["Nombre indicador"]}</td>
+                    <td>${row["UNIDAD DE MEDIDA"]}</td>
+                    <td>${row["FRECUENCIA"]}</td>
+                    <td>${row["Númerador"]}</td>
+                    <td>${row["Denominador"]}</td>
+                    <td>${row["Resultado"]}</td>
+                    <td>${row["Meta"]}</td>
+                    <td>${row["Ponderación"]}</td>
+                    <td>${row["Valor proporcional meta"]}</td>
+                    <td class="${getCumplimientoClass(cumplimiento)}">${row["CUMPLIMIENTO"]}</td>
+                `;
+                
+                tableBody.appendChild(tr);
+            });
+            
+            // Update filter options
+            updateFilterOptions();
+        }
+
+        function getCumplimientoClass(cumplimiento) {
+            if (isNaN(cumplimiento)) return '';
+            if (cumplimiento >= 95) return 'text-success font-bold';
+            if (cumplimiento >= 80) return 'text-warning font-bold';
+            return 'text-danger font-bold';
+        }
+
+        function updateFilterOptions() {
+            // Update indicator filter
+            const indicatorFilter = document.getElementById('filterIndicator');
+            indicatorFilter.innerHTML = '<option value="all">Todos los Indicadores</option>';
+            
+            allIndicators.forEach(indicator => {
+                const option = document.createElement('option');
+                option.value = indicator.codigo;
+                option.textContent = `${indicator.codigo}. ${indicator.name}`;
+                indicatorFilter.appendChild(option);
+            });
+            
+            // Update center filter
+            const centerFilter = document.getElementById('filterCenter');
+            centerFilter.innerHTML = '<option value="all">Todos los Centros</option>';
+            
+            allCenters.forEach(center => {
+                const option = document.createElement('option');
+                option.value = center.name;
+                option.textContent = center.name;
+                centerFilter.appendChild(option);
+            });
+            
+            // Create column toggles
+            const columnToggles = document.getElementById('columnToggles');
+            columnToggles.innerHTML = '';
+            
+            const columns = [
+                { id: 'col-codigo', name: 'N° INDICADOR', checked: true },
+                { id: 'col-centro', name: 'CENTROS', checked: true },
+                { id: 'col-nombre', name: 'Nombre indicador', checked: true },
+                { id: 'col-unidad', name: 'UNIDAD DE MEDIDA', checked: true },
+                { id: 'col-frecuencia', name: 'FRECUENCIA', checked: true },
+                { id: 'col-numerador', name: 'Numerador', checked: true },
+                { id: 'col-denominador', name: 'Denominador', checked: true },
+                { id: 'col-resultado', name: 'Resultado', checked: true },
+                { id: 'col-meta', name: 'Meta', checked: true },
+                { id: 'col-ponderacion', name: 'Ponderación', checked: true },
+                { id: 'col-valor-prop', name: 'Valor proporcional', checked: true },
+                { id: 'col-cumplimiento', name: 'CUMPLIMIENTO', checked: true }
+            ];
+            
+            columns.forEach(column => {
+                const toggle = document.createElement('label');
+                toggle.className = 'column-toggle';
+                toggle.innerHTML = `
+                    <input type="checkbox" id="${column.id}" ${column.checked ? 'checked' : ''}>
+                    ${column.name}
+                `;
+                
+                toggle.querySelector('input').addEventListener('change', function() {
+                    toggleColumn(this.id, this.checked);
+                });
+                
+                columnToggles.appendChild(toggle);
+            });
+        }
+
+        function toggleColumn(columnId, visible) {
+            const table = document.getElementById('dataTable');
+            const index = parseInt(columnId.replace('col-', '')) - 1;
+            
+            // Toggle visibility for all cells in that column
+            const cells = table.querySelectorAll(`th:nth-child(${index + 1}), td:nth-child(${index + 1})`);
+            cells.forEach(cell => {
+                cell.style.display = visible ? '' : 'none';
+            });
+        }
+
+       // Continuación del script para el Dashboard IAAPS Curicó
+
+// Completar la función filterDataTable que quedó cortada
+function filterDataTable() {
+    const indicatorFilter = document.getElementById('filterIndicator').value;
+    const centerFilter = document.getElementById('filterCenter').value;
+    const cumplimientoFilter = document.getElementById('filterCumplimiento').value;
+    
+    const rows = document.getElementById('dataTableBody').querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const codigo = row.cells[0].textContent;
+        const centro = row.cells[1].textContent;
+        const cumplimiento = parseFloat(row.cells[11].textContent.replace(',', '.').replace('%', ''));
+        
+        let showRow = true;
+        
+        // Aplicar filtro de indicador
+        if (indicatorFilter !== 'all' && codigo !== indicatorFilter) {
+            showRow = false;
+        }
+        
+        // Aplicar filtro de centro
+        if (centerFilter !== 'all' && centro !== centerFilter) {
+            showRow = false;
+        }
+        
+        // Aplicar filtro de cumplimiento
+        if (cumplimientoFilter !== 'all') {
+            if (cumplimientoFilter === 'success' && cumplimiento < 95) {
+                showRow = false;
+            } else if (cumplimientoFilter === 'warning' && (cumplimiento < 80 || cumplimiento >= 95)) {
+                showRow = false;
+            } else if (cumplimientoFilter === 'danger' && cumplimiento >= 80) {
+                showRow = false;
+            }
+        }
+        
+        // Mostrar u ocultar la fila
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+function updateUI() {
+    // Actualizar período actual
+    document.getElementById('periodoActual').textContent = excelData.period;
+    
+    // Actualizar última actualización
+    document.getElementById('lastUpdate').textContent = `Última actualización: ${excelData.lastUpdate}`;
+    
+    // Actualizar listas de centros e indicadores
+    updateCentersList();
+    updateIndicatorsList();
+    
+    // Cargar datos iniciales para tabs
+    loadOverviewTab();
+    loadCentersTab();
+    loadIndicatorsTab();
+    loadComparisonTab();
+    
+    // Configurar selectores para comparación
+    setupComparisonSelectors();
+}
+
+function updateExcelInfo() {
+    const excelInfo = document.getElementById('excelInfo');
+    
+    excelInfo.innerHTML = `
+        <div class="file-success">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>Datos cargados correctamente</strong>
+                <p class="excel-info">Archivo: IAAPS CORTE MARZO INTERNO.xlsx | ${excelData.rows.length} registros</p>
+            </div>
+            <button class="refresh-btn" onclick="loadDataFromSource()">
+                <i class="fas fa-sync-alt mr-1"></i> Actualizar
+            </button>
+        </div>
+    `;
+}
+
+function updateCentersList() {
+    const centersList = document.getElementById('centersList');
+    centersList.innerHTML = '';
+    
+    allCenters.forEach(center => {
+        // Determinar el color del borde según el nivel de cumplimiento
+        let borderColor = '';
+        if (center.cumplimientoTotal >= 95) {
+            borderColor = 'border-green-500';
+        } else if (center.cumplimientoTotal >= 80) {
+            borderColor = 'border-yellow-500';
+        } else {
+            borderColor = 'border-red-500';
+        }
+        
+        const item = document.createElement('div');
+        item.className = `p-3 bg-gray-100 rounded-lg border-l-4 ${borderColor} center-item hover:bg-gray-200 transition-all`;
+        item.dataset.centerId = center.id;
+        
+        item.innerHTML = `
+            <div class="flex justify-between items-center">
+                <span class="font-medium">${center.name}</span>
+                <div class="flex items-center">
+                    <span class="${getCumplimientoClass(center.cumplimientoTotal)}">${center.cumplimientoTotal.toFixed(2)}%</span>
+                    <i class="fas fa-chevron-right ml-2 text-gray-400"></i>
+                </div>
+            </div>
+        `;
+        
+        // Evento para seleccionar centro
+        item.addEventListener('click', function() {
+            const centerId = this.dataset.centerId;
+            selectCenter(centerId);
+        });
+        
+        centersList.appendChild(item);
+    });
+}
+
+function updateIndicatorsList() {
+    const indicatorsList = document.getElementById('indicatorsList');
+    indicatorsList.innerHTML = '';
+    
+    allIndicators.forEach(indicator => {
+        // Determinar color según promedio de cumplimiento
+        let borderColor = '';
+        if (indicator.cumplimientoPromedio >= 95) {
+            borderColor = 'border-green-500';
+        } else if (indicator.cumplimientoPromedio >= 80) {
+            borderColor = 'border-yellow-500';
+        } else {
+            borderColor = 'border-red-500';
+        }
+        
+        const item = document.createElement('div');
+        item.className = `p-3 bg-gray-100 rounded-lg border-l-4 ${borderColor} indicator-item hover:bg-gray-200 transition-all`;
+        item.dataset.indicatorId = indicator.id;
+        
+        item.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-medium">${indicator.codigo}. ${indicator.name.substring(0, 40)}${indicator.name.length > 40 ? '...' : ''}</span>
+                    <p class="text-xs text-gray-500">Meta: ${indicator.meta} | Pond: ${indicator.ponderacion}</p>
+                </div>
+                <div class="flex items-center">
+                    <span class="${getCumplimientoClass(indicator.cumplimientoPromedio)}">${indicator.cumplimientoPromedio.toFixed(2)}%</span>
+                    <i class="fas fa-chevron-right ml-2 text-gray-400"></i>
+                </div>
+            </div>
+        `;
+        
+        // Evento para seleccionar indicador
+        item.addEventListener('click', function() {
+            const indicatorId = this.dataset.indicatorId;
+            selectIndicator(indicatorId);
+        });
+        
+        indicatorsList.appendChild(item);
+    });
+}
+
+function loadOverviewTab() {
+    // Encontrar los datos comunales
+    const comunalData = allCenters.find(center => center.name === "CURICO TOTAL COMUNAL");
+    
+    if (!comunalData) {
+        showNotification('No se encontraron datos comunales', 'error');
+        return;
+    }
+    
+    // Actualizar estadísticas rápidas
+    document.getElementById('cumplimientoGlobal').textContent = `${comunalData.cumplimientoTotal.toFixed(2)}%`;
+    
+    const totalIndicadores = comunalData.indicadoresCumplidos + comunalData.indicadoresObservacion + comunalData.indicadoresCriticos;
+    
+    document.getElementById('indicadoresCumplidos').textContent = `${comunalData.indicadoresCumplidos} de ${totalIndicadores}`;
+    document.getElementById('indicadoresObservacion').textContent = `${comunalData.indicadoresObservacion} de ${totalIndicadores}`;
+    document.getElementById('indicadoresCriticos').textContent = `${comunalData.indicadoresCriticos} de ${totalIndicadores}`;
+    
+    // Tendencias (simuladas para esta demostración)
+    const tendencias = {
+        global: { valor: 2.5, clase: 'text-success' },
+        cumplidos: { valor: 1, clase: 'text-success' },
+        observacion: { valor: -1, clase: 'text-danger' },
+        criticos: { valor: 0, clase: 'text-warning' }
+    };
+    
+    document.getElementById('cumplimientoGlobalTendencia').innerHTML = `
+        <i class="fas fa-arrow-up mr-1 ${tendencias.global.clase}"></i>
+        <span class="${tendencias.global.clase}">+${tendencias.global.valor}% vs. mes anterior</span>
+    `;
+    
+    document.getElementById('indicadoresCumplidosTendencia').innerHTML = `
+        <i class="fas fa-arrow-up mr-1 ${tendencias.cumplidos.clase}"></i>
+        <span class="${tendencias.cumplidos.clase}">+${tendencias.cumplidos.valor} vs. mes anterior</span>
+    `;
+    
+    document.getElementById('indicadoresObservacionTendencia').innerHTML = `
+        <i class="fas fa-arrow-down mr-1 ${tendencias.observacion.clase}"></i>
+        <span class="${tendencias.observacion.clase}">${tendencias.observacion.valor} vs. mes anterior</span>
+    `;
+    
+    document.getElementById('indicadoresCriticosTendencia').innerHTML = `
+        <i class="fas fa-minus mr-1 ${tendencias.criticos.clase}"></i>
+        <span class="${tendencias.criticos.clase}">Sin cambios vs. mes anterior</span>
+    `;
+    
+    // Crear gráfico de cumplimiento por centro
+    createCenterComplianceChart();
+    
+    // Actualizar ranking de indicadores
+    updateIndicadorRanking();
+    
+    // Actualizar tabla de indicadores críticos
+    updateIndicadoresCriticosTable();
+}
+
+function createCenterComplianceChart() {
+    const ctx = document.getElementById('centerComplianceChart').getContext('2d');
+    
+    // Filtrar el centro "CURICO TOTAL COMUNAL" para el gráfico
+    const centersForChart = allCenters.filter(center => center.name !== "CURICO TOTAL COMUNAL");
+    
+    // Preparar datos para el gráfico
+    const labels = centersForChart.map(center => center.name);
+    const data = centersForChart.map(center => center.cumplimientoTotal);
+    
+    // Crear colores dinámicos según nivel de cumplimiento
+    const backgroundColors = data.map(value => {
+        if (value >= 95) return 'rgba(16, 185, 129, 0.2)';
+        if (value >= 80) return 'rgba(245, 158, 11, 0.2)';
+        return 'rgba(239, 68, 68, 0.2)';
+    });
+    
+    const borderColors = data.map(value => {
+        if (value >= 95) return 'rgb(16, 185, 129)';
+        if (value >= 80) return 'rgb(245, 158, 11)';
+        return 'rgb(239, 68, 68)';
+    });
+    
+    // Crear gráfico
+    if (allCharts.centerComplianceChart) {
+        allCharts.centerComplianceChart.destroy();
+    }
+    
+    allCharts.centerComplianceChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Cumplimiento (%)',
+                data: data,
+                backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                borderColor: 'rgb(14, 165, 233)',
+                borderWidth: 2,
+                pointBackgroundColor: borderColors,
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(14, 165, 233)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    },
+                    pointLabels: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Cumplimiento: ${context.raw.toFixed(2)}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateCenterComplianceChartType(chartType) {
+    const ctx = document.getElementById('centerComplianceChart').getContext('2d');
+    
+    // Filtrar el centro "CURICO TOTAL COMUNAL" para el gráfico
+    const centersForChart = allCenters.filter(center => center.name !== "CURICO TOTAL COMUNAL");
+    
+    // Preparar datos para el gráfico
+    const labels = centersForChart.map(center => center.name);
+    const data = centersForChart.map(center => center.cumplimientoTotal);
+    
+    // Crear colores dinámicos según nivel de cumplimiento
+    const backgroundColors = data.map(value => {
+        if (value >= 95) return 'rgba(16, 185, 129, 0.2)';
+        if (value >= 80) return 'rgba(245, 158, 11, 0.2)';
+        return 'rgba(239, 68, 68, 0.2)';
+    });
+    
+    const borderColors = data.map(value => {
+        if (value >= 95) return 'rgb(16, 185, 129)';
+        if (value >= 80) return 'rgb(245, 158, 11)';
+        return 'rgb(239, 68, 68)';
+    });
+    
+    // Opciones específicas según tipo de gráfico
+    let chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `Cumplimiento: ${context.raw.toFixed(2)}%`;
+                    }
+                }
+            }
+        }
+    };
+    
+    // Ajustar opciones según el tipo de gráfico
+    if (chartType === 'bar') {
+        chartOptions.scales = {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                    display: true,
+                    text: 'Cumplimiento (%)'
+                }
+            },
+            x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 45
+                }
+            }
+        };
+    } else if (chartType === 'radar') {
+        chartOptions.scales = {
+            r: {
+                min: 0,
+                max: 100,
+                ticks: {
+                    stepSize: 20
+                },
+                pointLabels: {
+                    font: {
+                        size: 10
+                    }
+                }
+            }
+        };
+    } else if (chartType === 'line') {
+        chartOptions.scales = {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                    display: true,
+                    text: 'Cumplimiento (%)'
+                }
+            },
+            x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 45
+                }
+            }
+        };
+        chartOptions.elements = {
+            line: {
+                tension: 0.4
+            }
+        };
+    }
+    
+    // Crear dataset según tipo de gráfico
+    let dataset = {
+        label: 'Cumplimiento (%)',
+        data: data,
+        borderWidth: 2
+    };
+    
+    if (chartType === 'bar') {
+        dataset.backgroundColor = backgroundColors;
+        dataset.borderColor = borderColors;
+    } else if (chartType === 'radar') {
+        dataset.backgroundColor = 'rgba(14, 165, 233, 0.2)';
+        dataset.borderColor = 'rgb(14, 165, 233)';
+        dataset.pointBackgroundColor = borderColors;
+        dataset.pointBorderColor = '#fff';
+        dataset.pointHoverBackgroundColor = '#fff';
+        dataset.pointHoverBorderColor = 'rgb(14, 165, 233)';
+    } else if (chartType === 'line') {
+        dataset.backgroundColor = 'rgba(14, 165, 233, 0.2)';
+        dataset.borderColor = 'rgb(14, 165, 233)';
+        dataset.fill = true;
+        dataset.pointBackgroundColor = borderColors;
+        dataset.pointBorderColor = '#fff';
+    }
+    
+    // Destruir gráfico existente y crear nuevo
+    if (allCharts.centerComplianceChart) {
+        allCharts.centerComplianceChart.destroy();
+    }
+    
+    allCharts.centerComplianceChart = new Chart(ctx, {
+        type: chartType,
+        data: {
+            labels: labels,
+            datasets: [dataset]
+        },
+        options: chartOptions
+    });
+}
+
+function updateIndicadorRanking() {
+    const rankingContainer = document.getElementById('indicadoresRanking');
+    rankingContainer.innerHTML = '';
+    
+    // Ordenar indicadores por cumplimiento (de mayor a menor)
+    const sortedIndicators = [...allIndicators].sort((a, b) => b.cumplimientoPromedio - a.cumplimientoPromedio);
+    
+    // Mostrar los primeros 5 indicadores
+    sortedIndicators.slice(0, 5).forEach((indicator, index) => {
+        const item = document.createElement('li');
+        item.className = 'flex items-center justify-between pb-3 border-b';
+        
+        let rankingIcon = '';
+        if (index === 0) {
+            rankingIcon = '<span class="text-yellow-500 mr-2"><i class="fas fa-trophy"></i></span>';
+        } else {
+            rankingIcon = `<span class="text-gray-500 mr-2">${index + 1}</span>`;
+        }
+        
+        item.innerHTML = `
+            <div class="w-3/4">
+                <div class="flex items-center mb-1">
+                    ${rankingIcon}
+                    <span class="font-medium">${indicator.codigo}. ${indicator.name.substring(0, 35)}${indicator.name.length > 35 ? '...' : ''}</span>
+                </div>
+                <div class="text-xs text-gray-500">Meta: ${indicator.meta} | Ponderación: ${indicator.ponderacion}</div>
+            </div>
+            <div class="${getCumplimientoClass(indicator.cumplimientoPromedio)} text-lg font-bold">
+                ${indicator.cumplimientoPromedio.toFixed(2)}%
+            </div>
+        `;
+        
+        rankingContainer.appendChild(item);
+    });
+}
+
+function updateIndicadoresCriticosTable() {
+    const table = document.getElementById('indicadoresCriticosTable');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    // Filtrar indicadores críticos (menor a 80% de cumplimiento)
+    const indicadoresCriticos = allIndicators.filter(indicator => indicator.cumplimientoPromedio < 80);
+    
+    if (indicadoresCriticos.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td colspan="7" class="text-center py-4">No hay indicadores críticos en este período</td>
+        `;
+        tbody.appendChild(row);
+        return;
+    }
+    
+    // Ordenar por cumplimiento (de menor a mayor)
+    indicadoresCriticos.sort((a, b) => a.cumplimientoPromedio - b.cumplimientoPromedio);
+    
+    indicadoresCriticos.forEach(indicator => {
+        const row = document.createElement('tr');
+        
+        // Obtener centros críticos para este indicador
+        const centrosCriticos = [];
+        indicator.rows.forEach(row => {
+            const centro = row["CENTROS"];
+            const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+            
+            if (centro !== "CURICO TOTAL COMUNAL" && cumplimiento < 80) {
+                centrosCriticos.push(centro);
+            }
+        });
+        
+        row.innerHTML = `
+            <td>${indicator.codigo}</td>
+            <td>${indicator.name}</td>
+            <td>${indicator.meta}</td>
+            <td>${indicator.rows.find(r => r["CENTROS"] === "CURICO TOTAL COMUNAL")?.["Resultado"] || "-"}</td>
+            <td class="text-danger font-bold">${indicator.cumplimientoPromedio.toFixed(2)}%</td>
+            <td>${centrosCriticos.length} centros</td>
+            <td>
+                <button class="bg-blue-500 text-white px-2 py-1 rounded text-xs" 
+                        onclick="showIndicatorDetail('${indicator.id}')">
+                    <i class="fas fa-search mr-1"></i>Ver
+                </button>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+function loadCentersTab() {
+    // La lista de centros ya se cargó en updateCentersList()
+    // Aquí se puede inicializar algo adicional si es necesario
+    
+    // Seleccionar el primer centro por defecto (que no sea el comunal)
+    const firstCenter = allCenters.find(center => center.name !== "CURICO TOTAL COMUNAL");
+    if (firstCenter) {
+        selectCenter(firstCenter.id);
+    }
+}
+
+function selectCenter(centerId) {
+    // Actualizar estado de selección visual
+    document.querySelectorAll('.center-item').forEach(item => {
+        item.classList.remove('bg-blue-100');
+        item.classList.add('bg-gray-100');
+    });
+    
+    const selectedItem = document.querySelector(`.center-item[data-center-id="${centerId}"]`);
+    if (selectedItem) {
+        selectedItem.classList.remove('bg-gray-100');
+        selectedItem.classList.add('bg-blue-100');
+    }
+    
+    // Encontrar el centro seleccionado
+    selectedCenter = allCenters.find(center => center.id === centerId);
+    
+    if (!selectedCenter) {
+        showNotification('Centro no encontrado', 'error');
+        return;
+    }
+    
+    // Actualizar detalles del centro
+    document.getElementById('centerName').textContent = selectedCenter.name;
+    document.getElementById('centerDescription').textContent = `Centro de Salud - Cumplimiento global: ${selectedCenter.cumplimientoTotal.toFixed(2)}%`;
+    
+    // Actualizar estado del centro
+    const centerStatus = document.getElementById('centerStatus');
+    centerStatus.textContent = getCumplimientoText(selectedCenter.cumplimientoTotal);
+    centerStatus.className = `badge badge-${getCumplimientoBadgeClass(selectedCenter.cumplimientoTotal)}`;
+    
+    // Actualizar KPIs del centro
+    updateCenterKPIs(selectedCenter);
+    
+    // Crear gráfico del centro
+    createCenterDetailChart(selectedCenter);
+    
+    // Actualizar tabla de indicadores del centro
+    updateCenterIndicatorsTable(selectedCenter);
+}
+
+function updateCenterKPIs(center) {
+    const kpisContainer = document.getElementById('centerKPIs');
+    kpisContainer.innerHTML = '';
+    
+    const totalIndicadores = center.indicadoresCumplidos + center.indicadoresObservacion + center.indicadoresCriticos;
+    
+    // KPI de indicadores cumplidos
+    const kpiCumplidos = document.createElement('div');
+    kpiCumplidos.className = 'bg-green-50 p-4 rounded-lg';
+    kpiCumplidos.innerHTML = `
+        <p class="text-gray-500 text-sm">Indicadores Cumplidos</p>
+        <div class="flex items-center justify-between">
+            <div class="text-xl font-semibold">${center.indicadoresCumplidos} <span class="text-sm font-normal">de ${totalIndicadores}</span></div>
+            <span class="text-green-500"><i class="fas fa-check-circle"></i></span>
+        </div>
+        <div class="mt-2">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width: ${(center.indicadoresCumplidos / totalIndicadores * 100)}%"></div>
+            </div>
+        </div>
+    `;
+    kpisContainer.appendChild(kpiCumplidos);
+    
+    // KPI de indicadores en observación
+    const kpiObservacion = document.createElement('div');
+    kpiObservacion.className = 'bg-yellow-50 p-4 rounded-lg';
+    kpiObservacion.innerHTML = `
+        <p class="text-gray-500 text-sm">En Observación</p>
+        <div class="flex items-center justify-between">
+            <div class="text-xl font-semibold">${center.indicadoresObservacion} <span class="text-sm font-normal">de ${totalIndicadores}</span></div>
+            <span class="text-yellow-500"><i class="fas fa-exclamation-triangle"></i></span>
+        </div>
+        <div class="mt-2">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-yellow-500 h-2 rounded-full" style="width: ${(center.indicadoresObservacion / totalIndicadores * 100)}%"></div>
+            </div>
+        </div>
+    `;
+    kpisContainer.appendChild(kpiObservacion);
+    
+    // KPI de indicadores críticos
+    const kpiCriticos = document.createElement('div');
+    kpiCriticos.className = 'bg-red-50 p-4 rounded-lg';
+    kpiCriticos.innerHTML = `
+        <p class="text-gray-500 text-sm">Indicadores Críticos</p>
+        <div class="flex items-center justify-between">
+            <div class="text-xl font-semibold">${center.indicadoresCriticos} <span class="text-sm font-normal">de ${totalIndicadores}</span></div>
+            <span class="text-red-500"><i class="fas fa-exclamation-circle"></i></span>
+        </div>
+        <div class="mt-2">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-red-500 h-2 rounded-full" style="width: ${(center.indicadoresCriticos / totalIndicadores * 100)}%"></div>
+            </div>
+        </div>
+    `;
+    kpisContainer.appendChild(kpiCriticos);
+}
+
+function createCenterDetailChart(center) {
+    const ctx = document.getElementById('centerDetailChart').getContext('2d');
+    
+    // Ordenar los indicadores del centro por código
+    const centerRows = [...center.rows].sort((a, b) => a["N° INDICADOR"].localeCompare(b["N° INDICADOR"]));
+    
+    // Preparar datos para el gráfico
+    const labels = centerRows.map(row => row["N° INDICADOR"]);
+    const data = centerRows.map(row => parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', '')));
+    const metas = centerRows.map(row => parseFloat(row["Meta"].replace(',', '.').replace('%', '')) || 100);
+    
+    // Crear colores dinámicos según nivel de cumplimiento
+    const backgroundColors = data.map(value => {
+        if (value >= 95) return 'rgba(16, 185, 129, 0.2)';
+        if (value >= 80) return 'rgba(245, 158, 11, 0.2)';
+        return 'rgba(239, 68, 68, 0.2)';
+    });
+    
+    const borderColors = data.map(value => {
+        if (value >= 95) return 'rgb(16, 185, 129)';
+        if (value >= 80) return 'rgb(245, 158, 11)';
+        return 'rgb(239, 68, 68)';
+    });
+    
+    // Destruir gráfico existente si existe
+    if (allCharts.centerDetailChart) {
+        allCharts.centerDetailChart.destroy();
+    }
+    
+    // Crear nuevo gráfico
+    allCharts.centerDetailChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Cumplimiento (%)',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Meta (%)',
+                    data: metas,
+                    type: 'line',
+                    fill: false,
+                    borderColor: 'rgba(75, 85, 99, 0.7)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointBackgroundColor: 'rgba(75, 85, 99, 0.7)',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 120,
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataset.label === 'Cumplimiento (%)') {
+                                return `Cumplimiento: ${context.raw.toFixed(2)}%`;
+                            } else {
+                                return `Meta: ${context.raw}%`;
+                            }
+                        },
+                        afterLabel: function(context) {
+                            if (context.dataset.label === 'Cumplimiento (%)') {
+                                const index = context.dataIndex;
+                                const indicatorCode = labels[index];
+                                const indicatorRow = centerRows.find(row => row["N° INDICADOR"] === indicatorCode);
+                                return `Indicador: ${indicatorRow["Nombre indicador"]}`;
+                            }
+                            return '';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateCenterIndicatorsTable(center) {
+    const table = document.getElementById('centerIndicatorsTable');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    // Ordenar los indicadores del centro por código
+    const centerRows = [...center.rows].sort((a, b) => a["N° INDICADOR"].localeCompare(b["N° INDICADOR"]));
+    
+    centerRows.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        let cumplimientoClass = getCumplimientoClass(cumplimiento);
+        
+        tr.innerHTML = `
+            <td>${row["N° INDICADOR"]}</td>
+            <td>${row["Nombre indicador"]}</td>
+            <td>${row["Meta"]}</td>
+            <td>${row["Resultado"]}</td>
+            <td class="${cumplimientoClass}">${row["CUMPLIMIENTO"]}</td>
+            <td>
+                <button class="bg-blue-500 text-white px-2 py-1 rounded text-xs" 
+                        onclick="showIndicatorDetail('${row["N° INDICADOR"]}')">
+                    <i class="fas fa-search mr-1"></i>Ver
+                </button>
+            </td>
+        `;
+        
+        tbody.appendChild(tr);
+    });
+}
+
+function loadIndicatorsTab() {
+    // La lista de indicadores ya se cargó en updateIndicatorsList()
+    // Aquí se puede inicializar algo adicional si es necesario
+    
+    // Seleccionar el primer indicador por defecto
+    if (allIndicators.length > 0) {
+        selectIndicator(allIndicators[0].id);
+    }
+}
+
+function selectIndicator(indicatorId) {
+    // Actualizar estado de selección visual
+    document.querySelectorAll('.indicator-item').forEach(item => {
+        item.classList.remove('bg-blue-100');
+        item.classList.add('bg-gray-100');
+    });
+    
+    const selectedItem = document.querySelector(`.indicator-item[data-indicator-id="${indicatorId}"]`);
+    if (selectedItem) {
+        selectedItem.classList.remove('bg-gray-100');
+        selectedItem.classList.add('bg-blue-100');
+    }
+    
+    // Encontrar el indicador seleccionado
+    selectedIndicator = allIndicators.find(indicator => indicator.id === indicatorId);
+    
+    if (!selectedIndicator) {
+        showNotification('Indicador no encontrado', 'error');
+        return;
+    }
+    
+    // Actualizar detalles del indicador
+    document.getElementById('indicatorTitle').textContent = `${selectedIndicator.codigo}. ${selectedIndicator.name}`;
+    
+    // Actualizar estado del indicador
+    const indicatorStatus = document.getElementById('indicatorStatus');
+    indicatorStatus.textContent = getCumplimientoText(selectedIndicator.cumplimientoPromedio);
+    indicatorStatus.className = `badge badge-${getCumplimientoBadgeClass(selectedIndicator.cumplimientoPromedio)}`;
+    
+    // Actualizar definición del indicador
+    updateIndicatorDefinition(selectedIndicator);
+    
+    // Crear gráfico del indicador
+    createIndicatorDetailChart(selectedIndicator);
+    
+    // Actualizar tabla de centros para el indicador
+    updateIndicatorCentersTable(selectedIndicator);
+}
+
+function updateIndicatorDefinition(indicator) {
+    // Buscar la fila comunal para este indicador
+    const comunalRow = indicator.rows.find(row => row["CENTROS"] === "CURICO TOTAL COMUNAL");
+    
+    if (!comunalRow) {
+        document.getElementById('indicatorDefinition').innerHTML = '<p class="text-center">No hay datos disponibles para este indicador</p>';
+        return;
+    }
+    
+    document.getElementById('indicatorDefinition').innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-500 text-sm font-semibold">Numerador</p>
+                <p>${comunalRow["Númerador"]}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm font-semibold">Denominador</p>
+                <p>${comunalRow["Denominador"]}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm font-semibold">Meta</p>
+                <p>${comunalRow["Meta"]}</p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <p class="text-gray-500 text-sm font-semibold">Unidad de Medida</p>
+            <p>${comunalRow["UNIDAD DE MEDIDA"]}</p>
+        </div>
+        <div class="mt-4">
+            <p class="text-gray-500 text-sm font-semibold">Frecuencia</p>
+            <p>${comunalRow["FRECUENCIA"]}</p>
+        </div>
+        <div class="mt-4">
+            <p class="text-gray-500 text-sm font-semibold">Ponderación</p>
+            <p>${comunalRow["Ponderación"]}</p>
+        </div>
+    `;
+}
+
+function createIndicatorDetailChart(indicator) {
+    const ctx = document.getElementById('indicatorDetailChart').getContext('2d');
+    
+    // Filtrar las filas que no sean comunales
+    const centersRows = indicator.rows.filter(row => row["CENTROS"] !== "CURICO TOTAL COMUNAL");
+    
+    // Ordenar por cumplimiento (de mayor a menor)
+    centersRows.sort((a, b) => {
+        const cumplimientoA = parseFloat(a["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        const cumplimientoB = parseFloat(b["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        return cumplimientoB - cumplimientoA;
+    });
+    
+    // Preparar datos para el gráfico
+    const labels = centersRows.map(row => row["CENTROS"]);
+    const data = centersRows.map(row => parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', '')));
+    
+    // Crear colores dinámicos según nivel de cumplimiento
+    const backgroundColors = data.map(value => {
+        if (value >= 95) return 'rgba(16, 185, 129, 0.2)';
+        if (value >= 80) return 'rgba(245, 158, 11, 0.2)';
+        return 'rgba(239, 68, 68, 0.2)';
+    });
+    
+    const borderColors = data.map(value => {
+        if (value >= 95) return 'rgb(16, 185, 129)';
+        if (value >= 80) return 'rgb(245, 158, 11)';
+        return 'rgb(239, 68, 68)';
+    });
+    
+    // Línea horizontal para la meta
+    const metaValue = parseFloat(indicator.meta.replace(',', '.').replace('%', '')) || 100;
+    
+    // Destruir gráfico existente si existe
+    if (allCharts.indicatorDetailChart) {
+        allCharts.indicatorDetailChart.destroy();
+    }
+    
+    // Crear nuevo gráfico
+    allCharts.indicatorDetailChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Cumplimiento (%)',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: Math.max(120, metaValue * 1.2),
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 90,
+                        minRotation: 45
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            yMin: metaValue,
+                            yMax: metaValue,
+                            borderColor: 'rgb(75, 85, 99)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: `Meta: ${metaValue}%`,
+                                enabled: true,
+                                position: 'start'
+                            }
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Cumplimiento: ${context.raw.toFixed(2)}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateIndicatorCentersTable(indicator) {
+    const table = document.getElementById('indicatorCentersTable');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    // Filtrar las filas que no sean comunales
+    const centersRows = indicator.rows.filter(row => row["CENTROS"] !== "CURICO TOTAL COMUNAL");
+    
+    // Ordenar por cumplimiento (de mayor a menor)
+    centersRows.sort((a, b) => {
+        const cumplimientoA = parseFloat(a["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        const cumplimientoB = parseFloat(b["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        return cumplimientoB - cumplimientoA;
+    });
+    
+    centersRows.forEach(row => {
+        const tr = document.createElement('tr');
+        
+        const cumplimiento = parseFloat(row["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+        let cumplimientoClass = getCumplimientoClass(cumplimiento);
+        
+        tr.innerHTML = `
+            <td>${row["CENTROS"]}</td>
+            <td>${row["Númerador"]}</td>
+            <td>${row["Denominador"]}</td>
+            <td>${row["Resultado"]}</td>
+            <td>${row["Meta"]}</td>
+            <td class="${cumplimientoClass}">${row["CUMPLIMIENTO"]}</td>
+        `;
+        
+        tbody.appendChild(tr);
+    });
+}
+
+function loadComparisonTab() {
+    // Inicializar selectores para la comparación
+    setupComparisonSelectors();
+    
+    // Crear gráfico de comparación inicial
+    createComparisonChart();
+}
+
+function setupComparisonSelectors() {
+    const centersSelect = document.getElementById('compareCentersSelect');
+    const indicatorsSelect = document.getElementById('compareIndicatorsSelect');
+    
+    // Limpiar selectores
+    centersSelect.innerHTML = '';
+    indicatorsSelect.innerHTML = '';
+    
+    // Agregar centros (excluyendo el comunal)
+    allCenters.filter(center => center.name !== "CURICO TOTAL COMUNAL").forEach(center => {
+        const option = document.createElement('option');
+        option.value = center.name;
+        option.textContent = center.name;
+        centersSelect.appendChild(option);
+    });
+    
+    // Si hay centros, seleccionar los primeros 3 por defecto
+    if (centersSelect.options.length > 0) {
+        for (let i = 0; i < Math.min(3, centersSelect.options.length); i++) {
+            centersSelect.options[i].selected = true;
+        }
+    }
+    
+    // Agregar indicadores
+    allIndicators.forEach(indicator => {
+        const option = document.createElement('option');
+        option.value = indicator.id;
+        option.textContent = `${indicator.codigo}. ${indicator.name}`;
+        indicatorsSelect.appendChild(option);
+    });
+    
+    // Si hay indicadores, seleccionar los primeros 3 por defecto
+    if (indicatorsSelect.options.length > 0) {
+        for (let i = 0; i < Math.min(3, indicatorsSelect.options.length); i++) {
+            indicatorsSelect.options[i].selected = true;
+        }
+    }
+}
+
+function createComparisonChart() {
+    const ctx = document.getElementById('comparisonChart').getContext('2d');
+    const chartType = document.getElementById('compareChartTypeSelect').value;
+    
+    // Obtener centros e indicadores seleccionados
+    const selectedCenters = Array.from(document.getElementById('compareCentersSelect').selectedOptions).map(option => option.value);
+    const selectedIndicatorIds = Array.from(document.getElementById('compareIndicatorsSelect').selectedOptions).map(option => option.value);
+    
+    // Si no hay selección, mostrar mensaje y salir
+    if (selectedCenters.length === 0 || selectedIndicatorIds.length === 0) {
+        if (allCharts.comparisonChart) {
+            allCharts.comparisonChart.destroy();
+            allCharts.comparisonChart = null;
+        }
+        
+        document.getElementById('comparisonDetailsContainer').innerHTML = `
+            <div class="card p-6 col-span-2">
+                <p class="text-center">Seleccione al menos un centro y un indicador para ver la comparación</p>
+            </div>
+        `;
+        
+        return;
+    }
+    
+    // Preparar datos para el gráfico
+    const datasets = [];
+    
+    if (chartType === 'bar' || chartType === 'line') {
+        // Para gráficos de barras o líneas, agrupamos por indicador
+        selectedIndicatorIds.forEach(indicatorId => {
+            const indicator = allIndicators.find(ind => ind.id === indicatorId);
+            
+            if (indicator) {
+                const data = [];
+                selectedCenters.forEach(centerName => {
+                    const centerRow = indicator.rows.find(row => row["CENTROS"] === centerName);
+                    if (centerRow) {
+                        const cumplimiento = parseFloat(centerRow["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                        data.push(cumplimiento);
+                    } else {
+                        data.push(null);
+                    }
+                });
+                
+                // Crear un color aleatorio para este indicador
+                const r = Math.floor(100 + Math.random() * 155);
+                const g = Math.floor(100 + Math.random() * 155);
+                const b = Math.floor(100 + Math.random() * 155);
+                
+                datasets.push({
+                    label: `${indicator.codigo}. ${indicator.name.substring(0, 30)}${indicator.name.length > 30 ? '...' : ''}`,
+                    data: data,
+                    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.2)`,
+                    borderColor: `rgba(${r}, ${g}, ${b}, 1)`,
+                    borderWidth: 1,
+                    fill: chartType === 'line'
+                });
+            }
+        });
+    } else if (chartType === 'radar' || chartType === 'polarArea') {
+        // Para gráficos de radar o polar, agrupamos por centro
+        selectedCenters.forEach(centerName => {
+            const data = [];
+            selectedIndicatorIds.forEach(indicatorId => {
+                const indicator = allIndicators.find(ind => ind.id === indicatorId);
+                
+                if (indicator) {
+                    const centerRow = indicator.rows.find(row => row["CENTROS"] === centerName);
+                    if (centerRow) {
+                        const cumplimiento = parseFloat(centerRow["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                        data.push(cumplimiento);
+                    } else {
+                        data.push(null);
+                    }
+                }
+            });
+            
+            // Crear un color aleatorio para este centro
+            const r = Math.floor(100 + Math.random() * 155);
+            const g = Math.floor(100 + Math.random() * 155);
+            const b = Math.floor(100 + Math.random() * 155);
+            
+            datasets.push({
+                label: centerName,
+                data: data,
+                backgroundColor: `rgba(${r}, ${g}, ${b}, 0.2)`,
+                borderColor: `rgba(${r}, ${g}, ${b}, 1)`,
+                borderWidth: 1
+            });
+        });
+    }
+    
+    // Preparar etiquetas
+    let labels = [];
+    if (chartType === 'bar' || chartType === 'line') {
+        labels = selectedCenters;
+    } else if (chartType === 'radar' || chartType === 'polarArea') {
+        labels = selectedIndicatorIds.map(id => {
+            const indicator = allIndicators.find(ind => ind.id === id);
+            return indicator ? indicator.codigo : id;
+        });
+    }
+    
+    // Destruir gráfico existente si existe
+    if (allCharts.comparisonChart) {
+        allCharts.comparisonChart.destroy();
+    }
+    
+    // Opciones específicas según tipo de gráfico
+    let chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `${context.dataset.label}: ${context.raw.toFixed(2)}%`;
+                    }
+                }
+            }
+        }
+    };
+    
+    if (chartType === 'bar' || chartType === 'line') {
+        chartOptions.scales = {
+            y: {
+                beginAtZero: true,
+                max: 120,
+                title: {
+                    display: true,
+                    text: 'Cumplimiento (%)'
+                }
+            },
+            x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 45
+                }
+            }
+        };
+        
+        if (chartType === 'line') {
+            chartOptions.elements = {
+                line: {
+                    tension: 0.4
+                }
+            };
+        }
+    } else if (chartType === 'radar') {
+        chartOptions.scales = {
+            r: {
+                min: 0,
+                max: 120,
+                ticks: {
+                    stepSize: 20
+                },
+                pointLabels: {
+                    font: {
+                        size: 10
+                    }
+                }
+            }
+        };
+    }
+    
+    // Crear gráfico de comparación
+    allCharts.comparisonChart = new Chart(ctx, {
+        type: chartType,
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: chartOptions
+    });
+    
+    // Actualizar detalles de comparación
+    updateComparisonDetails(selectedCenters, selectedIndicatorIds);
+}
+
+function updateComparisonDetails(centers, indicatorIds) {
+    const container = document.getElementById('comparisonDetailsContainer');
+    container.innerHTML = '';
+    
+    // Crear tarjeta de resumen
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'card p-6';
+    
+    let summaryContent = `
+        <h3 class="text-xl font-bold mb-4">Resumen Comparativo</h3>
+        <p class="mb-2">Se están comparando <strong>${centers.length}</strong> centros y <strong>${indicatorIds.length}</strong> indicadores.</p>
+    `;
+    
+    // Agregar promedios por centro
+    summaryContent += '<div class="mt-4"><h4 class="text-lg font-semibold mb-2">Promedio por Centro:</h4><ul class="space-y-2">';
+    
+    centers.forEach(centerName => {
+        let totalCumplimiento = 0;
+        let count = 0;
+        
+        indicatorIds.forEach(indicatorId => {
+            const indicator = allIndicators.find(ind => ind.id === indicatorId);
+            if (indicator) {
+                const centerRow = indicator.rows.find(row => row["CENTROS"] === centerName);
+                if (centerRow) {
+                    const cumplimiento = parseFloat(centerRow["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                    if (!isNaN(cumplimiento)) {
+                        totalCumplimiento += cumplimiento;
+                        count++;
+                    }
+                }
+            }
+        });
+        
+        const promedio = count > 0 ? totalCumplimiento / count : 0;
+        const promedioClass = getCumplimientoClass(promedio);
+        
+        summaryContent += `
+            <li class="flex justify-between items-center">
+                <span>${centerName}</span>
+                <span class="${promedioClass}">${promedio.toFixed(2)}%</span>
+            </li>
+        `;
+    });
+    
+    summaryContent += '</ul></div>';
+    
+    summaryCard.innerHTML = summaryContent;
+    container.appendChild(summaryCard);
+    
+    // Crear tarjeta de indicadores
+    const indicatorsCard = document.createElement('div');
+    indicatorsCard.className = 'card p-6';
+    
+    let indicatorsContent = `
+        <h3 class="text-xl font-bold mb-4">Detalle por Indicador</h3>
+    `;
+    
+    indicatorsContent += '<div class="mt-4 space-y-6">';
+    
+    indicatorIds.forEach(indicatorId => {
+        const indicator = allIndicators.find(ind => ind.id === indicatorId);
+        if (indicator) {
+            indicatorsContent += `
+                <div>
+                    <h4 class="text-lg font-semibold mb-2">${indicator.codigo}. ${indicator.name}</h4>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <div class="bg-gray-100 p-2 rounded">
+                            <p class="text-xs text-gray-500">Meta</p>
+                            <p class="font-semibold">${indicator.meta}</p>
+                        </div>
+                        <div class="bg-gray-100 p-2 rounded">
+                            <p class="text-xs text-gray-500">Ponderación</p>
+                            <p class="font-semibold">${indicator.ponderacion}</p>
+                        </div>
+                        <div class="bg-gray-100 p-2 rounded">
+                            <p class="text-xs text-gray-500">Promedio Comunal</p>
+                            <p class="font-semibold ${getCumplimientoClass(indicator.cumplimientoPromedio)}">${indicator.cumplimientoPromedio.toFixed(2)}%</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-2 py-1 text-left">Centro</th>
+                                    <th class="px-2 py-1 text-center">Numerador</th>
+                                    <th class="px-2 py-1 text-center">Denominador</th>
+                                    <th class="px-2 py-1 text-center">Resultado</th>
+                                    <th class="px-2 py-1 text-center">Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            centers.forEach(centerName => {
+                const centerRow = indicator.rows.find(row => row["CENTROS"] === centerName);
+                if (centerRow) {
+                    const cumplimiento = parseFloat(centerRow["CUMPLIMIENTO"].replace(',', '.').replace('%', ''));
+                    const cumplimientoClass = getCumplimientoClass(cumplimiento);
+                    
+                    indicatorsContent += `
+                        <tr class="border-b">
+                            <td class="px-2 py-1">${centerName}</td>
+                            <td class="px-2 py-1 text-center">${centerRow["Númerador"]}</td>
+                            <td class="px-2 py-1 text-center">${centerRow["Denominador"]}</td>
+                            <td class="px-2 py-1 text-center">${centerRow["Resultado"]}</td>
+                            <td class="px-2 py-1 text-center ${cumplimientoClass}">${centerRow["CUMPLIMIENTO"]}</td>
+                        </tr>
+                    `;
+                } else {
+                    indicatorsContent += `
+                        <tr class="border-b">
+                            <td class="px-2 py-1">${centerName}</td>
+                            <td colspan="4" class="px-2 py-1 text-center text-gray-500">No hay datos disponibles</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            indicatorsContent += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    indicatorsContent += '</div>';
+    
+    indicatorsCard.innerHTML = indicatorsContent;
+    container.appendChild(indicatorsCard);
+}
+
+function applyComparisonFilters() {
+    createComparisonChart();
+}
+
+function showIndicatorDetail(indicatorId) {
+    selectIndicator(indicatorId);
+    switchTab('indicators');
+}
+
+function showCenterDetail(centerId) {
+    selectCenter(centerId);
+    switchTab('centers');
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const loader = document.getElementById('loader');
+    
+    darkMode = !darkMode;
+    
+    if (darkMode) {
+        body.classList.add('dark-mode');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        loader.classList.add('loader-dark');
+    } else {
+        body.classList.remove('dark-mode');
+        darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        loader.classList.remove('loader-dark');
+    }
+    
+    // Actualizar gráficos para modo oscuro
+    updateChartsForDarkMode();
+}
+
+function updateChartsForDarkMode() {
+    // Actualizar todos los gráficos para reflejar el modo oscuro
+    for (const chartKey in allCharts) {
+        if (allCharts[chartKey]) {
+            const chart = allCharts[chartKey];
+            
+            if (darkMode) {
+                chart.options.plugins.legend.labels.color = '#e2e8f0';
+                chart.options.scales.r.pointLabels.color = '#e2e8f0';
+                chart.options.scales.r.ticks.color = '#e2e8f0';
+                chart.options.scales.x.ticks.color = '#e2e8f0';
+                chart.options.scales.y.ticks.color = '#e2e8f0';
+                chart.options.scales.x.grid.color = '#334155';
+                chart.options.scales.y.grid.color = '#334155';
+                chart.options.scales.r.grid.color = '#334155';
+            } else {
+                chart.options.plugins.legend.labels.color = '#334155';
+                chart.options.scales.r.pointLabels.color = '#334155';
+                chart.options.scales.r.ticks.color = '#334155';
+                chart.options.scales.x.ticks.color = '#334155';
+                chart.options.scales.y.ticks.color = '#334155';
+                chart.options.scales.x.grid.color = '#e2e8f0';
+                chart.options.scales.y.grid.color = '#e2e8f0';
+                chart.options.scales.r.grid.color = '#e2e8f0';
+            }
+            
+            chart.update();
+        }
+    }
+}
+
+function switchTab(tabId) {
+    // Ocultar todas las pestañas
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Mostrar la pestaña seleccionada
+    document.getElementById(tabId).classList.add('active');
+    
+    // Actualizar estado activo en links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    document.querySelector(`.nav-link[data-tab="${tabId}"]`).classList.add('active');
+}
+
+function globalSearch(query) {
+    query = query.toLowerCase().trim();
+    
+    if (query === '') {
+        // Si no hay búsqueda, restaurar todo
+        document.querySelectorAll('.center-item, .indicator-item').forEach(item => {
+            item.style.display = '';
+        });
+        
+        filterDataTable();
+        return;
+    }
+    
+    // Filtrar centros
+    document.querySelectorAll('.center-item').forEach(item => {
+        const centerName = item.querySelector('.font-medium').textContent.toLowerCase();
+        if (centerName.includes(query)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Filtrar indicadores
+    document.querySelectorAll('.indicator-item').forEach(item => {
+        const indicatorName = item.querySelector('.font-medium').textContent.toLowerCase();
+        if (indicatorName.includes(query)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Filtrar tabla de datos
+    const rows = document.getElementById('dataTableBody').querySelectorAll('tr');
+    rows.forEach(row => {
+        const codigo = row.cells[0].textContent.toLowerCase();
+        const centro = row.cells[1].textContent.toLowerCase();
+        const nombre = row.cells[2].textContent.toLowerCase();
+        
+        if (codigo.includes(query) || centro.includes(query) || nombre.includes(query)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function filterCenters(query) {
+    query = query.toLowerCase().trim();
+    
+    document.querySelectorAll('.center-item').forEach(item => {
+        const centerName = item.querySelector('.font-medium').textContent.toLowerCase();
+        if (centerName.includes(query) || query === '') {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function filterIndicators(query) {
+    query = query.toLowerCase().trim();
+    
+    document.querySelectorAll('.indicator-item').forEach(item => {
+        const indicatorName = item.querySelector('.font-medium').textContent.toLowerCase();
+        if (indicatorName.includes(query) || query === '') {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function exportData() {
+    // Simular exportación a Excel
+    showNotification('Exportando datos a Excel...', 'info');
+    
+    setTimeout(() => {
+        showNotification('Datos exportados correctamente', 'success');
+    }, 1500);
+}
+
+function generateReport() {
+    // Simular generación de informe
+    showNotification('Generando informe...', 'info');
+    
+    setTimeout(() => {
+        showNotification('Informe generado correctamente', 'success');
+    }, 2000);
+}
+
+function showDetailView(title, content) {
+    document.getElementById('detailTitle').textContent = title;
+    document.getElementById('detailContent').innerHTML = content;
+    document.getElementById('detailView').style.display = 'flex';
+}
+
+function closeDetailView() {
+    document.getElementById('detailView').style.display = 'none';
+}
+
+function showLoader(message) {
+    const loader = document.getElementById('loader');
+    const loaderText = document.querySelector('.loader-text');
+    
+    loaderText.textContent = message || 'Cargando...';
+    loader.style.display = 'flex';
+}
+
+function hideLoader() {
+    document.getElementById('loader').style.display = 'none';
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notificationMessage');
+    
+    notification.className = `notification ${type}`;
+    notificationMessage.textContent = message;
+    
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+function getCumplimientoText(value) {
+    if (value >= 95) return 'Cumplido';
+    if (value >= 80) return 'En Observación';
+    return 'Crítico';
+}
+
+function getCumplimientoBadgeClass(value) {
+    if (value >= 95) return 'badge-success';
+    if (value >= 80) return 'badge-warning';
+    return 'badge-danger';
+}
+
+function getCumplimientoClass(value) {
+    if (value >= 95) return 'text-success';
+    if (value >= 80) return 'text-warning';
+    return 'text-danger';
+}
+
+function loadPeriodData(period) {
+    showNotification(`Cargando datos del período: ${period}`, 'info');
+    loadDataFromSource();
+}
+
+// Función para cargar datos de Excel usando fetch y SheetJS
+async function loadExcelFile() {
+    try {
+        showLoader('Cargando archivo Excel...');
+        
+        const response = await fetch('IAAPS CORTE MARZO INTERNO.xlsx');
+        if (!response.ok) {
+            throw new Error('No se pudo cargar el archivo Excel. Verifique que exista en el servidor.');
+        }
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        // Obtener la primera hoja
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convertir a JSON
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        // Procesar los datos
+        if (rows.length < 2) {
+            throw new Error('El archivo Excel no contiene datos suficientes.');
+        }
+        
+        // Obtener encabezados (primera fila)
+        const headers = rows[0];
+        
+        // Convertir los datos a un formato compatible con la aplicación
+        const excelRows = [];
+        
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const rowData = {};
+            
+            for (let j = 0; j < headers.length; j++) {
+                rowData[headers[j]] = row[j] !== undefined ? row[j].toString() : '';
+            }
+            
+            excelRows.push(rowData);
+        }
+        
+        // Actualizar los datos globales
+        excelData = {
+            period: 'CORTE MARZO 2025',
+            lastUpdate: new Date().toLocaleString(),
+            rows: excelRows
+        };
+        
+        hideLoader();
+        return true;
+    } catch (error) {
+        console.error('Error cargando archivo Excel:', error);
+        showNotification(`Error: ${error.message}`, 'error');
+        hideLoader();
+        return false;
+    }
+}

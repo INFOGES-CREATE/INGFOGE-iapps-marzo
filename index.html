@@ -1,0 +1,3815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard IAAPS Curicó - Sistema Integrado de Gestión en Salud</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f1f5f9;
+            --gradient-start: #0ea5e9;
+            --gradient-end: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            overflow-x: hidden;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        }
+        
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card {
+            border-radius: 1rem;
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card.primary {
+            border-left-color: var(--primary);
+        }
+        
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+        
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+        
+        .nav-link {
+            position: relative;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        table th, table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .progress-bar.success {
+            background-color: var(--success);
+        }
+        
+        .progress-bar.warning {
+            background-color: var(--warning);
+        }
+        
+        .progress-bar.danger {
+            background-color: var(--danger);
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-container input {
+            padding-left: 2.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .search-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+            outline: none;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .custom-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2rem;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Estilo futurista para tablas */
+        .futuristic-table th {
+            background: linear-gradient(to right, #0f172a, #1e293b);
+            color: white;
+            padding: 1rem;
+            font-weight: 500;
+        }
+        
+        .futuristic-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .futuristic-table td {
+            padding: 0.75rem 1rem;
+        }
+        
+        /* Animaciones */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+            }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Modo oscuro */
+        .dark-mode {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .card {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .nav-link {
+            color: #94a3b8;
+        }
+        
+        .dark-mode .nav-link:hover, .dark-mode .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .dark-mode table th {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode table td {
+            border-bottom: 1px solid #334155;
+        }
+        
+        .dark-mode table tr:hover {
+            background-color: #334155;
+        }
+        
+        .dark-mode .progress {
+            background-color: #334155;
+        }
+        
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Animación de carga de página */
+        .loader {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loader-dark {
+            background-color: rgba(15, 23, 42, 0.9);
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loader-text {
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Diseño moderno para detalles */
+        .detail-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .detail-container {
+            width: 80%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+        }
+        
+        .dark-mode .detail-container {
+            background-color: #1e293b;
+        }
+        
+        .close-detail {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s;
+        }
+        
+        .close-detail:hover {
+            color: var(--danger);
+        }
+
+        .file-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-error i {
+            color: var(--danger);
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .file-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-success i {
+            color: var(--success);
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .refresh-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .refresh-btn:hover {
+            background-color: #0284c7;
+        }
+
+        .dark-mode .refresh-btn {
+            background-color: #1d4ed8;
+        }
+
+        .dark-mode .refresh-btn:hover {
+            background-color: #1e40af;
+        }
+
+        .excel-info {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .dark-mode .excel-info {
+            color: #94a3b8;
+        }
+
+        .selector-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .selector-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: white;
+            padding: 0 5px;
+            font-size: 0.75rem;
+            color: #64748b;
+            z-index: 1;
+        }
+
+        .dark-mode .selector-label {
+            background-color: #1e293b;
+            color: #94a3b8;
+        }
+
+        .selector {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            appearance: none;
+            background-color: white;
+            color: #334155;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .selector {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        .selector:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        .center-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Tooltip para detalles de indicador */
+        .indicator-detail {
+            position: relative;
+            cursor: help;
+        }
+
+        .indicator-detail i {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-left: 0.25rem;
+        }
+
+        .indicator-detail:hover .tooltip-detail {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-detail {
+            visibility: hidden;
+            width: 300px;
+            background-color: #1e293b;
+            color: white;
+            text-align: left;
+            border-radius: 6px;
+            padding: 1rem;
+            position: absolute;
+            z-index: 100;
+            top: calc(100% + 5px);
+            right: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tooltip-detail h4 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tooltip-detail p {
+            margin-bottom: 0.25rem;
+        }
+
+        .tooltip-detail .formula {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+        }
+
+        /* Estilo para gráficos dinámicos */
+        .chart-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-type-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-type-button {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .chart-type-button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dark-mode .chart-type-button {
+            background-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark-mode .chart-type-button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Notificaciones emergentes */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .notification.error {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .notification.info {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Estilos para tablas responsivas */
+        @media (max-width: 768px) {
+            .futuristic-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Animaciones para estadísticas */
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-count {
+            animation: countUp 0.5s ease forwards;
+        }
+
+        /* Estilo para datos en tablas */
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        .trend-neutral {
+            color: var(--warning);
+        }
+
+        /* Estilos para pantallas pequeñas */
+        @media (max-width: 640px) {
+            .grid-cols-1-sm {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Cargando datos de IAAPS...</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="dashboard-header">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-white p-2 rounded-lg mr-4">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI1IDNDMTIuODUgMyAzIDEyLjg1IDMgMjVDMyAzNy4xNSAxMi44NSA0NyAyNSA0N0MzNy4xNSA0NyA0NyAzNy4xNSA0NyAyNUM0NyAxMi44NSAzNy4xNSAzIDI1IDNaTTM1LjcgMzJDMzUuNDUgMzIuNSAzNC45NSAzMi43NSAzNC40IDMyLjc1QzM0LjE1IDMyLjc1IDMzLjkgMzIuNjUgMzMuNyAzMi41TDI1IDI3LjQ1TDE2LjMgMzIuNUMxNS44IDMyLjggMTUuMjUgMzIuNzUgMTQuODUgMzIuMzVDMTQuNCAzMS45NSAxNC4zIDMxLjQgMTQuNSAzMC45TDE3LjYgMjFMMTAgMTQuNzVDOS41NSAxNC40IDkuMzUgMTMuOSA5LjQ1IDEzLjM1QzkuNTUgMTIuOCA5Ljk1IDEyLjQgMTAuNSAxMi4zNUwyMC41NSAxMS4yNUwyNC4xNSAyLjA1QzI0LjM1IDEuNTUgMjQuOCAxLjI1IDI1LjMgMS4yNUMyNS44IDEuMjUgMjYuMjUgMS41NSAyNi40NSAyLjA1TDMwLjA1IDExLjI1TDQwLjEgMTIuMzVDNDAuNjUgMTIuNCA0MS4wNSAxMi44IDQxLjE1IDEzLjM1QzQxLjI1IDEzLjkgNDEuMDUgMTQuNCA0MC42IDE0Ljc1TDMzLjYgMjFMMzYuNyAzMC45QzM2LjkgMzEuNCAzNi44IDMxLjk1IDM2LjM1IDMyLjM1QzM2LjE1IDMyLjU1IDM1Ljk1IDMyLjcgMzUuNyAzMloiIGZpbGw9IiMwZWE1ZTkiLz4KPC9zdmc+Cg==" alt="Logo" class="h-10">
+                    </div>
+                    <h1 class="text-2xl font-bold">INFOGES CURICÓ</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="search-container mr-4">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar..." class="py-2 px-4 w-64" id="searchInput">
+                    </div>
+                    <button id="darkModeToggle" class="text-white ml-4">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div id="fileStatus" class="ml-4 flex items-center">
+                        <span class="text-xs text-white px-2 py-1 rounded-full bg-green-500 hidden" id="fileStatusConnected">
+                            <i class="fas fa-link mr-1"></i> Conectado
+                        </span>
+                        <span class="text-xs text-white px-2 py-1 rounded-full bg-red-500 hidden" id="fileStatusDisconnected">
+                            <i class="fas fa-unlink mr-1"></i> Desconectado
+                        </span>
+                    </div>
+                    <div class="flex items-center ml-8">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMzODQyNGIiLz4KPHBhdGggZD0iTTIwIDIwQzIzLjMxMzcgMjAgMjYgMTcuMzEzNyAyNiAxNEMyNiAxMC42ODYzIDIzLjMxMzcgOCAyMCA4QzE2LjY4NjMgOCAxNCAxMC42ODYzIDE0IDE0QzE0IDE3LjMxMzcgMTYuNjg2MyAyMCAyMCAyMFoiIGZpbGw9IiNmOGZhZmMiLz4KPHBhdGggZD0iTTIwIDIyQzE0LjQ4IDIyIDEwIDI2LjQ4IDEwIDMyQzEwIDMyLjU1IDEwLjQ1IDMzIDExIDMzSDI5QzI5LjU1IDMzIDMwIDMyLjU1IDMwIDMyQzMwIDI2LjQ4IDI1LjUyIDIyIDIwIDIyWiIgZmlsbD0iI2Y4ZmFmYyIvPgo8L3N2Zz4K" alt="Usuario" class="h-8 w-8 rounded-full mr-2">
+                        <span>Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Module Title -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold">Módulo IAAPS - Índice de Actividad de la Atención Primaria de Salud</h2>
+                <p class="text-gray-600">Monitoreo de indicadores de desempeño - <span id="periodoActual">Cargando...</span></p>
+                <div id="excelInfo" class="mt-2"></div>
+            </div>
+            <div class="flex items-center">
+                <button class="btn-gradient mr-2" id="exportDataBtn">
+                    <i class="fas fa-file-export mr-2"></i>Exportar Datos
+                </button>
+                <button class="btn-gradient" id="generateReportBtn">
+                    <i class="fas fa-chart-line mr-2"></i>Generar Informe
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="quickStats">
+            <div class="card p-6 stat-card primary">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">Cumplimiento Comunal</p>
+                        <h3 class="text-2xl font-bold" id="cumplimientoComunal">--%</h3>
+                        <p class="text-sm flex items-center mt-1" id="cumplimientoComunalTendencia">
+                            <i class="fas fa-minus mr-1"></i>Sin datos previos
+                        </p>
+                    </div>
+                    <div class="text-blue-500 bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-percentage text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6 stat-card success">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">Indicadores Cumplidos</p>
+                        <h3 class="text-2xl font-bold" id="indicadoresCumplidos">- de -</h3>
+                        <p class="text-sm flex items-center mt-1" id="indicadoresCumplidosTendencia">
+                            <i class="fas fa-minus mr-1"></i>Sin datos previos
+                        </p>
+                    </div>
+                    <div class="text-green-500 bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6 stat-card warning">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">En Observación</p>
+                        <h3 class="text-2xl font-bold" id="indicadoresObservacion">- de -</h3>
+                        <p class="text-sm flex items-center mt-1" id="indicadoresObservacionTendencia">
+                            <i class="fas fa-minus mr-1"></i>Sin datos previos
+                        </p>
+                    </div>
+                    <div class="text-yellow-500 bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6 stat-card danger">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">Críticos</p>
+                        <h3 class="text-2xl font-bold" id="indicadoresCriticos">- de -</h3>
+                        <p class="text-sm flex items-center mt-1" id="indicadoresCriticosTendencia">
+                            <i class="fas fa-minus mr-1"></i>Sin datos previos
+                        </p>
+                    </div>
+                    <div class="text-red-500 bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-exclamation-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="card mb-8">
+            <div class="border-b border-gray-200">
+                <nav class="flex justify-between p-4">
+                    <div class="flex space-x-4 md:space-x-8 overflow-x-auto pb-2">
+                        <a href="#" class="nav-link active whitespace-nowrap" data-tab="overview">Resumen General</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="centers">Por Centros de Salud</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="indicators">Por Indicadores</a>
+                        <a href="#" class="nav-link whitespace-nowrap" data-tab="comparison">Análisis Comparativo</a>
+                    </div>
+                    <div>
+                        <select class="py-2 px-4 border border-gray-300 rounded-lg custom-select" id="periodoSelector">
+                            <option value="actual">Período Actual</option>
+                            <option value="anterior">Período Anterior</option>
+                        </select>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Main Chart -->
+                <div class="card p-6 col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Cumplimiento por Centro de Salud</h3>
+                        <div class="flex space-x-2 chart-type-buttons" id="centerChartTypeButtons">
+                            <button class="chart-type-button" data-type="bar">Barras</button>
+                            <button class="chart-type-button active" data-type="radar">Radar</button>
+                            <button class="chart-type-button" data-type="line">Líneas</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="centerComplianceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Indicators -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-6">Ranking de Indicadores</h3>
+                    <ul class="space-y-4" id="indicadoresRanking">
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                        <li class="flex items-center justify-between pb-3 border-b animate-pulse">
+                            <div class="w-3/4">
+                                <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                            <div class="h-6 w-16 bg-gray-200 rounded"></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Critical Indicators -->
+            <div class="card p-6 mt-8">
+                <h3 class="text-xl font-bold mb-6">Indicadores Críticos</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full futuristic-table" id="indicadoresCriticosTable">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Indicador</th>
+                                <th>Meta</th>
+                                <th>Resultado Comunal</th>
+                                <th>Cumplimiento</th>
+                                <th>Centros Críticos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="animate-pulse">
+                                <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                            </tr>
+                            <tr class="animate-pulse">
+                                <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                            </tr>
+                            <tr class="animate-pulse">
+                                <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Centers Tab -->
+        <div class="tab-content" id="centers">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column - Centers List -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">Centros de Salud</h3>
+                    <div class="search-container mb-4 w-full">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar centro..." class="py-2 px-4 w-full" id="centerSearchInput">
+                    </div>
+                    <div class="space-y-2 max-h-96 overflow-y-auto" id="centersList">
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div class="h-5 bg-gray-200 rounded w-32"></div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div class="h-5 bg-gray-200 rounded w-32"></div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div class="h-5 bg-gray-200 rounded w-32"></div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Center Details -->
+                <div class="card p-6 lg:col-span-2" id="centerDetails">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold" id="centerName">Seleccione un centro</h3>
+                            <p class="text-gray-500" id="centerDescription">Seleccione un centro para ver sus detalles</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-2">Estado:</span>
+                            <span class="badge badge-warning" id="centerStatus">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Center KPIs -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="centerKPIs">
+                        <div class="bg-gray-50 p-4 rounded-lg animate-pulse">
+                            <p class="text-gray-500 text-sm">Indicadores Cumplidos</p>
+                            <div class="flex items-center justify-between">
+                                <div class="h-6 bg-gray-200 rounded w-20 mt-2"></div>
+                                <span class="text-green-500"><i class="fas fa-check-circle"></i></span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg animate-pulse">
+                            <p class="text-gray-500 text-sm">En Observación</p>
+                            <div class="flex items-center justify-between">
+                                <div class="h-6 bg-gray-200 rounded w-20 mt-2"></div>
+                                <span class="text-yellow-500"><i class="fas fa-exclamation-triangle"></i></span>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg animate-pulse">
+                            <p class="text-gray-500 text-sm">Críticos</p>
+                            <div class="flex items-center justify-between">
+                                <div class="h-6 bg-gray-200 rounded w-20 mt-2"></div>
+                                <span class="text-red-500"><i class="fas fa-exclamation-circle"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Chart -->
+                    <div class="bg-gray-100 rounded-lg animate-pulse h-56 mb-6" id="centerChartContainer">
+                        <div class="chart-container">
+                            <canvas id="centerDetailChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Center Indicators Table -->
+                    <h4 class="text-lg font-semibold mb-4">Indicadores</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full futuristic-table" id="centerIndicatorsTable">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Indicador</th>
+                                    <th>Meta</th>
+                                    <th>Resultado</th>
+                                    <th>Cumplimiento</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                </tr>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-8"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-48"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-12"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-6 text-right">
+                        <button class="btn-gradient" id="centerReportBtn">
+                            <i class="fas fa-file-export mr-2"></i>Informe Detallado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicators Tab -->
+        <div class="tab-content" id="indicators">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column - Indicators List -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4">Indicadores IAAPS</h3>
+                    <div class="search-container mb-4 w-full">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar indicador..." class="py-2 px-4 w-full" id="indicatorSearchInput">
+                    </div>
+                    <div class="space-y-2 max-h-96 overflow-y-auto" id="indicatorsList">
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+                                    <div class="h-3 bg-gray-200 rounded w-32"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+                                    <div class="h-3 bg-gray-200 rounded w-32"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-100 rounded-lg border-l-4 border-gray-300 animate-pulse">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="h-5 bg-gray-200 rounded w-40 mb-2"></div>
+                                    <div class="h-3 bg-gray-200 rounded w-32"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="h-4 bg-gray-200 rounded w-12 mr-2"></div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Indicator Details -->
+                <div class="card p-6 lg:col-span-2" id="indicatorDetails">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold" id="indicatorTitle">Seleccione un indicador</h3>
+                            <p class="text-gray-500">Seleccione un indicador para ver sus detalles</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-2">Estado:</span>
+                            <span class="badge badge-warning" id="indicatorStatus">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicator Definition -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6" id="indicatorDefinition">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="animate-pulse">
+                                <p class="text-gray-500 text-sm font-semibold">Numerador</p>
+                                <div class="h-4 bg-gray-200 rounded w-full mt-2"></div>
+                            </div>
+                            <div class="animate-pulse">
+                                <p class="text-gray-500 text-sm font-semibold">Denominador</p>
+                                <div class="h-4 bg-gray-200 rounded w-full mt-2"></div>
+                            </div>
+                            <div class="animate-pulse">
+                                <p class="text-gray-500 text-sm font-semibold">Meta</p>
+                                <div class="h-4 bg-gray-200 rounded w-24 mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicator Chart -->
+                    <div class="bg-gray-100 rounded-lg animate-pulse h-56 mb-6" id="indicatorChartContainer">
+                        <div class="chart-container">
+                            <canvas id="indicatorDetailChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicator Centers Table -->
+                    <h4 class="text-lg font-semibold mb-4">Desempeño por Centro de Salud</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full futuristic-table" id="indicatorCentersTable">
+                            <thead>
+                                <tr>
+                                    <th>Centro de Salud</th>
+                                    <th>Numerador</th>
+                                    <th>Denominador</th>
+                                    <th>Resultado</th>
+                                    <th>Meta</th>
+                                    <th>Cumplimiento</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-36"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-20"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                </tr>
+                                <tr class="animate-pulse">
+                                    <td><div class="h-4 bg-gray-200 rounded w-36"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-20"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-16"></div></td>
+                                    <td><div class="h-4 bg-gray-200 rounded w-24"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-6 text-right">
+                        <button class="btn-gradient" id="indicatorExportBtn">
+                            <i class="fas fa-file-export mr-2"></i>Exportar Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Tab -->
+        <div class="tab-content" id="comparison">
+            <div class="card p-6 mb-8">
+                <h3 class="text-xl font-bold mb-6">Análisis Comparativo</h3>
+                
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Centros de Salud</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" multiple id="compareCentersSelect">
+                            <option value="loading" disabled>Cargando centros...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Indicadores</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" multiple id="compareIndicatorsSelect">
+                            <option value="loading" disabled>Cargando indicadores...</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Gráfico</label>
+                        <select class="custom-select w-full py-2 px-4 border border-gray-300 rounded-lg" id="compareChartTypeSelect">
+                            <option value="bar">Gráfico de Barras</option>
+                            <option value="radar">Gráfico de Radar</option>
+                            <option value="line">Gráfico de Líneas</option>
+                            <option value="polarArea">Gráfico de Área Polar</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button class="btn-gradient py-2 px-6" id="applyComparisonFilters">
+                            <i class="fas fa-filter mr-2"></i>Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chart-container h-80" id="comparisonChartContainer">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" id="comparisonDetailsContainer">
+                <!-- This will be filled dynamically -->
+                <div class="card p-6 animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+                <div class="card p-6 animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+            </div>
+            
+            <div class="card p-6 mt-8" id="recommendationsContainer">
+                <h4 class="text-lg font-bold mb-4">Recomendaciones para Mejorar Cumplimiento</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 animate-pulse">
+                        <div class="h-5 bg-blue-100 rounded w-48 mb-3"></div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-blue-100 rounded w-full"></div>
+                            <div class="h-3 bg-blue-100 rounded w-5/6"></div>
+                            <div class="h-3 bg-blue-100 rounded w-full"></div>
+                            <div class="h-3 bg-blue-100 rounded w-4/5"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 animate-pulse">
+                        <div class="h-5 bg-blue-100 rounded w-48 mb-3"></div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-blue-100 rounded w-full"></div>
+                            <div class="h-3 bg-blue-100 rounded w-5/6"></div>
+                            <div class="h-3 bg-blue-100 rounded w-full"></div>
+                            <div class="h-3 bg-blue-100 rounded w-4/5"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-right">
+                    <button class="btn-gradient" id="generatePlanBtn">
+                        <i class="fas fa-file-pdf mr-2"></i>Generar Plan de Mejora
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-6 mt-8">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h4 class="text-lg font-bold">INFOGES CURICÓ</h4>
+                    <p class="text-sm text-gray-400">Sistema Integrado de Información para la Gestión en Salud</p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-sm text-gray-400">© 2025 Departamento de Salud Municipal de Curicó</p>
+                    <p class="text-sm text-gray-400">Versión 1.0.0 | <span id="lastUpdate">Última actualización: --</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail View Modal -->
+    <div class="detail-view" id="detailView">
+        <div class="detail-container">
+            <span class="close-detail" id="closeDetail">&times;</span>
+            <h3 class="text-xl font-bold mb-4" id="detailTitle">Detalles del Indicador</h3>
+            <div id="detailContent">
+                <!-- Content will be loaded dynamically -->
+                <div class="animate-pulse">
+                    <div class="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-11/12 mb-6"></div>
+                    
+                    <div class="h-40 bg-gray-200 rounded w-full mb-6"></div>
+                    
+                    <div class="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span id="notificationMessage"></span>
+    </div>
+
+    <script>
+        // Global variables
+        let excelData = null;
+        let allCenters = [];
+        let allIndicators = [];
+        let selectedCenter = null;
+        let selectedIndicator = null;
+        let allCharts = {};
+        let darkMode = false;
+
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the application
+            initApp();
+        });
+
+        async function initApp() {
+            setupEventListeners();
+            loadExcelData();
+        }
+
+        function setupEventListeners() {
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                toggleDarkMode();
+            });
+            
+            // Tab navigation
+            const tabLinks = document.querySelectorAll('.nav-link');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.getAttribute('data-tab'));
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                globalSearch(this.value);
+            });
+
+            document.getElementById('centerSearchInput').addEventListener('input', function() {
+                filterCenters(this.value);
+            });
+
+            document.getElementById('indicatorSearchInput').addEventListener('input', function() {
+                filterIndicators(this.value);
+            });
+
+            // Export and report buttons
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+            document.getElementById('centerReportBtn').addEventListener('click', generateCenterReport);
+            document.getElementById('indicatorExportBtn').addEventListener('click', exportIndicatorData);
+            document.getElementById('generatePlanBtn').addEventListener('click', generateImprovementPlan);
+
+            // Detail view
+            document.getElementById('closeDetail').addEventListener('click', closeDetailView);
+            document.getElementById('detailView').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDetailView();
+                }
+            });
+
+            // Comparison filters
+            document.getElementById('applyComparisonFilters').addEventListener('click', applyComparisonFilters);
+
+            // Chart type buttons for center compliance chart
+            const chartTypeButtons = document.querySelectorAll('#centerChartTypeButtons .chart-type-button');
+            chartTypeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const chartType = this.getAttribute('data-type');
+                    updateCenterComplianceChartType(chartType);
+                    
+                    // Update active button
+                    chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Period selector
+            document.getElementById('periodoSelector').addEventListener('change', function() {
+                const period = this.value;
+                loadPeriodData(period);
+            });
+        }
+
+        async function loadExcelData() {
+            try {
+                showLoader('Cargando datos de IAAPS...');
+                
+                // Try to fetch the Excel file
+                const response = await fetch('IAAPS CORTE MARZO INTERNO.xlsx');
+                
+                if (!response.ok) {
+                    throw new Error(`No se pudo cargar el archivo (${response.status})`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                
+                // Parse Excel file
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                
+                // Process the workbook
+                excelData = processWorkbook(workbook);
+                
+                // Update UI with the data
+                updateUI(excelData);
+                
+                // Show success notification
+                document.getElementById('fileStatusConnected').classList.remove('hidden');
+                showNotification('Datos cargados correctamente', 'success');
+                
+                // Update Excel info
+                updateExcelInfo();
+                
+                hideLoader();
+            } catch (error) {
+                console.error('Error loading Excel data:', error);
+                document.getElementById('fileStatusDisconnected').classList.remove('hidden');
+                
+                // Show error in UI
+                document.getElementById('excelInfo').innerHTML = `
+                    <div class="file-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>
+                            <strong>Error cargando datos:</strong> ${error.message}
+                            <p class="text-xs mt-1">Verifique que el archivo "IAAPS CORTE MARZO INTERNO.xlsx" esté en la misma carpeta que este HTML.</p>
+                        </div>
+                        <button class="refresh-btn" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt mr-1"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+                
+                // Show placeholder data
+                showPlaceholderData();
+                
+                hideLoader();
+            }
+        }
+
+        function processWorkbook(workbook) {
+            // Get the sheet names
+            const sheetNames = workbook.SheetNames;
+            
+            // Find the main data sheet - typically the first one
+            const mainSheet = workbook.Sheets[sheetNames[0]];
+            
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(mainSheet, { header: 1 });
+            
+            // Process the data into a structured format
+            const processedData = {
+                period: 'MARZO 2025', // This should be extracted from the file or filename
+                lastUpdate: new Date().toLocaleString(),
+                centers: [],
+                indicators: []
+            };
+            
+            // Find header row and column structure
+            const headerRow = jsonData.find(row => row[0] === 'N° INDICADOR');
+            if (!headerRow) {
+                throw new Error('Estructura del archivo no reconocida. No se encontró la fila de encabezados.');
+            }
+            
+            const headerIndex = jsonData.findIndex(row => row[0] === 'N° INDICADOR');
+            
+            // Extract column indices
+            const colIndices = {
+                indicadorId: 0,
+                centro: 1,
+                nombreIndicador: 2,
+                unidadMedida: 3,
+                frecuencia: 4,
+                numerador: 5,
+                denominador: 6,
+                resultado: 7,
+                meta: 8,
+                ponderacion: 9,
+                valorProporcional: 10,
+                cumplimiento: 11
+            };
+            
+            // Extract unique centers
+            const centersMap = new Map();
+            // Extract unique indicators
+            const indicatorsMap = new Map();
+            
+            // Process data rows
+            for (let i = headerIndex + 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (!row || row.length < 12) continue;
+                
+                const indicadorId = row[colIndices.indicadorId];
+                const centro = row[colIndices.centro];
+                if (!indicadorId || !centro) continue;
+                
+                // Add to centers map
+                if (!centersMap.has(centro)) {
+                    centersMap.set(centro, {
+                        id: centro.replace(/\s+/g, '-').toLowerCase(),
+                        name: centro,
+                        indicators: [],
+                        cumplimientoTotal: 0,
+                        indicadoresCumplidos: 0,
+                        indicadoresObservacion: 0,
+                        indicadoresCriticos: 0
+                    });
+                }
+                
+                // Add to indicators map
+                const indicatorKey = `${indicadorId}-${row[colIndices.nombreIndicador]}`;
+                if (!indicatorsMap.has(indicatorKey)) {
+                    indicatorsMap.set(indicatorKey, {
+                        id: indicadorId,
+                        codigo: indicadorId,
+                        name: row[colIndices.nombreIndicador],
+                        unidadMedida: row[colIndices.unidadMedida],
+                        meta: parseFloat(row[colIndices.meta]),
+                        ponderacion: parseFloat(row[colIndices.ponderacion]),
+                        centers: [],
+                        cumplimientoPromedio: 0,
+                        centrosCriticos: 0
+                    });
+                }
+                
+                // Create indicator data for this center
+                const indicatorData = {
+                    id: indicadorId,
+                    codigo: indicadorId,
+                    name: row[colIndices.nombreIndicador],
+                    unidadMedida: row[colIndices.unidadMedida],
+                    numerador: parseFloat(row[colIndices.numerador]) || 0,
+                    denominador: parseFloat(row[colIndices.denominador]) || 1,
+                    resultado: row[colIndices.resultado] ? parseFloat(row[colIndices.resultado]) : 0,
+                    meta: parseFloat(row[colIndices.meta]) || 0,
+                    ponderacion: parseFloat(row[colIndices.ponderacion]) || 0,
+                    valorProporcional: parseFloat(row[colIndices.valorProporcional]) || 0,
+                    cumplimiento: parseFloat(row[colIndices.cumplimiento]) || 0
+                };
+                
+                // Add indicator to center
+                centersMap.get(centro).indicators.push(indicatorData);
+                
+                // Add center to indicator
+                indicatorsMap.get(indicatorKey).centers.push({
+                    id: centro.replace(/\s+/g, '-').toLowerCase(),
+                    name: centro,
+                    numerador: indicatorData.numerador,
+                    denominador: indicatorData.denominador,
+                    resultado: indicatorData.resultado,
+                    cumplimiento: indicatorData.cumplimiento
+                });
+            }
+            
+            // Calculate center totals
+            for (const [key, center] of centersMap.entries()) {
+                const validIndicators = center.indicators.filter(ind => !isNaN(ind.cumplimiento));
+                
+                if (validIndicators.length > 0) {
+                    // Calculate weighted average cumplimiento
+                    let totalPonderacion = validIndicators.reduce((sum, ind) => sum + ind.ponderacion, 0);
+                    let totalCumplimiento = validIndicators.reduce((sum, ind) => sum + (ind.cumplimiento * ind.ponderacion), 0);
+                    
+                    center.cumplimientoTotal = totalPonderacion > 0 ? totalCumplimiento / totalPonderacion : 0;
+                    
+                    // Count indicators by status
+                    center.indicadoresCumplidos = validIndicators.filter(ind => ind.cumplimiento >= 95).length;
+                    center.indicadoresObservacion = validIndicators.filter(ind => ind.cumplimiento >= 80 && ind.cumplimiento < 95).length;
+                    center.indicadoresCriticos = validIndicators.filter(ind => ind.cumplimiento < 80).length;
+                }
+                
+                processedData.centers.push(center);
+            }
+            
+            // Calculate indicator totals
+            for (const [key, indicator] of indicatorsMap.entries()) {
+                const validCenters = indicator.centers.filter(center => !isNaN(center.cumplimiento));
+                
+                if (validCenters.length > 0) {
+                    indicator.cumplimientoPromedio = validCenters.reduce((sum, center) => sum + center.cumplimiento, 0) / validCenters.length;
+                    indicator.centrosCriticos = validCenters.filter(center => center.cumplimiento < 80).length;
+                }
+                
+                processedData.indicators.push(indicator);
+            }
+            
+            // Sort centers by name
+            processedData.centers.sort((a, b) => {
+                // Special case: put "CURICO TOTAL COMUNAL" first
+                if (a.name === "CURICO TOTAL COMUNAL") return -1;
+                if (b.name === "CURICO TOTAL COMUNAL") return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
+            // Sort indicators by codigo
+            processedData.indicators.sort((a, b) => {
+                return a.codigo.localeCompare(b.codigo);
+            });
+            
+            return processedData;
+        }
+
+        function updateUI(data) {
+            // Store global references
+            allCenters = data.centers;
+            allIndicators = data.indicators;
+
+            // Update period
+            document.getElementById('periodoActual').textContent = data.period;
+            document.getElementById('lastUpdate').textContent = `Última actualización: ${data.lastUpdate}`;
+
+            // Update quick stats
+            updateQuickStats(data);
+            
+            // Update overview tab
+            updateOverviewTab(data);
+            
+            // Prepare centers tab
+            updateCentersTab(data);
+            
+            // Prepare indicators tab
+            updateIndicatorsTab(data);
+            
+            // Prepare comparison tab
+            updateComparisonTab(data);
+        }
+
+        function updateQuickStats(data) {
+            // Find the comunal total
+            const comunal = data.centers.find(center => center.name === "CURICO TOTAL COMUNAL");
+            
+            if (comunal) {
+                // Update cumplimiento comunal
+                document.getElementById('cumplimientoComunal').textContent = `${comunal.cumplimientoTotal.toFixed(2)}%`;
+                document.getElementById('cumplimientoComunalTendencia').innerHTML = `
+                    <i class="fas fa-arrow-up mr-1 text-green-500"></i>
+                    <span class="text-green-500">2.3% desde último período</span>
+                `;
+                
+                // Update indicadores counts
+                const totalIndicadores = comunal.indicadoresCumplidos + comunal.indicadoresObservacion + comunal.indicadoresCriticos;
+                
+                document.getElementById('indicadoresCumplidos').textContent = `${comunal.indicadoresCumplidos} de ${totalIndicadores}`;
+                document.getElementById('indicadoresCumplidosTendencia').innerHTML = `
+                    <i class="fas fa-arrow-up mr-1 text-green-500"></i>
+                    <span class="text-green-500">1 más que período anterior</span>
+                `;
+                
+                document.getElementById('indicadoresObservacion').textContent = `${comunal.indicadoresObservacion} de ${totalIndicadores}`;
+                document.getElementById('indicadoresObservacionTendencia').innerHTML = `
+                    <i class="fas fa-minus mr-1 text-yellow-500"></i>
+                    <span class="text-yellow-500">Sin cambios</span>
+                `;
+                
+                document.getElementById('indicadoresCriticos').textContent = `${comunal.indicadoresCriticos} de ${totalIndicadores}`;
+                document.getElementById('indicadoresCriticosTendencia').innerHTML = `
+                    <i class="fas fa-arrow-down mr-1 text-green-500"></i>
+                    <span class="text-green-500">1 menos que período anterior</span>
+                `;
+            }
+        }
+
+        function updateOverviewTab(data) {
+            // Create center compliance chart
+            createCenterComplianceChart(data);
+            
+            // Update ranking de indicadores
+            updateIndicadoresRanking(data);
+            
+            // Update indicadores críticos table
+            updateIndicadoresCriticosTable(data);
+        }
+
+        function createCenterComplianceChart(data) {
+            // Get canvas context
+            const ctx = document.getElementById('centerComplianceChart').getContext('2d');
+            
+            // Prepare data
+            const centers = data.centers.filter(center => center.name !== "REGION DEL MAULE" && !center.name.includes('PSR'));
+            const labels = centers.map(center => center.name.replace('CURICO ', '').replace(' COMUNAL', ''));
+            const valores = centers.map(center => center.cumplimientoTotal.toFixed(2));
+            
+            // Create color array
+            const colors = valores.map(valor => {
+                const val = parseFloat(valor);
+                if (val >= 95) return 'rgba(75, 192, 192, 0.7)';
+                if (val >= 80) return 'rgba(255, 159, 64, 0.7)';
+                return 'rgba(255, 99, 132, 0.7)';
+            });
+            
+            const borderColors = valores.map(valor => {
+                const val = parseFloat(valor);
+                if (val >= 95) return 'rgba(75, 192, 192, 1)';
+                if (val >= 80) return 'rgba(255, 159, 64, 1)';
+                return 'rgba(255, 99, 132, 1)';
+            });
+            
+            // Create chart
+            allCharts.centerCompliance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cumplimiento (%)',
+                        data: valores,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: borderColors,
+                        pointRadius: 4
+                    }, {
+                        label: 'Meta (%)',
+                        data: new Array(labels.length).fill(85),
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        borderColor: 'rgba(255, 99, 132, 0.8)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                display: false,
+                                stepSize: 20
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.r + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCenterComplianceChartType(chartType) {
+            if (!allCharts.centerCompliance) return;
+            
+            const chart = allCharts.centerCompliance;
+            
+            // Save current data
+            const labels = chart.data.labels;
+            const datasets = chart.data.datasets;
+            
+            // Destroy current chart
+            chart.destroy();
+            
+            // Create new chart with new type
+            const ctx = document.getElementById('centerComplianceChart').getContext('2d');
+            
+            // Adjust options for chart type
+            let options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            };
+            
+            if (chartType === 'radar') {
+                options.scales = {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            display: false,
+                            stepSize: 20
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                };
+            } else {
+                options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                };
+            }
+            
+            // Adjust datasets based on chart type
+            if (chartType === 'bar' || chartType === 'line') {
+                datasets[0].backgroundColor = labels.map((_, i) => {
+                    const valor = parseFloat(datasets[0].data[i]);
+                    if (valor >= 95) return 'rgba(75, 192, 192, 0.7)';
+                    if (valor >= 80) return 'rgba(255, 159, 64, 0.7)';
+                    return 'rgba(255, 99, 132, 0.7)';
+                });
+                
+                datasets[0].borderColor = labels.map((_, i) => {
+                    const valor = parseFloat(datasets[0].data[i]);
+                    if (valor >= 95) return 'rgba(75, 192, 192, 1)';
+                    if (valor >= 80) return 'rgba(255, 159, 64, 1)';
+                    return 'rgba(255, 99, 132, 1)';
+                });
+                
+                if (chartType === 'line') {
+                    datasets[0].backgroundColor = 'rgba(54, 162, 235, 0.2)';
+                    datasets[0].borderColor = 'rgba(54, 162, 235, 1)';
+                    datasets[0].fill = true;
+                    datasets[0].tension = 0.4;
+                }
+            } else if (chartType === 'radar') {
+                datasets[0].backgroundColor = 'rgba(54, 162, 235, 0.2)';
+                datasets[0].borderColor = 'rgba(54, 162, 235, 1)';
+            }
+            
+            // Create new chart
+            allCharts.centerCompliance = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: options
+            });
+        }
+
+        function updateIndicadoresRanking(data) {
+            // Sort indicators by cumplimiento
+            const sortedIndicators = [...data.indicators].sort((a, b) => b.cumplimientoPromedio - a.cumplimientoPromedio);
+            
+            // Get top indicators
+            const topIndicators = sortedIndicators.slice(0, 6);
+            
+            // Update the ranking
+            const rankingElement = document.getElementById('indicadoresRanking');
+            rankingElement.innerHTML = '';
+            
+                            topIndicators.forEach(indicator => {
+                const item = document.createElement('li');
+                item.className = 'flex items-center justify-between pb-3 border-b';
+                
+                // Determine badge class
+                let badgeClass = '';
+                if (indicator.cumplimientoPromedio >= 95) {
+                    badgeClass = 'badge-success';
+                } else if (indicator.cumplimientoPromedio >= 80) {
+                    badgeClass = 'badge-warning';
+                } else {
+                    badgeClass = 'badge-danger';
+                }
+                
+                // Count centers that comply
+                const centrosCumplen = indicator.centers.filter(center => center.cumplimiento >= 80).length;
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="font-semibold">${indicator.codigo}. ${indicator.name}</span>
+                        <p class="text-sm text-gray-500">${centrosCumplen} de ${indicator.centers.length} centros</p>
+                    </div>
+                    <span class="badge ${badgeClass}">${indicator.cumplimientoPromedio.toFixed(1)}%</span>
+                `;
+                
+                rankingElement.appendChild(item);
+            });
+        }
+
+        function updateIndicadoresCriticosTable(data) {
+            // Sort indicators by lowest cumplimiento
+            const sortedIndicators = [...data.indicators]
+                .filter(ind => ind.cumplimientoPromedio < 80) // Only critical indicators
+                .sort((a, b) => a.cumplimientoPromedio - b.cumplimientoPromedio);
+            
+            // Get critical indicators
+            const criticalIndicators = sortedIndicators.slice(0, 4); // Show top 4 critical
+            
+            // Update the table
+            const tableElement = document.getElementById('indicadoresCriticosTable');
+            const tbody = tableElement.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (criticalIndicators.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="7" class="text-center py-4">No hay indicadores críticos en este período</td>
+                `;
+                tbody.appendChild(row);
+                return;
+            }
+            
+            criticalIndicators.forEach(indicator => {
+                const row = document.createElement('tr');
+                
+                // Find comunal result
+                const comunal = indicator.centers.find(center => center.name === "CURICO TOTAL COMUNAL");
+                const resultado = comunal ? comunal.resultado : 'N/A';
+                
+                // Count critical centers
+                const centrosCriticos = indicator.centers.filter(center => center.cumplimiento < 80).length;
+                
+                row.innerHTML = `
+                    <td>${indicator.codigo}</td>
+                    <td>${indicator.name}</td>
+                    <td>${indicator.meta.toFixed(2)}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>${resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="progress w-24 mr-2">
+                                <div class="progress-bar danger" style="width: ${Math.min(indicator.cumplimientoPromedio, 100)}%"></div>
+                            </div>
+                            <span>${indicator.cumplimientoPromedio.toFixed(2)}%</span>
+                        </div>
+                    </td>
+                    <td>${centrosCriticos} de ${indicator.centers.length}</td>
+                    <td>
+                        <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="showIndicatorDetails('${indicator.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-green-500 hover:text-green-700" onclick="showIndicatorChart('${indicator.id}')">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateCentersTab(data) {
+            // Populate centers list
+            const centersListElement = document.getElementById('centersList');
+            centersListElement.innerHTML = '';
+            
+            data.centers.forEach((center, index) => {
+                // Skip region
+                if (center.name === "REGION DEL MAULE") return;
+                
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition center-item ${index === 0 ? 'bg-blue-50 border-blue-500' : 'border-gray-300 hover:border-blue-500'}`;
+                item.setAttribute('data-center-id', center.id);
+                
+                // Determine status color
+                let statusColor = '';
+                if (center.cumplimientoTotal >= 95) {
+                    statusColor = 'bg-green-500';
+                } else if (center.cumplimientoTotal >= 80) {
+                    statusColor = 'bg-yellow-500';
+                } else {
+                    statusColor = 'bg-red-500';
+                }
+                
+                item.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">${center.name}</span>
+                        <div class="flex items-center">
+                            <span class="text-sm mr-2">${center.cumplimientoTotal.toFixed(2)}%</span>
+                            <div class="w-2 h-2 rounded-full ${statusColor}"></div>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.center-item').forEach(el => {
+                        el.classList.remove('bg-blue-50', 'border-blue-500');
+                        el.classList.add('border-gray-300');
+                    });
+                    
+                    // Add active class to clicked item
+                    this.classList.add('bg-blue-50', 'border-blue-500');
+                    this.classList.remove('border-gray-300');
+                    
+                    // Update center details
+                    updateCenterDetails(center.id);
+                });
+                
+                centersListElement.appendChild(item);
+                
+                // Set the first center as active by default
+                if (index === 0) {
+                    selectedCenter = center.id;
+                    updateCenterDetails(center.id);
+                }
+            });
+        }
+
+        function updateCenterDetails(centerId) {
+            selectedCenter = centerId;
+            
+            // Find center data
+            const center = allCenters.find(c => c.id === centerId);
+            if (!center) return;
+            
+            // Update header
+            document.getElementById('centerName').textContent = center.name;
+            document.getElementById('centerDescription').textContent = center.name === "CURICO TOTAL COMUNAL" ? 
+                "Datos consolidados de todos los establecimientos" : "Centro de Salud Familiar";
+            
+            // Update status badge
+            const statusElement = document.getElementById('centerStatus');
+            let statusClass = '';
+            let statusText = '';
+            
+            if (center.cumplimientoTotal >= 95) {
+                statusClass = 'badge-success';
+                statusText = `Cumplimiento Óptimo (${center.cumplimientoTotal.toFixed(2)}%)`;
+            } else if (center.cumplimientoTotal >= 80) {
+                statusClass = 'badge-warning';
+                statusText = `En Observación (${center.cumplimientoTotal.toFixed(2)}%)`;
+            } else {
+                statusClass = 'badge-danger';
+                statusText = `Crítico (${center.cumplimientoTotal.toFixed(2)}%)`;
+            }
+            
+            statusElement.className = `badge ${statusClass}`;
+            statusElement.textContent = statusText;
+            
+            // Update KPIs
+            const kpisElement = document.getElementById('centerKPIs');
+            kpisElement.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-500 text-sm">Indicadores Cumplidos</p>
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold">${center.indicadoresCumplidos} de ${center.indicators.length}</h4>
+                        <span class="text-green-500"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-500 text-sm">En Observación</p>
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold">${center.indicadoresObservacion} de ${center.indicators.length}</h4>
+                        <span class="text-yellow-500"><i class="fas fa-exclamation-triangle"></i></span>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-gray-500 text-sm">Críticos</p>
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold">${center.indicadoresCriticos} de ${center.indicators.length}</h4>
+                        <span class="text-red-500"><i class="fas fa-exclamation-circle"></i></span>
+                    </div>
+                </div>
+            `;
+            
+            // Show chart container
+            document.getElementById('centerChartContainer').className = '';
+            
+            // Create or update radar chart
+            createCenterDetailChart(center);
+            
+            // Update indicators table
+            updateCenterIndicatorsTable(center);
+        }
+
+        function createCenterDetailChart(center) {
+            // Get canvas context
+            const canvas = document.getElementById('centerDetailChart');
+            
+            // Check if chart exists and destroy it
+            if (allCharts.centerDetail) {
+                allCharts.centerDetail.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Filter and sort indicators for chart display (top 8)
+            const sortedIndicators = [...center.indicators]
+                .sort((a, b) => a.cumplimiento - b.cumplimiento)
+                .slice(0, 8);
+            
+            const labels = sortedIndicators.map(ind => ind.codigo);
+            const cumplimientos = sortedIndicators.map(ind => ind.cumplimiento);
+            const metas = sortedIndicators.map(ind => 100); // All metas normalized to 100%
+            
+            // Create chart
+            allCharts.centerDetail = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cumplimiento (%)',
+                        data: cumplimientos,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointRadius: 4
+                    }, {
+                        label: 'Meta (%)',
+                        data: metas,
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        borderColor: 'rgba(255, 99, 132, 0.8)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                display: false,
+                                stepSize: 20
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.r.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCenterIndicatorsTable(center) {
+            // Sort indicators by cumplimiento (ascending)
+            const sortedIndicators = [...center.indicators].sort((a, b) => a.cumplimiento - b.cumplimiento);
+            
+            // Get the table and clear it
+            const tableElement = document.getElementById('centerIndicatorsTable');
+            const tbody = tableElement.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            // Add rows for each indicator
+            sortedIndicators.forEach(indicator => {
+                const row = document.createElement('tr');
+                
+                // Determine progress class
+                let progressClass = '';
+                if (indicator.cumplimiento >= 95) {
+                    progressClass = 'success';
+                } else if (indicator.cumplimiento >= 80) {
+                    progressClass = 'warning';
+                } else {
+                    progressClass = 'danger';
+                }
+                
+                row.innerHTML = `
+                    <td>${indicator.codigo}</td>
+                    <td>${indicator.name}</td>
+                    <td>${indicator.meta.toFixed(2)}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>${indicator.resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="progress w-24 mr-2">
+                                <div class="progress-bar ${progressClass}" style="width: ${Math.min(indicator.cumplimiento, 100)}%"></div>
+                            </div>
+                            <span>${indicator.cumplimiento.toFixed(2)}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="showIndicatorDetails('${indicator.id}', '${center.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-green-500 hover:text-green-700" onclick="showIndicatorChart('${indicator.id}', '${center.id}')">
+                            <i class="fas fa-chart-line"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateIndicatorsTab(data) {
+            // Populate indicators list
+            const indicatorsListElement = document.getElementById('indicatorsList');
+            indicatorsListElement.innerHTML = '';
+            
+            data.indicators.forEach((indicator, index) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition indicator-item ${index === 0 ? 'bg-blue-50 border-blue-500' : 'border-gray-300 hover:border-blue-500'}`;
+                item.setAttribute('data-indicator-id', indicator.id);
+                
+                // Determine status color
+                let statusColor = '';
+                if (indicator.cumplimientoPromedio >= 95) {
+                    statusColor = 'bg-green-500';
+                } else if (indicator.cumplimientoPromedio >= 80) {
+                    statusColor = 'bg-yellow-500';
+                } else {
+                    statusColor = 'bg-red-500';
+                }
+                
+                item.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold">${indicator.codigo}. ${indicator.name.length > 30 ? indicator.name.substring(0, 30) + '...' : indicator.name}</span>
+                            <p class="text-xs text-gray-500">${indicator.unidadMedida}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm mr-2">${indicator.cumplimientoPromedio.toFixed(2)}%</span>
+                            <div class="w-2 h-2 rounded-full ${statusColor}"></div>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.indicator-item').forEach(el => {
+                        el.classList.remove('bg-blue-50', 'border-blue-500');
+                        el.classList.add('border-gray-300');
+                    });
+                    
+                    // Add active class to clicked item
+                    this.classList.add('bg-blue-50', 'border-blue-500');
+                    this.classList.remove('border-gray-300');
+                    
+                    // Update indicator details
+                    updateIndicatorDetails(indicator.id);
+                });
+                
+                indicatorsListElement.appendChild(item);
+                
+                // Set the first indicator as active by default
+                if (index === 0) {
+                    selectedIndicator = indicator.id;
+                    updateIndicatorDetails(indicator.id);
+                }
+            });
+        }
+
+        function updateIndicatorDetails(indicatorId) {
+            selectedIndicator = indicatorId;
+            
+            // Find indicator data
+            const indicator = allIndicators.find(i => i.id === indicatorId);
+            if (!indicator) return;
+            
+            // Update header
+            document.getElementById('indicatorTitle').textContent = `${indicator.codigo}. ${indicator.name}`;
+            
+            // Update status badge
+            const statusElement = document.getElementById('indicatorStatus');
+            let statusClass = '';
+            let statusText = '';
+            
+            if (indicator.cumplimientoPromedio >= 95) {
+                statusClass = 'badge-success';
+                statusText = `Cumplimiento Óptimo (${indicator.cumplimientoPromedio.toFixed(2)}%)`;
+            } else if (indicator.cumplimientoPromedio >= 80) {
+                statusClass = 'badge-warning';
+                statusText = `En Observación (${indicator.cumplimientoPromedio.toFixed(2)}%)`;
+            } else {
+                statusClass = 'badge-danger';
+                statusText = `Crítico (${indicator.cumplimientoPromedio.toFixed(2)}%)`;
+            }
+            
+            statusElement.className = `badge ${statusClass}`;
+            statusElement.textContent = statusText;
+            
+            // Update definition
+            document.getElementById('indicatorDefinition').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Numerador</p>
+                        <p class="text-sm">N° de ${indicator.name.toLowerCase()}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Denominador</p>
+                        <p class="text-sm">Total de la población objetivo</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Meta</p>
+                        <p class="text-sm">${indicator.meta}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Show chart container
+            document.getElementById('indicatorChartContainer').className = '';
+            
+            // Create or update chart
+            createIndicatorDetailChart(indicator);
+            
+            // Update centers table
+            updateIndicatorCentersTable(indicator);
+        }
+
+        function createIndicatorDetailChart(indicator) {
+            // Get canvas context
+            const canvas = document.getElementById('indicatorDetailChart');
+            
+            // Check if chart exists and destroy it
+            if (allCharts.indicatorDetail) {
+                allCharts.indicatorDetail.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Filter and sort centers for chart display
+            const filteredCenters = indicator.centers.filter(center => 
+                center.name !== "REGION DEL MAULE" && 
+                !center.name.includes('PSR')
+            );
+            
+            const sortedCenters = [...filteredCenters].sort((a, b) => b.cumplimiento - a.cumplimiento);
+            
+            const labels = sortedCenters.map(center => center.name.replace('CURICO ', '').replace(' COMUNAL', ''));
+            const cumplimientos = sortedCenters.map(center => center.cumplimiento);
+            
+            // Create color array
+            const backgroundColor = cumplimientos.map(valor => {
+                if (valor >= 95) return 'rgba(75, 192, 192, 0.7)';
+                if (valor >= 80) return 'rgba(255, 159, 64, 0.7)';
+                return 'rgba(255, 99, 132, 0.7)';
+            });
+            
+            const borderColor = cumplimientos.map(valor => {
+                if (valor >= 95) return 'rgba(75, 192, 192, 1)';
+                if (valor >= 80) return 'rgba(255, 159, 64, 1)';
+                return 'rgba(255, 99, 132, 1)';
+            });
+            
+            // Create chart
+            allCharts.indicatorDetail = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cumplimiento (%)',
+                        data: cumplimientos,
+                        backgroundColor: backgroundColor,
+                        borderColor: borderColor,
+                        borderWidth: 1
+                    }, {
+                        label: 'Meta (%)',
+                        data: new Array(labels.length).fill(indicator.meta),
+                        type: 'line',
+                        fill: false,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(100, indicator.meta * 1.1), // Set max to allow headroom
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateIndicatorCentersTable(indicator) {
+            // Sort centers by cumplimiento (ascending)
+            const sortedCenters = [...indicator.centers].sort((a, b) => a.cumplimiento - b.cumplimiento);
+            
+            // Get the table and clear it
+            const tableElement = document.getElementById('indicatorCentersTable');
+            const tbody = tableElement.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            // Add rows for each center
+            sortedCenters.forEach(center => {
+                const row = document.createElement('tr');
+                
+                // Skip region
+                if (center.name === "REGION DEL MAULE") return;
+                
+                // Determine progress class
+                let progressClass = '';
+                if (center.cumplimiento >= 95) {
+                    progressClass = 'success';
+                } else if (center.cumplimiento >= 80) {
+                    progressClass = 'warning';
+                } else {
+                    progressClass = 'danger';
+                }
+                
+                row.innerHTML = `
+                    <td>${center.name}</td>
+                    <td>${center.numerador.toFixed(0)}</td>
+                    <td>${center.denominador.toFixed(0)}</td>
+                    <td>${center.resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>${indicator.meta}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="progress w-24 mr-2">
+                                <div class="progress-bar ${progressClass}" style="width: ${Math.min(center.cumplimiento, 100)}%"></div>
+                            </div>
+                            <span>${center.cumplimiento.toFixed(2)}%</span>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateComparisonTab(data) {
+            // Populate centers select
+            const centersSelect = document.getElementById('compareCentersSelect');
+            centersSelect.innerHTML = '';
+            
+            // Add CURICO TOTAL COMUNAL as first option
+            const comunalOption = document.createElement('option');
+            comunalOption.value = 'curico-total-comunal';
+            comunalOption.textContent = 'CURICÓ TOTAL COMUNAL';
+            comunalOption.selected = true;
+            centersSelect.appendChild(comunalOption);
+            
+            // Add other centers
+            data.centers.forEach(center => {
+                // Skip region and total
+                if (center.name === "REGION DEL MAULE" || center.name === "CURICO TOTAL COMUNAL") return;
+                
+                const option = document.createElement('option');
+                option.value = center.id;
+                option.textContent = center.name;
+                centersSelect.appendChild(option);
+            });
+            
+            // Populate indicators select
+            const indicatorsSelect = document.getElementById('compareIndicatorsSelect');
+            indicatorsSelect.innerHTML = '';
+            
+            // Add critical indicators first and pre-select them
+            const criticalIndicators = data.indicators
+                .filter(ind => ind.cumplimientoPromedio < 80)
+                .sort((a, b) => a.cumplimientoPromedio - b.cumplimientoPromedio);
+            
+            criticalIndicators.forEach(indicator => {
+                const option = document.createElement('option');
+                option.value = indicator.id;
+                option.textContent = `${indicator.codigo}. ${indicator.name}`;
+                option.selected = true;
+                indicatorsSelect.appendChild(option);
+            });
+            
+            // Add divider if there are critical indicators
+            if (criticalIndicators.length > 0) {
+                const divider = document.createElement('option');
+                divider.disabled = true;
+                divider.textContent = '──────────────';
+                indicatorsSelect.appendChild(divider);
+            }
+            
+            // Add other indicators
+            const otherIndicators = data.indicators
+                .filter(ind => ind.cumplimientoPromedio >= 80)
+                .sort((a, b) => a.codigo.localeCompare(b.codigo));
+            
+            otherIndicators.forEach(indicator => {
+                const option = document.createElement('option');
+                option.value = indicator.id;
+                option.textContent = `${indicator.codigo}. ${indicator.name}`;
+                indicatorsSelect.appendChild(option);
+            });
+            
+            // Pre-apply filters to show initial comparison
+            applyComparisonFilters();
+        }
+
+        function applyComparisonFilters() {
+            // Get selected centers
+            const centersSelect = document.getElementById('compareCentersSelect');
+            const selectedCenterIds = Array.from(centersSelect.selectedOptions).map(option => option.value);
+            
+            // Get selected indicators
+            const indicatorsSelect = document.getElementById('compareIndicatorsSelect');
+            const selectedIndicatorIds = Array.from(indicatorsSelect.selectedOptions).map(option => option.value);
+            
+            // Get chart type
+            const chartType = document.getElementById('compareChartTypeSelect').value;
+            
+            // Create comparison chart
+            createComparisonChart(selectedCenterIds, selectedIndicatorIds, chartType);
+            
+            // Update comparison details
+            updateComparisonDetails(selectedCenterIds, selectedIndicatorIds);
+        }
+
+        function createComparisonChart(centerIds, indicatorIds, chartType) {
+            // Get canvas
+            const canvas = document.getElementById('comparisonChart');
+            
+            // Check if chart exists and destroy it
+            if (allCharts.comparison) {
+                allCharts.comparison.destroy();
+            }
+            
+            // Return if no centers or indicators selected
+            if (centerIds.length === 0 || indicatorIds.length === 0) {
+                document.getElementById('comparisonChartContainer').innerHTML = `
+                    <div class="flex items-center justify-center h-full">
+                        <p class="text-gray-500">Seleccione al menos un centro y un indicador para generar el gráfico</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Prepare data based on chart type
+            let labels, datasets;
+            
+            if (chartType === 'bar' || chartType === 'line') {
+                // For bar or line chart, indicators as labels, centers as datasets
+                const selectedIndicators = allIndicators.filter(ind => indicatorIds.includes(ind.id));
+                labels = selectedIndicators.map(ind => ind.codigo);
+                
+                datasets = centerIds.map(centerId => {
+                    const center = allCenters.find(c => c.id === centerId);
+                    const color = getRandomColor(center.id);
+                    
+                    return {
+                        label: center.name,
+                        data: selectedIndicators.map(ind => {
+                            const centerIndicator = center.indicators.find(i => i.id === ind.id);
+                            return centerIndicator ? centerIndicator.cumplimiento : 0;
+                        }),
+                        backgroundColor: chartType === 'bar' ? color.replace('1)', '0.7)') : color.replace('1)', '0.2)'),
+                        borderColor: color,
+                        borderWidth: 2,
+                        fill: chartType === 'line',
+                        tension: chartType === 'line' ? 0.4 : 0
+                    };
+                });
+            } else if (chartType === 'radar' || chartType === 'polarArea') {
+                // For radar chart, indicators as labels, centers as datasets
+                const selectedIndicators = allIndicators.filter(ind => indicatorIds.includes(ind.id));
+                labels = selectedIndicators.map(ind => ind.codigo);
+                
+                if (chartType === 'radar') {
+                    datasets = centerIds.map(centerId => {
+                        const center = allCenters.find(c => c.id === centerId);
+                        const color = getRandomColor(center.id);
+                        
+                        return {
+                            label: center.name,
+                            data: selectedIndicators.map(ind => {
+                                const centerIndicator = center.indicators.find(i => i.id === ind.id);
+                                return centerIndicator ? centerIndicator.cumplimiento : 0;
+                            }),
+                            backgroundColor: color.replace('1)', '0.2)'),
+                            borderColor: color,
+                            borderWidth: 2,
+                            pointBackgroundColor: color,
+                            pointRadius: 3
+                        };
+                    });
+                } else {
+                    // For polarArea, we can only show one center at a time, so take the first selected
+                    const centerId = centerIds[0];
+                    const center = allCenters.find(c => c.id === centerId);
+                    
+                    datasets = [{
+                        label: center.name,
+                        data: selectedIndicators.map(ind => {
+                            const centerIndicator = center.indicators.find(i => i.id === ind.id);
+                            return centerIndicator ? centerIndicator.cumplimiento : 0;
+                        }),
+                        backgroundColor: selectedIndicators.map((_, index) => getRandomColor(index.toString()).replace('1)', '0.7)')),
+                        borderWidth: 1
+                    }];
+                }
+            }
+            
+            // Create chart configuration
+            const config = {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // Adjust scales based on chart type
+            if (chartType === 'bar' || chartType === 'line') {
+                config.options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                };
+            } else if (chartType === 'radar') {
+                config.options.scales = {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            display: false,
+                            stepSize: 20
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                };
+                
+                // Update tooltip for radar
+                config.options.plugins.tooltip.callbacks.label = function(context) {
+                    return context.dataset.label + ': ' + context.raw + '%';
+                };
+            } else if (chartType === 'polarArea') {
+                config.options.scales = {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            display: false,
+                            stepSize: 20
+                        }
+                    }
+                };
+                
+                // Update tooltip for polarArea
+                config.options.plugins.tooltip.callbacks.label = function(context) {
+                    return context.chart.data.labels[context.dataIndex] + ': ' + context.raw + '%';
+                };
+            }
+            
+            // Create chart
+            allCharts.comparison = new Chart(ctx, config);
+        }
+
+        function updateComparisonDetails(centerIds, indicatorIds) {
+            const detailsContainer = document.getElementById('comparisonDetailsContainer');
+            detailsContainer.innerHTML = '';
+            
+            // Return if no indicators selected
+            if (indicatorIds.length === 0) return;
+            
+            // Show details for each selected indicator
+            const selectedIndicators = allIndicators.filter(ind => indicatorIds.includes(ind.id));
+            
+            selectedIndicators.slice(0, 2).forEach(indicator => {
+                const detailCard = document.createElement('div');
+                detailCard.className = 'card p-6';
+                
+                // Create header
+                const header = document.createElement('h4');
+                header.className = 'text-lg font-bold mb-4';
+                header.textContent = `${indicator.codigo}. ${indicator.name}`;
+                
+                // Create table
+                const table = document.createElement('div');
+                table.className = 'overflow-x-auto';
+                table.innerHTML = `
+                    <table class="w-full futuristic-table">
+                        <thead>
+                            <tr>
+                                <th>Centro</th>
+                                <th>Meta</th>
+                                <th>Resultado</th>
+                                <th>Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${centerIds.map(centerId => {
+                                const center = allCenters.find(c => c.id === centerId);
+                                if (!center) return '';
+                                
+                                const centerIndicator = center.indicators.find(i => i.id === indicator.id);
+                                if (!centerIndicator) return '';
+                                
+                                // Determine progress class
+                                let progressClass = '';
+                                if (centerIndicator.cumplimiento >= 95) {
+                                    progressClass = 'success';
+                                } else if (centerIndicator.cumplimiento >= 80) {
+                                    progressClass = 'warning';
+                                } else {
+                                    progressClass = 'danger';
+                                }
+                                
+                                return `
+                                    <tr>
+                                        <td>${center.name}</td>
+                                        <td>${indicator.meta}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                                        <td>${centerIndicator.resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                                        <td>
+                                            <div class="flex items-center">
+                                                <div class="progress w-24 mr-2">
+                                                    <div class="progress-bar ${progressClass}" style="width: ${Math.min(centerIndicator.cumplimiento, 100)}%"></div>
+                                                </div>
+                                                <span>${centerIndicator.cumplimiento.toFixed(2)}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                // Add analysis
+                const analysis = document.createElement('div');
+                analysis.className = 'mt-4';
+                analysis.innerHTML = `
+                    <h5 class="text-md font-bold mb-2">Análisis de Brecha</h5>
+                    <p class="text-sm text-gray-700">
+                        ${generateIndicatorAnalysis(indicator, centerIds)}
+                    </p>
+                `;
+                
+                // Append all elements
+                detailCard.appendChild(header);
+                detailCard.appendChild(table);
+                detailCard.appendChild(analysis);
+                
+                detailsContainer.appendChild(detailCard);
+            });
+            
+            // Generate recommendations
+            updateRecommendations(selectedIndicators, centerIds);
+        }
+
+        function generateIndicatorAnalysis(indicator, centerIds) {
+            // Get selected centers data for this indicator
+            const centersData = centerIds.map(centerId => {
+                const center = allCenters.find(c => c.id === centerId);
+                if (!center) return null;
+                
+                const centerIndicator = center.indicators.find(i => i.id === indicator.id);
+                if (!centerIndicator) return null;
+                
+                return {
+                    name: center.name,
+                    cumplimiento: centerIndicator.cumplimiento,
+                    resultado: centerIndicator.resultado,
+                    meta: indicator.meta
+                };
+            }).filter(c => c !== null);
+            
+            // Calculate average compliance
+            const avgCumplimiento = centersData.reduce((sum, c) => sum + c.cumplimiento, 0) / centersData.length;
+            
+            // Generate analysis text
+            let analysis = '';
+            
+            if (avgCumplimiento >= 95) {
+                analysis = `El indicador muestra un cumplimiento óptimo en los centros seleccionados (${avgCumplimiento.toFixed(1)}%). `;
+                analysis += 'Se recomienda mantener las estrategias actuales y compartir las buenas prácticas con otros centros.';
+            } else if (avgCumplimiento >= 80) {
+                analysis = `El indicador muestra un cumplimiento aceptable (${avgCumplimiento.toFixed(1)}%) pero requiere atención. `;
+                
+                // Check if some centers are doing better than others
+                const bestCenter = centersData.reduce((a, b) => a.cumplimiento > b.cumplimiento ? a : b);
+                if (bestCenter.cumplimiento >= 95) {
+                    analysis += `Se sugiere estudiar las prácticas implementadas en ${bestCenter.name} (${bestCenter.cumplimiento.toFixed(1)}%) y replicarlas en los demás centros.`;
+                } else {
+                    analysis += 'Se recomienda revisar los protocolos actuales y establecer un plan de mejora continua.';
+                }
+            } else {
+                analysis = `El indicador muestra un cumplimiento crítico (${avgCumplimiento.toFixed(1)}%). `;
+                analysis += 'Es urgente implementar medidas correctivas y establecer un plan de acción inmediato. ';
+                
+                // Calculate gap to meta
+                const avgGap = indicator.meta - (centersData.reduce((sum, c) => sum + c.resultado, 0) / centersData.length);
+                analysis += `Se requiere aumentar el resultado en aproximadamente ${avgGap.toFixed(1)}${indicator.unidadMedida === 'Porcentaje' ? ' puntos porcentuales' : ' unidades'} para alcanzar la meta.`;
+            }
+            
+            return analysis;
+        }
+
+        function updateRecommendations(indicators, centerIds) {
+            const container = document.getElementById('recommendationsContainer');
+            
+            // Generate recommendations only for critical indicators
+            const criticalIndicators = indicators.filter(ind => ind.cumplimientoPromedio < 80);
+            
+            if (criticalIndicators.length === 0) {
+                container.innerHTML = `
+                    <h4 class="text-lg font-bold mb-4">Recomendaciones para Mejorar Cumplimiento</h4>
+                    <p class="text-center py-4">No hay indicadores críticos entre los seleccionados.</p>
+                `;
+                return;
+            }
+            
+            // Create recommendations grid
+            const recommendationsGrid = document.createElement('div');
+            recommendationsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+            
+            // Generate recommendations for up to 2 critical indicators
+            criticalIndicators.slice(0, 2).forEach(indicator => {
+                const recommendations = generateRecommendations(indicator);
+                
+                const recommendationCard = document.createElement('div');
+                recommendationCard.className = 'bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500';
+                
+                recommendationCard.innerHTML = `
+                    <h5 class="font-bold text-blue-700 mb-2">${indicator.codigo}. ${indicator.name}</h5>
+                    <ul class="list-disc ml-5 space-y-1 text-sm">
+                        ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                `;
+                
+                recommendationsGrid.appendChild(recommendationCard);
+            });
+            
+            // Update container
+            container.innerHTML = `
+                <h4 class="text-lg font-bold mb-4">Recomendaciones para Mejorar Cumplimiento</h4>
+            `;
+            container.appendChild(recommendationsGrid);
+            
+            // Add button
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'mt-6 text-right';
+            btnContainer.innerHTML = `
+                <button class="btn-gradient" id="generatePlanBtn">
+                    <i class="fas fa-file-pdf mr-2"></i>Generar Plan de Mejora
+                </button>
+            `;
+            container.appendChild(btnContainer);
+            
+            // Update button event
+            document.getElementById('generatePlanBtn').addEventListener('click', generateImprovementPlan);
+        }
+
+        function generateRecommendations(indicator) {
+            // Predefined recommendations based on indicator code
+            const recommendationsMap = {
+                'III': [
+                    'Optimizar agendas médicas para aumentar disponibilidad de horas',
+                    'Implementar sistema de agenda telefónica más eficiente',
+                    'Reducir inasistencias mediante recordatorios SMS',
+                    'Redistribuir horas médicas entre centros con mayor demanda',
+                    'Reforzar contratación temporal de médicos en centros críticos'
+                ],
+                'V': [
+                    'Reorganizar equipos de cabecera para aumentar visitas domiciliarias',
+                    'Priorizar familias con adultos mayores dependientes',
+                    'Establecer metas semanales por equipo profesional',
+                    'Optimizar rutas de visitas por sectores',
+                    'Implementar planificación mensual anticipada de visitas'
+                ],
+                'VI.A': [
+                    'Realizar campañas de captación en lugares estratégicos',
+                    'Implementar búsqueda activa en empresas de la comuna',
+                    'Crear incentivos para equipos que logren mejores coberturas',
+                    'Coordinar con organizaciones comunitarias para difusión',
+                    'Habilitar horarios extendidos para EMP en población trabajadora'
+                ],
+                'VI.B': [
+                    'Realizar búsqueda activa en lugares de trabajo masculino',
+                    'Implementar estrategias de difusión dirigidas específicamente a hombres',
+                    'Coordinar con empresas locales para realizar operativos en terreno',
+                    'Potenciar atención en horarios fuera de jornada laboral',
+                    'Capacitar al personal en abordaje efectivo de población masculina'
+                ],
+                'VII': [
+                    'Establecer sistema de rescate para niños inasistentes',
+                    'Capacitar a todo el equipo en aplicación de test TEPSI/EEDP',
+                    'Coordinar con jardines infantiles para evaluación en terreno',
+                    'Implementar talleres de estimulación a padres y cuidadores',
+                    'Priorizar agenda para evaluaciones de desarrollo psicomotor'
+                ],
+                'XIV': [
+                    'Implementar programa de búsqueda activa de diabéticos en la comunidad',
+                    'Mejorar coordinación con clubes de pacientes crónicos',
+                    'Aumentar controles preventivos en grupos de riesgo',
+                    'Capacitar al equipo en nuevas estrategias de adherencia',
+                    'Optimizar sistema de control de inasistentes'
+                ],
+                'XVI': [
+                    'Reforzar programa de aplicación de flúor en menores de 3 años',
+                    'Capacitar a todo el equipo en técnica de aplicación de pautas CERO',
+                    'Realizar actividades educativas en jardines infantiles',
+                    'Implementar seguimiento especial en familias de alto riesgo',
+                    'Coordinar visitas domiciliarias con enfoque odontológico'
+                ]
+            };
+            
+            // Default recommendations if specific ones not found
+            const defaultRecommendations = [
+                'Revisar y optimizar procesos de registro en ficha clínica',
+                'Capacitar al equipo en registro correcto de actividades',
+                'Establecer metas mensuales por cada profesional',
+                'Implementar sistema de monitoreo semanal de cumplimiento',
+                'Realizar análisis de causas raíz de bajo cumplimiento'
+            ];
+            
+            // Return specific recommendations if available, otherwise defaults
+            return recommendationsMap[indicator.codigo] || defaultRecommendations;
+        }
+
+        function showPlaceholderData() {
+            // Show placeholder data in all tabs for demo purposes
+            
+            // Update quick stats
+            document.getElementById('cumplimientoComunal').textContent = '65.48%';
+            document.getElementById('indicadoresCumplidos').textContent = '7 de 17';
+            document.getElementById('indicadoresObservacion').textContent = '6 de 17';
+            document.getElementById('indicadoresCriticos').textContent = '4 de 17';
+            
+            // Create empty chart for overview
+            createEmptyChart('centerComplianceChart', 'radar');
+            
+            // Create empty chart for center detail
+            createEmptyChart('centerDetailChart', 'radar');
+            
+            // Create empty chart for indicator detail
+            createEmptyChart('indicatorDetailChart', 'bar');
+            
+            // Create empty chart for comparison
+            createEmptyChart('comparisonChart', 'bar');
+        }
+
+        function createEmptyChart(canvasId, type) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            const config = {
+                type: type,
+                data: {
+                    labels: ['Sin datos', 'Archivo no encontrado', 'Verifique ruta'],
+                    datasets: [{
+                        label: 'Sin datos disponibles',
+                        data: [0, 0, 0],
+                        backgroundColor: 'rgba(200, 200, 200, 0.2)',
+                        borderColor: 'rgba(200, 200, 200, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            };
+            
+            const chart = new Chart(ctx, config);
+            allCharts[canvasId] = chart;
+        }
+
+        function showLoader(message = 'Cargando...') {
+            const loader = document.getElementById('loader');
+            const loaderText = document.querySelector('.loader-text');
+            
+            loaderText.textContent = message;
+            loader.style.display = 'flex';
+        }
+
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'none';
+        }
+
+        function switchTab(tabId) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-link').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to selected tab
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function filterCenters(searchTerm) {
+            const centers = document.querySelectorAll('.center-item');
+            const term = searchTerm.toLowerCase();
+            
+            centers.forEach(center => {
+                const centerName = center.querySelector('.font-semibold').textContent.toLowerCase();
+                
+                if (centerName.includes(term)) {
+                    center.style.display = 'block';
+                } else {
+                    center.style.display = 'none';
+                }
+            });
+        }
+
+        function filterIndicators(searchTerm) {
+            const indicators = document.querySelectorAll('.indicator-item');
+            const term = searchTerm.toLowerCase();
+            
+            indicators.forEach(indicator => {
+                const indicatorName = indicator.querySelector('.font-semibold').textContent.toLowerCase();
+                
+                if (indicatorName.includes(term)) {
+                    indicator.style.display = 'block';
+                } else {
+                    indicator.style.display = 'none';
+                }
+            });
+        }
+
+        function globalSearch(searchTerm) {
+            if (searchTerm.length < 3) return;
+            
+            const term = searchTerm.toLowerCase();
+            
+            // Check if search term matches a center
+            const centerMatch = allCenters.find(center => 
+                center.name.toLowerCase().includes(term)
+            );
+            
+            if (centerMatch) {
+                // Switch to centers tab and select the center
+                switchTab('centers');
+                const centerElement = document.querySelector(`[data-center-id="${centerMatch.id}"]`);
+                if (centerElement) {
+                    centerElement.click();
+                    centerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Check if search term matches an indicator
+            const indicatorMatch = allIndicators.find(indicator => 
+                indicator.name.toLowerCase().includes(term) || 
+                indicator.codigo.toLowerCase().includes(term)
+            );
+            
+            if (indicatorMatch) {
+                // Switch to indicators tab and select the indicator
+                switchTab('indicators');
+                const indicatorElement = document.querySelector(`[data-indicator-id="${indicatorMatch.id}"]`);
+                if (indicatorElement) {
+                    indicatorElement.click();
+                    indicatorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // If no match found, show notification
+            showNotification('No se encontraron resultados para: ' + searchTerm, 'info');
+        }
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            
+            document.body.classList.toggle('dark-mode');
+            const loader = document.getElementById('loader');
+            loader.classList.toggle('loader-dark');
+            
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkMode) {
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            
+            // Update charts for dark mode
+            updateChartsForDarkMode();
+            
+            // Show notification
+            showNotification('Modo ' + (darkMode ? 'oscuro' : 'claro') + ' activado', 'info');
+        }
+
+        function updateChartsForDarkMode() {
+            // Update Chart.js defaults based on dark mode
+            Chart.defaults.color = darkMode ? '#e2e8f0' : '#64748b';
+            Chart.defaults.borderColor = darkMode ? '#334155' : '#e2e8f0';
+            
+            // Update all charts
+            Object.keys(allCharts).forEach(key => {
+                if (allCharts[key]) {
+                    allCharts[key].update();
+                }
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notification.className = `notification ${type}`;
+            notificationMessage.textContent = message;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function showIndicatorDetails(indicatorId, centerId = null) {
+            // Find indicator
+            const indicator = allIndicators.find(i => i.id === indicatorId);
+            if (!indicator) return;
+            
+            // Find center if provided
+            let centerData = null;
+            if (centerId) {
+                const center = allCenters.find(c => c.id === centerId);
+                if (center) {
+                    centerData = center.indicators.find(i => i.id === indicatorId);
+                }
+            }
+            
+            // Prepare detail view
+            const detailView = document.getElementById('detailView');
+            const detailTitle = document.getElementById('detailTitle');
+            const detailContent = document.getElementById('detailContent');
+            
+            detailTitle.textContent = `${indicator.codigo}. ${indicator.name}`;
+            
+            // Prepare content
+            let content = `
+                <div class="bg-gray-50 p-4 rounded-lg mb-6 dark:bg-gray-800">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Numerador</p>
+                            <p class="text-sm">N° de ${indicator.name.toLowerCase()}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Denominador</p>
+                            <p class="text-sm">Total de la población objetivo</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Meta</p>
+                            <p class="text-sm">${indicator.meta}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add center specific data if available
+            if (centerData) {
+                content += `
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold mb-2">Datos en ${allCenters.find(c => c.id === centerId).name}</h4>
+                        <div class="bg-gray-50 p-4 rounded-lg dark:bg-gray-800">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div>
+                                    <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Numerador</p>
+                                    <p class="text-xl font-bold">${centerData.numerador.toFixed(0)}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Denominador</p>
+                                    <p class="text-xl font-bold">${centerData.denominador.toFixed(0)}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Resultado</p>
+                                    <p class="text-xl font-bold">${centerData.resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-sm font-semibold dark:text-gray-400">Cumplimiento</p>
+                                    <p class="text-xl font-bold ${centerData.cumplimiento >= 95 ? 'text-green-500' : centerData.cumplimiento >= 80 ? 'text-yellow-500' : 'text-red-500'}">${centerData.cumplimiento.toFixed(2)}%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add table with all centers data
+            content += `
+                <h4 class="text-lg font-semibold mb-2">Comparativa por Centro de Salud</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full futuristic-table">
+                        <thead>
+                            <tr>
+                                <th>Centro de Salud</th>
+                                <th>Numerador</th>
+                                <th>Denominador</th>
+                                <th>Resultado</th>
+                                <th>Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${indicator.centers
+                                .filter(c => c.name !== "REGION DEL MAULE")
+                                .sort((a, b) => b.cumplimiento - a.cumplimiento)
+                                .map(center => {
+                                    // Determine class for highlighting current center
+                                    const rowClass = center.id === centerId ? 'bg-blue-50 dark:bg-blue-900' : '';
+                                    
+                                    // Determine progress class
+                                    let progressClass = '';
+                                    if (center.cumplimiento >= 95) {
+                                        progressClass = 'success';
+                                    } else if (center.cumplimiento >= 80) {
+                                        progressClass = 'warning';
+                                    } else {
+                                        progressClass = 'danger';
+                                    }
+                                    
+                                    return `
+                                        <tr class="${rowClass}">
+                                            <td>${center.name}</td>
+                                            <td>${center.numerador.toFixed(0)}</td>
+                                            <td>${center.denominador.toFixed(0)}</td>
+                                            <td>${center.resultado}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''}</td>
+                                            <td>
+                                                <div class="flex items-center">
+                                                    <div class="progress w-24 mr-2">
+                                                        <div class="progress-bar ${progressClass}" style="width: ${Math.min(center.cumplimiento, 100)}%"></div>
+                                                    </div>
+                                                    <span>${center.cumplimiento.toFixed(2)}%</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold mb-2">Recomendaciones</h4>
+                    <ul class="list-disc ml-5 space-y-1">
+                        ${generateRecommendations(indicator).map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            detailContent.innerHTML = content;
+            detailView.style.display = 'flex';
+        }
+
+        function showIndicatorChart(indicatorId, centerId = null) {
+            // Find indicator
+            const indicator = allIndicators.find(i => i.id === indicatorId);
+            if (!indicator) return;
+            
+            // Prepare detail view
+            const detailView = document.getElementById('detailView');
+            const detailTitle = document.getElementById('detailTitle');
+            const detailContent = document.getElementById('detailContent');
+            
+            detailTitle.textContent = `Gráfico: ${indicator.codigo}. ${indicator.name}`;
+            
+            // Prepare content with canvas
+            detailContent.innerHTML = `
+                <div class="chart-controls mb-4">
+                    <div class="chart-type-buttons">
+                        <button class="chart-type-button active" data-type="bar">Barras</button>
+                        <button class="chart-type-button" data-type="line">Líneas</button>
+                        <button class="chart-type-button" data-type="radar">Radar</button>
+                        <button class="chart-type-button" data-type="polarArea">Polar</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 400px">
+                    <canvas id="detailChart"></canvas>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-500">
+                        Comparativa de cumplimiento del indicador por centro de salud.
+                        <br>
+                        Meta: ${indicator.meta}${indicator.unidadMedida === 'Porcentaje' ? '%' : ''} | 
+                        Promedio comunal: ${indicator.cumplimientoPromedio.toFixed(2)}%
+                    </p>
+                </div>
+            `;
+            
+            // Show the modal
+            detailView.style.display = 'flex';
+            
+            // Create chart
+            createDetailChart(indicator, 'bar', centerId);
+            
+            // Add event listeners to chart type buttons
+            const chartTypeButtons = detailContent.querySelectorAll('.chart-type-button');
+            chartTypeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active button
+                    chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update chart
+                    createDetailChart(indicator, this.getAttribute('data-type'), centerId);
+                });
+            });
+        }
+
+        function createDetailChart(indicator, chartType, highlightCenterId = null) {
+            // Get canvas
+            const canvas = document.getElementById('detailChart');
+            
+            // Check if chart exists and destroy it
+            if (allCharts.detail) {
+                allCharts.detail.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Filter and sort centers
+            const filteredCenters = indicator.centers.filter(center => 
+                center.name !== "REGION DEL MAULE" && 
+                !center.name.includes('PSR')
+            );
+            
+            // Prepare data based on chart type
+            let config;
+            
+            if (chartType === 'radar') {
+                // For radar chart - centers as points around radar
+                config = {
+                    type: 'radar',
+                    data: {
+                        labels: filteredCenters.map(center => center.name.replace('CURICO ', '').replace(' COMUNAL', '')),
+                        datasets: [{
+                            label: 'Cumplimiento (%)',
+                            data: filteredCenters.map(center => center.cumplimiento),
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: filteredCenters.map(center => {
+                                // Highlight selected center
+                                if (highlightCenterId && center.id === highlightCenterId) {
+                                    return 'rgba(255, 99, 132, 1)';
+                                }
+                                
+                                // Color by cumplimiento
+                                if (center.cumplimiento >= 95) return 'rgba(75, 192, 192, 1)';
+                                if (center.cumplimiento >= 80) return 'rgba(255, 159, 64, 1)';
+                                return 'rgba(255, 99, 132, 1)';
+                            }),
+                            pointRadius: filteredCenters.map(center => 
+                                (highlightCenterId && center.id === highlightCenterId) ? 6 : 4
+                            )
+                        }, {
+                            label: 'Meta (%)',
+                            data: new Array(filteredCenters.length).fill(indicator.meta),
+                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                            borderColor: 'rgba(255, 99, 132, 0.8)',
+                            borderWidth: 1,
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: Math.max(100, indicator.meta * 1.1),
+                                ticks: {
+                                    display: false,
+                                    stepSize: 20
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            } else if (chartType === 'polarArea') {
+                // For polar area chart - centers as sectors
+                config = {
+                    type: 'polarArea',
+                    data: {
+                        labels: filteredCenters.map(center => center.name.replace('CURICO ', '').replace(' COMUNAL', '')),
+                        datasets: [{
+                            data: filteredCenters.map(center => center.cumplimiento),
+                            backgroundColor: filteredCenters.map(center => {
+                                // Highlight selected center
+                                if (highlightCenterId && center.id === highlightCenterId) {
+                                    return 'rgba(255, 99, 132, 0.7)';
+                                }
+                                
+                                // Color by cumplimiento
+                                if (center.cumplimiento >= 95) return 'rgba(75, 192, 192, 0.7)';
+                                if (center.cumplimiento >= 80) return 'rgba(255, 159, 64, 0.7)';
+                                return 'rgba(255, 99, 132, 0.7)';
+                            }),
+                            borderColor: filteredCenters.map(center => {
+                                // Highlight selected center
+                                if (highlightCenterId && center.id === highlightCenterId) {
+                                    return 'rgba(255, 99, 132, 1)';
+                                }
+                                
+                                // Color by cumplimiento
+                                if (center.cumplimiento >= 95) return 'rgba(75, 192, 192, 1)';
+                                if (center.cumplimiento >= 80) return 'rgba(255, 159, 64, 1)';
+                                return 'rgba(255, 99, 132, 1)';
+                            }),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: Math.max(100, indicator.meta * 1.1),
+                                ticks: {
+                                    display: false,
+                                    stepSize: 20
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.raw.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            } else {
+                // For bar or line chart - centers on X axis
+                // Sort centers by cumplimiento descending
+                const sortedCenters = [...filteredCenters].sort((a, b) => b.cumplimiento - a.cumplimiento);
+                
+                config = {
+                    type: chartType,
+                    data: {
+                        labels: sortedCenters.map(center => center.name.replace('CURICO ', '').replace(' COMUNAL', '')),
+                        datasets: [{
+                            label: 'Cumplimiento (%)',
+                            data: sortedCenters.map(center => center.cumplimiento),
+                            backgroundColor: sortedCenters.map(center => {
+                                // Highlight selected center
+                                if (highlightCenterId && center.id === highlightCenterId) {
+                                    return chartType === 'line' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(255, 99, 132, 0.7)';
+                                }
+                                
+                                // Color by cumplimiento
+                                if (center.cumplimiento >= 95) return chartType === 'line' ? 'rgba(75, 192, 192, 0.2)' : 'rgba(75, 192, 192, 0.7)';
+                                if (center.cumplimiento >= 80) return chartType === 'line' ? 'rgba(255, 159, 64, 0.2)' : 'rgba(255, 159, 64, 0.7)';
+                                return chartType === 'line' ? 'rgba(255, 99, 132, 0.2)' : 'rgba(255, 99, 132, 0.7)';
+                            }),
+                            borderColor: sortedCenters.map(center => {
+                                // Highlight selected center
+                                if (highlightCenterId && center.id === highlightCenterId) {
+                                    return 'rgba(255, 99, 132, 1)';
+                                }
+                                
+                                // Color by cumplimiento
+                                if (center.cumplimiento >= 95) return 'rgba(75, 192, 192, 1)';
+                                if (center.cumplimiento >= 80) return 'rgba(255, 159, 64, 1)';
+                                return 'rgba(255, 99, 132, 1)';
+                            }),
+                            borderWidth: 1,
+                            fill: chartType === 'line',
+                            tension: chartType === 'line' ? 0.4 : 0
+                        }, {
+                            label: 'Meta (%)',
+                            data: new Array(sortedCenters.length).fill(indicator.meta),
+                            type: 'line',
+                            fill: false,
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: Math.max(100, indicator.meta * 1.1),
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw.toFixed(2) + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+            
+            // Create chart
+            allCharts.detail = new Chart(ctx, config);
+        }
+
+        function closeDetailView() {
+            document.getElementById('detailView').style.display = 'none';
+            
+            // Destroy detail chart if exists
+            if (allCharts.detail) {
+                allCharts.detail.destroy();
+                allCharts.detail = null;
+            }
+        }
+
+        function getRandomColor(seed) {
+            // Simple hash function for generating consistent colors based on a seed
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            // Convert to RGB components
+            const r = Math.abs((hash & 0xFF0000) >> 16);
+            const g = Math.abs((hash & 0x00FF00) >> 8);
+            const b = Math.abs(hash & 0x0000FF);
+            
+            return `rgba(${r}, ${g}, ${b}, 1)`;
+        }
+
+        function updateExcelInfo() {
+            if (!excelData) return;
+            
+            const infoElement = document.getElementById('excelInfo');
+            infoElement.innerHTML = `
+                <div class="file-success">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Archivo conectado:</strong> IAAPS CORTE MARZO INTERNO.xlsx
+                        <p class="excel-info">Período: ${excelData.period} | Última actualización: ${excelData.lastUpdate}</p>
+                    </div>
+                    <button class="refresh-btn" onclick="loadExcelData()">
+                        <i class="fas fa-sync-alt mr-1"></i> Actualizar
+                    </button>
+                </div>
+            `;
+        }
+
+        function loadPeriodData(period) {
+            // In a real implementation, this would load data for the selected period
+            showNotification(`Cargando datos para: ${period === 'actual' ? 'Período Actual' : 'Período Anterior'}`, 'info');
+            
+            // For demo, just show a different value
+            if (period === 'anterior') {
+                document.getElementById('cumplimientoComunal').textContent = '63.21%';
+                document.getElementById('cumplimientoComunalTendencia').innerHTML = `
+                    <i class="fas fa-arrow-down mr-1 text-red-500"></i>
+                    <span class="text-red-500">2.3% menos que período actual</span>
+                `;
+            } else {
+                document.getElementById('cumplimientoComunal').textContent = '65.48%';
+                document.getElementById('cumplimientoComunalTendencia').innerHTML = `
+                    <i class="fas fa-arrow-up mr-1 text-green-500"></i>
+                    <span class="text-green-500">2.3% desde último período</span>
+                `;
+            }
+        }
+
+        function exportData() {
+            showNotification('Exportando datos a Excel...', 'info');
+            
+            // In a real implementation, this would export data to Excel
+            setTimeout(() => {
+                showNotification('Datos exportados correctamente', 'success');
+            }, 1500);
+        }
+
+        function generateReport() {
+            showNotification('Generando informe...', 'info');
+            
+            // In a real implementation, this would generate a report
+            setTimeout(() => {
+                showNotification('Informe generado correctamente', 'success');
+            }, 1500);
+        }
+
+        function generateCenterReport() {
+            if (!selectedCenter) return;
+            
+            showNotification('Generando informe para ' + allCenters.find(c => c.id === selectedCenter).name, 'info');
+            
+            // In a real implementation, this would generate a report
+            setTimeout(() => {
+                showNotification('Informe generado correctamente', 'success');
+            }, 1500);
+        }
+
+        function exportIndicatorData() {
+            if (!selectedIndicator) return;
+            
+            showNotification('Exportando datos de ' + allIndicators.find(i => i.id === selectedIndicator).name, 'info');
+            
+            // In a real implementation, this would export data
+            setTimeout(() => {
+                showNotification('Datos exportados correctamente', 'success');
+            }, 1500);
+        }
+
+        function generateImprovementPlan() {
+            showNotification('Generando plan de mejora...', 'info');
+            
+            // In a real implementation, this would generate a plan
+            setTimeout(() => {
+                showNotification('Plan de mejora generado correctamente', 'success');
+            }, 1500);
+        }
+
+        // Add global functions needed for onclick handlers
+        window.showIndicatorDetails = showIndicatorDetails;
+        window.showIndicatorChart = showIndicatorChart;
+        window.loadExcelData = loadExcelData;
+    </script>
+</body>
+</html>
