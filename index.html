@@ -13,482 +13,1084 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-color:rgb(28, 186, 225);
-            --dark-color: #2c3e50;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .navbar {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .nav-link {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-        
-        .nav-link:hover {
-            color: rgba(255, 255, 255, 1) !important;
-        }
-        
-        .container-fluid {
-            padding: 20px;
-        }
-        
-        .dashboard-header {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e1e5eb;
-        }
-        
-        .card {
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-            margin-bottom: 20px;
-            border: none;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-            padding: 15px 20px;
-            font-weight: 600;
-            border-radius: 8px 8px 0 0 !important;
-        }
-        
-        .card-body {
-            padding: 20px;
-        }
-        
-        .btn-primary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-        
-        .btn-primary:hover {
-            background-color: #2980b9;
-            border-color: #2980b9;
-        }
-        
-        .btn-success {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-        }
-        
-        .btn-success:hover {
-            background-color: #219a52;
-            border-color: #219a52;
-        }
-        
-        .btn-warning {
-            background-color: var(--warning-color);
-            border-color: var(--warning-color);
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background-color: #e67e22;
-            border-color: #e67e22;
-            color: white;
-        }
-        
-        .btn-danger {
-            background-color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-            border-color: #c0392b;
-        }
-        
-        .summary-card {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .summary-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0;
-        }
-        
-        .summary-label {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 10px;
-        }
-        
-        .progress {
-            height: 10px;
-            margin-top: auto;
-        }
-        
-        .table-responsive {
-            margin-top: 20px;
-        }
-        
-        .table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        
-        .table th {
-            font-weight: 600;
-            background-color: #f8f9fa;
-        }
-        
-        .table tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05);
-        }
-        
-        .badge {
-            padding: 0.5em 0.75em;
-            font-weight: 500;
-        }
-        
-        /* Dashboard grid layout */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            grid-gap: 20px;
-        }
-        
-        .grid-span-3 {
-            grid-column: span 3;
-        }
-        
-        .grid-span-4 {
-            grid-column: span 4;
-        }
-        
-        .grid-span-6 {
-            grid-column: span 6;
-        }
-        
-        .grid-span-8 {
-            grid-column: span 8;
-        }
-        
-        .grid-span-12 {
-            grid-column: span 12;
-        }
-        
-        /* Indicador status */
-        .status-success {
-            color: var(--success-color);
-        }
-        
-        .status-warning {
-            color: var(--warning-color);
-        }
-        
-        .status-danger {
-            color: var(--danger-color);
-        }
-        
-        /* Styling for the tabs */
-        .tabs-container {
-            margin-bottom: 20px;
-        }
-        
-        .nav-tabs .nav-link {
-            color: #495057;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            margin-right: 5px;
-            border-radius: 4px 4px 0 0;
-        }
-        
-        .nav-tabs .nav-link.active {
-            color: var(--primary-color);
-            background-color: #fff;
-            border-color: #dee2e6 #dee2e6 #fff;
-            font-weight: 600;
-        }
-        
-        /* Custom styling for the charts */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 20px;
-        }
-        
-        /* Loading indicator */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-        
-        /* Tooltip styling */
-        .tooltip-inner {
-            max-width: 300px;
-            padding: 10px;
-            color: #fff;
-            text-align: center;
-            background-color: var(--dark-color);
-            border-radius: 6px;
-        }
-        
-        /* Centro cards */
-        .centro-card {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .centro-card:hover {
-            border-color: var(--secondary-color);
-        }
-        
-        .centro-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-        }
-        
-        .centro-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .centro-subtitle {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 15px;
-        }
-        
-        /* Detail view */
-        .breadcrumb {
-            background-color: transparent;
-            padding-left: 0;
-            margin-bottom: 20px;
-        }
-        
-        .detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .detail-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-        
-        .detail-subtitle {
-            font-size: 1rem;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        /* Table coloring based on percentage */
-        .table-percentage-cell {
-            position: relative;
-        }
-        
-        .table-percentage-bg {
-            position: absolute;
-            height: 100%;
-            left: 0;
-            top: 0;
-            z-index: 0;
-            opacity: 0.15;
-        }
-        
-        .table-percentage-text {
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Custom toggle switch for dark/light mode */
-        .custom-switch {
-            display: inline-block;
-            margin-left: 15px;
-        }
-        
-        /* Modal styling */
-        .modal-content {
-            border-radius: 8px;
-            border: none;
-        }
-        
-        .modal-header {
-            border-bottom: 1px solid #e1e5eb;
-            padding: 15px 20px;
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .modal-footer {
-            border-top: 1px solid #e1e5eb;
-            padding: 15px 20px;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        
-        /* Dark mode */
-        .dark-mode {
-            background-color: #1a202c;
-            color: #f7fafc;
-        }
-        
-        .dark-mode .card {
-            background-color: #2d3748;
-            color: #f7fafc;
-        }
-        
-        .dark-mode .card-header {
-            background-color: #2d3748;
-            border-bottom-color: #4a5568;
-        }
-        
-        .dark-mode .table {
-            color: #f7fafc;
-        }
-        
-        .dark-mode .table th {
-            background-color: #2d3748;
-            color: #f7fafc;
-            border-color: #4a5568;
-        }
-        
-        .dark-mode .table td {
-            border-color: #4a5568;
-        }
-        
-        .dark-mode .table tbody tr:hover {
-            background-color: rgba(66, 153, 225, 0.1);
-        }
-        
-        .dark-mode .summary-label {
-            color: #cbd5e0;
-        }
-        
-        .dark-mode .nav-tabs .nav-link {
-            color: #cbd5e0;
-            background-color: #2d3748;
-            border-color: #4a5568;
-        }
-        
-        .dark-mode .nav-tabs .nav-link.active {
-            color: #f7fafc;
-            background-color: #4a5568;
-            border-color: #4a5568;
-        }
+       /* Variables de colores y estilos base */
+:root {
+    --primary-color: #3AC97C;       /* Verde pato - color principal */
+    --primary-dark: #2EA067;        /* Verde pato oscuro para hover */
+    --primary-light: #6FDDA6;       /* Verde pato claro para detalles */
+    --primary-ultra-light: #eafaf1; /* Verde pato muy claro para fondos */
+    --secondary-color: #389CC0;     /* Azul complementario */
+    --success-color: #3AC97C;       /* Verde como success */
+    --warning-color: #FFBD3D;       /* Amarillo para warning */
+    --danger-color: #FF5A5A;        /* Rojo para danger */
+    --light-color: #F9FDFC;         /* Blanco con tinte verde muy sutil */
+    --dark-color: #263238;          /* Gris oscuro para contraste */
+    --text-dark: #263238;           /* Texto oscuro */
+    --text-light: #FFFFFF;          /* Texto claro */
+    --shadow-light: 0 8px 25px rgba(0, 0, 0, 0.07);  /* Sombra sutil */
+    --shadow-medium: 0 12px 30px rgba(0, 0, 0, 0.1); /* Sombra media */
+    --shadow-strong: 0 15px 35px rgba(0, 0, 0, 0.15); /* Sombra pronunciada */
+    --border-radius-sm: 8px;        /* Radio de borde pequeño */
+    --border-radius-md: 12px;       /* Radio de borde mediano */
+    --border-radius-lg: 16px;       /* Radio de borde grande */
+    --transition-fast: all 0.2s ease; /* Transición rápida */
+    --transition-normal: all 0.3s ease; /* Transición normal */
+    --transition-slow: all 0.5s ease; /* Transición lenta */
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%); /* Degradado principal */
+    --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, #6FB1FF 100%); /* Degradado secundario */
+}
 
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
-            
-            .grid-span-3, .grid-span-4 {
-                grid-column: span 3;
-            }
-            
-            .grid-span-6, .grid-span-8, .grid-span-12 {
-                grid-column: span 6;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .grid-span-3, .grid-span-4, .grid-span-6, .grid-span-8, .grid-span-12 {
-                grid-column: span 3;
-            }
-            
-            .summary-value {
-                font-size: 1.8rem;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .dashboard-grid {
-                display: block;
-            }
-            
-            .card {
-                margin-bottom: 15px;
-            }
-        }
+/* Estilos base */
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Open Sans', sans-serif;
+    background-color: #F5F9F7;
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    transition: var(--transition-normal);
+}
+
+/* Navbar - Futurista y elegante */
+.navbar {
+    background: var(--gradient-primary);
+    color: var(--text-light);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-medium);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding-left: 2.5rem;
+}
+
+.navbar-brand i {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.8rem;
+    background: var(--text-light);
+    color: var(--primary-color);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    position: relative;
+    margin: 0 0.2rem;
+    padding: 0.6rem 1rem !important;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--text-light) !important;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link.active {
+    color: var(--text-light) !important;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link i {
+    margin-right: 0.4rem;
+    font-size: 1.1em;
+}
+
+/* Contenedor principal */
+.container-fluid {
+    padding: 1.5rem;
+}
+
+/* Header del dashboard */
+.dashboard-header {
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 2px solid rgba(58, 201, 124, 0.15);
+}
+
+.dashboard-header h2 {
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.dashboard-header p {
+    opacity: 0.8;
+    max-width: 800px;
+}
+
+/* Tarjetas - Diseño futurista */
+.card {
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 1.5rem;
+    border: none;
+    overflow: hidden;
+    background-color: var(--light-color);
+    transition: var(--transition-normal);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--gradient-primary);
+    opacity: 0.7;
+}
+
+.card:hover {
+    transform: translateY(-7px);
+    box-shadow: var(--shadow-strong);
+}
+
+.card-header {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(58, 201, 124, 0.15);
+    padding: 1.2rem 1.5rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important;
+    display: flex;
+    align-items: center;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+.card-header i {
+    margin-right: 0.7rem;
+    background: var(--primary-ultra-light);
+    color: var(--primary-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Botones futuristas */
+.btn {
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    padding: 0.5rem 1.2rem;
+    transition: var(--transition-fast);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.btn:active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--text-light);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 201, 124, 0.3);
+}
+
+.btn-secondary {
+    background: var(--gradient-secondary);
+    border: none;
+    color: var(--text-light);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #3089A9 0%, #5DA0FF 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(56, 156, 192, 0.3);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: var(--text-light);
+}
+
+.btn-success:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 201, 124, 0.3);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: var(--text-dark);
+}
+
+.btn-warning:hover {
+    background-color: #F2A324;
+    border-color: #F2A324;
+    color: var(--text-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 189, 61, 0.3);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+.btn-danger:hover {
+    background-color: #E53E3E;
+    border-color: #E53E3E;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 90, 90, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(58, 201, 124, 0.3);
+}
+
+.btn-outline-light {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: white;
+    transform: translateY(-2px);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.8rem;
+    font-size: 0.75rem;
+}
+
+/* Tarjetas de resumen */
+.summary-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    position: relative;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--gradient-primary);
+    opacity: 0.7;
+}
+
+.summary-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+
+.centro-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    background: var(--primary-ultra-light);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 15px rgba(58, 201, 124, 0.15);
+    transition: var(--transition-normal);
+}
+
+.card:hover .centro-icon {
+    transform: scale(1.1);
+    box-shadow: 0 15px 25px rgba(58, 201, 124, 0.25);
+}
+
+.summary-value {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    color: var(--primary-dark);
+    text-shadow: 0 2px 10px rgba(58, 201, 124, 0.15);
+}
+
+.summary-label {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.progress {
+    height: 10px;
+    margin-top: auto;
+    border-radius: 5px;
+    background-color: rgba(230, 230, 230, 0.8);
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out;
+    background-image: linear-gradient(45deg, 
+                      rgba(255, 255, 255, 0.15) 25%, 
+                      transparent 25%, 
+                      transparent 50%, 
+                      rgba(255, 255, 255, 0.15) 50%, 
+                      rgba(255, 255, 255, 0.15) 75%, 
+                      transparent 75%, 
+                      transparent);
+    background-size: 20px 20px;
+    animation: progress-animation 1.5s linear infinite;
+}
+
+@keyframes progress-animation {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 20px 0;
+    }
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Tablas futuristas */
+.table-responsive {
+    margin-top: 1.5rem;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    font-weight: 600;
+    background-color: var(--primary-ultra-light);
+    color: var(--primary-dark);
+    border-bottom: 2px solid rgba(58, 201, 124, 0.2);
+    padding: 1rem;
+    position: relative;
+}
+
+.table tbody tr {
+    transition: var(--transition-fast);
+    background-color: white;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(58, 201, 124, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Badges futuristas */
+.badge {
+    padding: 0.4em 0.65em;
+    font-weight: 500;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicadores de estado */
+.status-success {
+    color: var(--success-color);
+}
+
+.status-warning {
+    color: var(--warning-color);
+}
+
+.status-danger {
+    color: var(--danger-color);
+}
+
+/* Tarjetas de centro mejoradas */
+.centro-card {
+    cursor: pointer;
+    transition: var(--transition-normal);
+    overflow: hidden;
+    border-radius: var(--border-radius-md);
+}
+
+.centro-card:hover {
+    transform: translateY(-7px);
+    box-shadow: var(--shadow-strong);
+}
+
+.centro-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--gradient-primary);
+    opacity: 0.7;
+}
+
+.centro-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-dark);
+}
+
+.centro-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Gráficos mejorados */
+.chart-container {
+    position: relative;
+    height: 350px;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: var(--border-radius-sm);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.02);
+}
+
+/* Tabs futuristas */
+.nav-tabs {
+    border-bottom: none;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d;
+    background-color: rgba(245, 245, 245, 0.8);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 0.8rem 1.5rem;
+    margin-right: 0;
+    font-weight: 500;
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-tabs .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    transition: var(--transition-fast);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-dark);
+}
+
+.nav-tabs .nav-link:hover::before {
+    width: 100%;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: white;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.nav-tabs .nav-link.active::before {
+    width: 100%;
+}
+
+/* Breadcrumb futurista */
+.breadcrumb {
+    background-color: transparent;
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-dark);
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: #aaa;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Efectos de animación */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Loading overlay mejorado */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25rem;
+    color: var(--primary-color);
+    animation: spinner-border 1s linear infinite;
+}
+
+/* Barra de búsqueda mejorada */
+.input-group {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+}
+
+.input-group-text {
+    background-color: white;
+    border: none;
+    color: var(--primary-color);
+}
+
+.form-control {
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+/* Switch para modo oscuro */
+.custom-switch {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.form-check-input {
+    height: 1.3rem;
+    width: 2.6rem;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border: none;
+    transition: var(--transition-fast);
+}
+
+.form-check-input:checked {
+    background-color: white;
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%233AC97C'/%3e%3c/svg%3e");
+}
+
+.form-check-label {
+    color: white;
+    cursor: pointer;
+}
+
+/* Modal mejorado */
+.modal-content {
+    border-radius: var(--border-radius-md);
+    border: none;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-ultra-light);
+    border-bottom: 1px solid rgba(58, 201, 124, 0.15);
+    padding: 1.2rem 1.5rem;
+}
+
+.modal-title {
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.2rem 1.5rem;
+}
+
+/* Customización de scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(58, 201, 124, 0.5);
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* AJUSTES PARA MODO OSCURO */
+.dark-mode {
+    background-color: #121212;
+    color: #E0E0E0;
+}
+
+.dark-mode .navbar {
+    background: linear-gradient(135deg, #2a7e4c 0%, #1e5d38 100%);
+}
+
+.dark-mode .card {
+    background-color: #1E1E1E;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .card-header {
+    background-color: #252525;
+    color: #E0E0E0;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .summary-value {
+    color: var(--primary-light);
+}
+
+.dark-mode .summary-label,
+.dark-mode .centro-subtitle {
+    color: #A0A0A0;
+}
+
+.dark-mode .centro-title,
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode h3, 
+.dark-mode h4, 
+.dark-mode h5, 
+.dark-mode h6 {
+    color: #E0E0E0;
+}
+
+.dark-mode .table {
+    color: #E0E0E0;
+}
+
+.dark-mode .table th {
+    background-color: #252525;
+    color: var(--primary-light);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .table td {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .table tbody tr {
+    background-color: #1E1E1E;
+}
+
+.dark-mode .table tbody tr:hover {
+    background-color: #252525;
+}
+
+.dark-mode .nav-tabs .nav-link {
+    color: #A0A0A0;
+    background-color: rgba(40, 40, 40, 0.8);
+}
+
+.dark-mode .nav-tabs .nav-link.active {
+    color: var(--primary-light);
+    background-color: #252525;
+}
+
+.dark-mode .progress {
+    background-color: rgba(30, 30, 30, 0.8);
+}
+
+.dark-mode .chart-container {
+    background: #1E1E1E;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .breadcrumb-item.active {
+    color: #A0A0A0;
+}
+
+.dark-mode .loading-overlay {
+    background-color: rgba(18, 18, 18, 0.8);
+}
+
+.dark-mode .input-group {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .input-group-text,
+.dark-mode .form-control {
+    background-color: #252525;
+    color: #E0E0E0;
+    border: none;
+}
+
+.dark-mode .form-control::placeholder {
+    color: #888;
+}
+
+.dark-mode .centro-icon {
+    background: rgba(58, 201, 124, 0.15);
+    color: var(--primary-light);
+}
+
+.dark-mode .text-muted {
+    color: #A0A0A0 !important;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+    background: #252525;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+    background: rgba(58, 201, 124, 0.4);
+    border: 2px solid #252525;
+}
+
+/* Estilos para detalles de tabla */
+.table-percentage-cell {
+    position: relative;
+}
+
+.table-percentage-bg {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    opacity: 0.2;
+    transition: var(--transition-fast);
+    border-radius: 3px;
+}
+
+.dark-mode .table-percentage-bg {
+    opacity: 0.3;
+}
+
+.table-percentage-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 992px) {
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .summary-value {
+        font-size: 2.2rem;
+    }
+    
+    .centro-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-toggler {
+        border: none;
+        color: white;
+    }
+    
+    .summary-value {
+        font-size: 1.8rem;
+    }
+    
+    .centro-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.7rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .table td, 
+    .table th {
+        padding: 0.75rem;
+    }
+}
+
+/* Efectos especiales y animaciones para diseño futurista */
+.pulse {
+    box-shadow: 0 0 0 rgba(58, 201, 124, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(58, 201, 124, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(58, 201, 124, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(58, 201, 124, 0);
+    }
+}
+
+/* Notificación Toast */
+.toast-container {
+    z-index: 1080;
+}
+
+.toast {
+    backdrop-filter: blur(10px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-error {
+    background-color: var(--danger-color) !important;
+}
+
+/* Ajustes para diseño futurista */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-gap: 1.5rem;
+}
+
+.grid-span-3 {
+    grid-column: span 3;
+}
+
+.grid-span-4 {
+    grid-column: span 4;
+}
+
+.grid-span-6 {
+    grid-column: span 6;
+}
+
+.grid-span-8 {
+    grid-column: span 8;
+}
+
+.grid-span-12 {
+    grid-column: span 12;
+}
+
+/* Efecto de hover en las tarjetas */
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%, 
+                rgba(255, 255, 255, 0) 100%);
+    transform: translateX(-100%);
+    transition: transform 1s ease;
+    pointer-events: none;
+}
+
+.card:hover::after {
+    transform: translateX(0);
+}
     </style>
 </head>
 <body>
@@ -3119,180 +3721,214 @@ function actualizarGraficosDetalleCentro() {
             });
         }
         
-        // Función para actualizar el detalle del indicador
-        function actualizarDetalleIndicador() {
-            const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
-            if (!indicador) return;
-            
-            // Actualizar título y detalles
-            document.getElementById('indicadorDetailTitle').textContent = `Indicador ${indicador.codigo}: ${indicador.nombre}`;
-            document.getElementById('indicadorNombreCompleto').textContent = indicador.nombre;
-            document.getElementById('indicadorMetaValor').textContent = indicador.meta.toFixed(2) + (indicador.tipo === 'porcentaje' ? '%' : '');
-            document.getElementById('indicadorImportanciaValor').textContent = importanciaIndicadores[indicador.codigo];
-            document.getElementById('indicadorNumeradorFormula').textContent = formulasIndicadores[indicador.codigo].numerador;
-            document.getElementById('indicadorDenominadorFormula').textContent = formulasIndicadores[indicador.codigo].denominador;
-            
-            // Actualizar gráficos
-            actualizarGraficosDetalleIndicador(indicador);
-            
-            // Actualizar tabla
-            actualizarTablaDetalleIndicador(indicador);
+       // Instancias globales para los dos charts de indicador
+
+/**
+ * Actualiza todo el bloque de detalle de un indicador:
+ * - Títulos, fórmulas, meta e importancia
+ * - Gráficos de barras y de línea
+ * - Tabla de valores por centro
+ */
+function actualizarDetalleIndicador() {
+  const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+  if (!indicador) return;
+
+  // 1) Actualizar textos
+  document.getElementById('indicadorDetailTitle').textContent =
+    `Indicador ${indicador.codigo}: ${indicador.nombre}`;
+  document.getElementById('indicadorNombreCompleto').textContent = indicador.nombre;
+  document.getElementById('indicadorMetaValor').textContent =
+    indicador.meta.toFixed(2) + (indicador.tipo === 'porcentaje' ? '%' : '');
+  document.getElementById('indicadorImportanciaValor').textContent =
+    importanciaIndicadores[indicador.codigo];
+  document.getElementById('indicadorNumeradorFormula').textContent =
+    formulasIndicadores[indicador.codigo].numerador;
+  document.getElementById('indicadorDenominadorFormula').textContent =
+    formulasIndicadores[indicador.codigo].denominador;
+
+  // 2) Gráficos
+  actualizarGraficosDetalleIndicador(indicador);
+
+  // 3) Tabla
+  actualizarTablaDetalleIndicador(indicador);
+}
+
+/**
+ * Dibuja (o redibuja) los dos gráficos dentro de la pestaña de detalle
+ */
+function actualizarGraficosDetalleIndicador(indicador) {
+  // ————————————————
+  //  A) GRÁFICO DE BARRAS: cumplimiento por centro
+  // ————————————————
+  const labels = [];
+  const data = [];
+  iaapsData.centros
+    .filter(c => c.codigo !== 'comunal')
+    .forEach(c => {
+      const r = indicador.resultados.find(x => x.centro === c.codigo);
+      if (r && r.denominador > 0) {
+        labels.push(c.nombre);
+        data.push(r.cumplimiento || 0);
+      }
+    });
+
+  // destruir instancia previa si existe
+  if (indicadorCentrosChartInstance) {
+    indicadorCentrosChartInstance.destroy();
+  }
+
+  const ctxBar = document.getElementById('indicadorCentrosChart').getContext('2d');
+  indicadorCentrosChartInstance = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Cumplimiento (%)',
+        data,
+        backgroundColor: ctx => {
+          const v = ctx.dataset.data[ctx.dataIndex];
+          return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
+        },
+        borderColor: 'rgba(0,0,0,0.1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: 'Cumplimiento por Centro' }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          title: { display: true, text: 'Cumplimiento (%)' }
+        },
+        x: {
+          title: { display: true, text: 'Centro de Salud' }
         }
-        
-        // Función para actualizar los gráficos de detalle del indicador
-        function actualizarGraficosDetalleIndicador(indicador) {
-            // Preparar datos para gráfico por centro
-            const centrosLabels = [];
-            const centrosCumplimiento = [];
-            
-            iaapsData.centros.filter(centro => centro.codigo !== 'comunal').forEach(centro => {
-                const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                if (resultado && resultado.denominador > 0) {
-                    centrosLabels.push(centro.nombre);
-                    centrosCumplimiento.push(resultado.cumplimiento || 0);
-                }
-            });
-            
-            // Destruir gráficos anteriores si existen
-            if (window.indicadorCentrosChart) {
-                window.indicadorCentrosChart.destroy();
-            }
-            
-            if (window.indicadorTendenciaChart) {
-                window.indicadorTendenciaChart.destroy();
-            }
-            
-            // Actualizar gráfico por centro
-            const ctxCentros = document.getElementById('indicadorCentrosChart').getContext('2d');
-            window.indicadorCentrosChart = new Chart(ctxCentros, {
-                type: 'bar',
-                data: {
-                    labels: centrosLabels,
-                    datasets: [{
-                        label: 'Cumplimiento (%)',
-                        data: centrosCumplimiento,
-                        backgroundColor: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            if (value >= 95) return '#27ae60';
-                            else if (value >= 80) return '#f39c12';
-                            else return '#e74c3c';
-                        },
-                        borderColor: 'rgba(0, 0, 0, 0.1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Cumplimiento por Centro'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Cumplimiento (%)'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Simular datos de tendencia
-            const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
-            const datosTendencia = [];
-            
-            // Generar valores que aumenten o disminuyan gradualmente
-            const valorInicial = Math.random() * 50 + 30; // Entre 30 y 80
-            let valorActual = valorInicial;
-            
-            for (let i = 0; i < meses.length; i++) {
-                // Variación aleatoria entre -5 y +5
-                const variacion = (Math.random() * 10) - 5;
-                valorActual = Math.max(0, Math.min(100, valorActual + variacion));
-                datosTendencia.push(valorActual);
-            }
-            
-            // Destacar valores por encima y por debajo de la meta
-            const backgroundColors = datosTendencia.map(valor => 
-                valor >= indicador.meta ? '#27ae60' : '#e74c3c'
-            );
-            
-            // Actualizar gráfico de tendencia
-            const ctxTendencia = document.getElementById('indicadorTendenciaChart').getContext('2d');
-            window.indicadorTendenciaChart = new Chart(ctxTendencia, {
-                type: 'line',
-                data: {
-                    labels: meses,
-                    datasets: [
-                        {
-                            label: 'Resultado',
-                            data: datosTendencia,
-                            borderColor: '#3498db',
-                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Meta',
-                            data: Array(meses.length).fill(indicador.meta),
-                            borderColor: '#e74c3c',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Tendencia Mensual'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: indicador.tipo === 'porcentaje' ? 'Resultado (%)' : 'Resultado'
-                            }
-                        }
-                    }
-                }
-            });
+      }
+    }
+  });
+
+  // ————————————————
+  //  B) GRÁFICO DE LÍNEA: tendencia mensual (simulada)
+  // ————————————————
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun'];
+  let v = Math.random() * 50 + 30;
+  const trend = meses.map(() => {
+    v = Math.max(0, Math.min(100, v + (Math.random()*10-5)));
+    return parseFloat(v.toFixed(2));
+  });
+  const metaArr = Array(meses.length).fill(indicador.meta);
+
+  if (indicadorTendenciaChartInstance) {
+    indicadorTendenciaChartInstance.destroy();
+  }
+
+  const ctxLine = document.getElementById('indicadorTendenciaChart').getContext('2d');
+  indicadorTendenciaChartInstance = new Chart(ctxLine, {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: [
+        {
+          label: 'Resultado',
+          data: trend,
+          borderColor: '#3498db',
+          backgroundColor: 'rgba(52,152,219,0.2)',
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: 'Meta',
+          data: metaArr,
+          borderColor: '#e74c3c',
+          borderDash: [5,5],
+          fill: false,
+          pointRadius: 0
         }
-        
-        // Función para actualizar la tabla de detalle del indicador
-        function actualizarTablaDetalleIndicador(indicador) {
-            const tableBody = document.getElementById('indicadorCentrosTableBody');
-            tableBody.innerHTML = '';
-            
-            // Agregar fila comunal
-            const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
-            if (resultadoComunal) {
-                agregarFilaIndicador(tableBody, indicador, resultadoComunal, 'CURICÓ (COMUNAL)');
-            }
-            
-            // Agregar filas por centro
-            iaapsData.centros.filter(centro => centro.codigo !== 'comunal').forEach(centro => {
-                const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                if (resultado) {
-                    agregarFilaIndicador(tableBody, indicador, resultado, centro.nombre);
-                }
-            });
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        title: { display: true, text: 'Tendencia Mensual' }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: indicador.tipo === 'porcentaje' ? 'Resultado (%)' : 'Resultado'
+          }
         }
+      }
+    }
+  });
+}
+
+/**
+ * Rellena la tabla de detalle de indicador fila a fila
+ */
+function actualizarTablaDetalleIndicador(indicador) {
+  const tbody = document.getElementById('indicadorCentrosTableBody');
+  tbody.innerHTML = '';
+
+  // fila comunal
+  const rc = indicador.resultados.find(r => r.centro === 'comunal');
+  if (rc) agregarFilaIndicador(tbody, indicador, rc, 'CURICÓ (COMUNAL)');
+
+  // demás centros
+  iaapsData.centros
+    .filter(c => c.codigo !== 'comunal')
+    .forEach(c => {
+      const r = indicador.resultados.find(x => x.centro === c.codigo);
+      if (r) agregarFilaIndicador(tbody, indicador, r, c.nombre);
+    });
+}
+
+/**
+ * Inserta una fila en la tabla dada, con sus badges
+ */
+function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
+  let cls, icon, txt;
+  if (resultado.cumplimiento >= 95) {
+    cls = 'bg-success'; icon = 'fa-check-circle'; txt = 'Cumplido';
+  } else if (resultado.cumplimiento >= 80) {
+    cls = 'bg-warning'; icon = 'fa-exclamation-triangle'; txt = 'Parcial';
+  } else {
+    cls = 'bg-danger'; icon = 'fa-times-circle'; txt = 'Crítico';
+  }
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${nombre}</td>
+    <td class="text-center">${resultado.numerador}</td>
+    <td class="text-center">${resultado.denominador}</td>
+    <td class="text-center">${
+      indicador.tipo==='porcentaje'
+        ? resultado.resultado.toFixed(2)+'%'
+        : resultado.resultado.toFixed(2)
+    }</td>
+    <td class="text-center">${
+      indicador.tipo==='porcentaje'
+        ? indicador.meta.toFixed(2)+'%'
+        : indicador.meta.toFixed(2)
+    }</td>
+    <td class="text-center">
+      <span class="badge ${cls}">
+        <i class="fas ${icon} me-1"></i> ${txt}
+      </span>
+    </td>
+  `;
+  tbody.appendChild(tr);
+}
+
         
         // Función auxiliar para agregar una fila a la tabla de indicadores
         function agregarFilaIndicador(tableBody, indicador, resultado, nombreCentro) {
