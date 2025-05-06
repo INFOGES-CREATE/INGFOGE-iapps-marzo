@@ -3434,118 +3434,6 @@ function actualizarGraficoTop(indicadores, canvasId, isTop) {
 }
 
 
-// Variables globales para las instancias de Chart.js en la vista detalle de centro
-let centroCumplimientoChartInstance = null;
-let centroIndicadoresChartInstance = null;
-
-/**
- * Actualiza los gráficos de detalle para el centro seleccionado.
- */
-function actualizarGraficosDetalleCentro() {
-  // 1) Recolectar datos para el gráfico de donut (estado de indicadores)
-  const datosCumplimiento = [0, 0, 0]; // [Cumplidos, Parciales, Críticos]
-  iaapsData.indicadores.forEach(indicador => {
-    const res = indicador.resultados.find(r => r.centro === currentCentro);
-    if (res && res.denominador > 0) {
-      if (res.cumplimiento >= 25) datosCumplimiento[0]++;
-      else if (res.cumplimiento >= 80) datosCumplimiento[1]++;
-      else datosCumplimiento[2]++;
-    }
-  });
-
-  // 2) Destruir instancia previa si existe
-  if (centroCumplimientoChartInstance) {
-    centroCumplimientoChartInstance.destroy();
-  }
-
-  // 3) Crear gráfico de tipo "doughnut"
-  const ctxCumplimiento = document
-    .getElementById('centroCumplimientoChart')
-    .getContext('2d');
-  centroCumplimientoChartInstance = new Chart(ctxCumplimiento, {
-    type: 'doughnut',
-    data: {
-      labels: ['Cumplidos', 'Parciales', 'Críticos'],
-      datasets: [{
-        data: datosCumplimiento,
-        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
-        borderColor: ['#27ae60', '#f39c12', '#e74c3c'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right' },
-        title: { display: true, text: 'Estado de Indicadores' }
-      }
-    }
-  });
-
-  // 4) Preparar datos para el gráfico de barras por categoría
-  const categoriasAcum = { Cobertura: [], Tasa: [], Porcentaje: [], Otro: [] };
-  iaapsData.indicadores.forEach(ind => {
-    const res = ind.resultados.find(r => r.centro === currentCentro);
-    if (res && res.denominador > 0) {
-      // Clasificar por nombre o tipo
-      if (/cobertura/i.test(ind.nombre))       categoriasAcum.Cobertura.push(res.cumplimiento);
-      else if (ind.tipo === 'tasa')            categoriasAcum.Tasa.push(res.cumplimiento);
-      else if (ind.tipo === 'porcentaje')      categoriasAcum.Porcentaje.push(res.cumplimiento);
-      else                                     categoriasAcum.Otro.push(res.cumplimiento);
-    }
-  });
-
-  const categorias = [], promedios = [];
-  for (const [cat, vals] of Object.entries(categoriasAcum)) {
-    if (vals.length) {
-      categorias.push(cat);
-      const suma = vals.reduce((a, b) => a + b, 0);
-      promedios.push(parseFloat((suma / vals.length).toFixed(2)));
-    }
-  }
-
-  // 5) Destruir instancia previa si existe
-  if (centroIndicadoresChartInstance) {
-    centroIndicadoresChartInstance.destroy();
-  }
-
-  // 6) Crear gráfico de barras
-  const ctxCategoria = document
-    .getElementById('centroIndicadoresChart')
-    .getContext('2d');
-  centroIndicadoresChartInstance = new Chart(ctxCategoria, {
-    type: 'bar',
-    data: {
-      labels: categorias,
-      datasets: [{
-        label: 'Cumplimiento promedio (%)',
-        data: promedios,
-        backgroundColor: function(ctx) {
-          const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 25 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
-        },
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Cumplimiento por Categoría' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: { display: true, text: 'Cumplimiento (%)' }
-        }
-      }
-    }
-  });
-}
 
         
         // Función para actualizar las tarjetas de centros
@@ -3620,147 +3508,160 @@ function actualizarGraficosDetalleCentro() {
             // Actualizar vista comparativa
             actualizarVistaComparativa();
         }
-        
-        // Función para actualizar el detalle del centro
-        function actualizarDetalleCentro() {
-            if (currentCentro === 'comunal') {
-                document.getElementById('establecimientosCard').style.display = 'none';
-                document.getElementById('centroCumplimientoTitle').textContent = 'Cumplimiento IAAPS Comunal';
+
+        // Variables globales para las instancias de Chart.js
+let centroCumplimientoChartInstance = null;
+let centroIndicadoresChartInstance = null;
+
+/**
+ * Actualiza los gráficos de detalle para el centro seleccionado.
+ * Esta función unificada sustituye a las versiones anteriores para evitar conflictos.
+ */
+function actualizarGraficosDetalleCentro() {
+    console.log("Actualizando gráficos de detalle para centro:", currentCentro);
+    
+    // 1) Recolectar datos para el gráfico de donut (estado de indicadores)
+    const datosCumplimiento = [0, 0, 0]; // [Cumplidos, Parciales, Críticos]
+    
+    // Contador para debugging
+    let indicadoresAnalizados = 0;
+    
+    iaapsData.indicadores.forEach(indicador => {
+        const res = indicador.resultados.find(r => r.centro === currentCentro);
+        if (res && res.denominador > 0) {
+            indicadoresAnalizados++;
+            if (res.cumplimiento >= 95) {
+                datosCumplimiento[0]++; // Cumplidos
+            } else if (res.cumplimiento >= 80) {
+                datosCumplimiento[1]++; // Parciales
             } else {
-                const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
-                if (centro) {
-                    document.getElementById('centroCumplimientoTitle').textContent = `Cumplimiento IAAPS - ${centro.nombre}`;
-                    
-                    // Verificar si tiene establecimientos
-                    const tieneEstablecimientos = establecimientosMap[currentCentro] && establecimientosMap[currentCentro].length > 0;
-                    document.getElementById('establecimientosCard').style.display = tieneEstablecimientos ? 'block' : 'none';
-                    
-                    if (tieneEstablecimientos) {
-                        actualizarTablaEstablecimientos();
-                    }
-                }
+                datosCumplimiento[2]++; // Críticos
             }
-            
-            // Actualizar gráficos y tabla de indicadores del centro
-            actualizarGraficosDetalleCentro();
-            actualizarTablaIndicadoresCentro();
         }
-        
-        // Función para actualizar los gráficos de detalle del centro
-        function actualizarGraficosDetalleCentro() {
-            // Gráfico de cumplimiento
-            const datosCumplimiento = [];
-            let cumplimientoTotal = 0;
-            let indicadoresCumplidos = 0;
-            let indicadoresParciales = 0;
-            let indicadoresCriticos = 0;
-            let indicadoresContados = 0;
-            
-            iaapsData.indicadores.forEach(indicador => {
-                const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-                if (resultado && resultado.denominador > 0) {
-                    cumplimientoTotal += resultado.cumplimiento || 0;
-                    indicadoresContados++;
-                    
-                    if (resultado.cumplimiento >= 25) {
-                        indicadoresCumplidos++;
-                    } else if (resultado.cumplimiento >= 80) {
-                        indicadoresParciales++;
-                    } else {
-                        indicadoresCriticos++;
-                    }
-                }
-            });
-            
-            datosCumplimiento.push(indicadoresCumplidos, indicadoresParciales, indicadoresCriticos);
-            
-            // Destruir gráficos anteriores si existen
-            if (window.centroCumplimientoChart) {
-                window.centroCumplimientoChart.destroy();
-            }
-            
-            if (window.centroIndicadoresChart) {
-                window.centroIndicadoresChart.destroy();
-            }
-            
-            // Actualizar gráfico de cumplimiento
-            const ctxCumplimiento = document.getElementById('centroCumplimientoChart').getContext('2d');
-            window.centroCumplimientoChart = new Chart(ctxCumplimiento, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Cumplidos', 'Parciales', 'Críticos'],
-                    datasets: [{
-                        data: datosCumplimiento,
-                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
-                        borderColor: ['#27ae60', '#f39c12', '#e74c3c'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Estado de Indicadores'
+    });
+    
+    console.log("Indicadores analizados:", indicadoresAnalizados);
+    console.log("Datos de cumplimiento:", datosCumplimiento);
+
+    // 2) Destruir instancia previa si existe
+    if (centroCumplimientoChartInstance) {
+        centroCumplimientoChartInstance.destroy();
+    }
+    
+    // Verificar que el elemento del DOM exista
+    const ctxCumplimiento = document.getElementById('centroCumplimientoChart');
+    if (!ctxCumplimiento) {
+        console.error("No se encontró el elemento 'centroCumplimientoChart' en el DOM");
+        return;
+    }
+    
+    // 3) Crear gráfico de tipo "doughnut"
+    try {
+        centroCumplimientoChartInstance = new Chart(ctxCumplimiento.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cumplidos', 'Parciales', 'Críticos'],
+                datasets: [{
+                    data: datosCumplimiento,
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { 
+                        display: true, 
+                        text: 'Estado de Indicadores',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                const dataset = tooltipItem.dataset;
+                                const total = dataset.data.reduce((acc, data) => acc + data, 0);
+                                const value = dataset.data[tooltipItem.dataIndex];
+                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                return `${tooltipItem.label}: ${value} (${percentage})`;
+                            }
                         }
                     }
                 }
-            });
-            
-            // Preparar datos para gráfico por categoría
-            const categoriasIndicadores = {
-                'Cobertura': [],
-                'Tasa': [],
-                'Porcentaje': [],
-                'Otro': []
-            };
-            
-            iaapsData.indicadores.forEach(indicador => {
-                const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-                if (resultado && resultado.denominador > 0) {
-                    if (indicador.nombre.toLowerCase().includes('cobertura')) {
-                        categoriasIndicadores['Cobertura'].push(resultado.cumplimiento || 0);
-                    } else if (indicador.tipo === 'tasa') {
-                        categoriasIndicadores['Tasa'].push(resultado.cumplimiento || 0);
-                    } else if (indicador.tipo === 'porcentaje') {
-                        categoriasIndicadores['Porcentaje'].push(resultado.cumplimiento || 0);
-                    } else {
-                        categoriasIndicadores['Otro'].push(resultado.cumplimiento || 0);
-                    }
-                }
-            });
-            
-            // Calcular promedios por categoría
-            const categorias = [];
-            const promedios = [];
-            
-            for (const categoria in categoriasIndicadores) {
-                const valores = categoriasIndicadores[categoria];
-                if (valores.length > 0) {
-                    categorias.push(categoria);
-                    const promedio = valores.reduce((a, b) => a + b, 0) / valores.length;
-                    promedios.push(promedio);
-                }
             }
-            
-            // Actualizar gráfico por categoría
-            const ctxCategoria = document.getElementById('centroIndicadoresChart').getContext('2d');
-            window.centroIndicadoresChart = new Chart(ctxCategoria, {
+        });
+    } catch (error) {
+        console.error("Error al crear gráfico de cumplimiento:", error);
+    }
+
+    // 4) Preparar datos para el gráfico de barras por categoría
+    const categoriasAcum = { 
+        Cobertura: [], 
+        Tasa: [], 
+        Porcentaje: [], 
+        Otros: [] 
+    };
+    
+    iaapsData.indicadores.forEach(ind => {
+        const res = ind.resultados.find(r => r.centro === currentCentro);
+        if (res && res.denominador > 0) {
+            // Clasificar por nombre o tipo
+            if (/cobertura/i.test(ind.nombre)) {
+                categoriasAcum.Cobertura.push(res.cumplimiento);
+            } else if (ind.tipo === 'tasa') {
+                categoriasAcum.Tasa.push(res.cumplimiento);
+            } else if (ind.tipo === 'porcentaje') {
+                categoriasAcum.Porcentaje.push(res.cumplimiento);
+            } else {
+                categoriasAcum.Otros.push(res.cumplimiento);
+            }
+        }
+    });
+    
+    // Calcular promedios por categoría
+    const categorias = [];
+    const promedios = [];
+    
+    for (const [cat, vals] of Object.entries(categoriasAcum)) {
+        if (vals.length) {
+            categorias.push(cat);
+            const suma = vals.reduce((a, b) => a + b, 0);
+            promedios.push(parseFloat((suma / vals.length).toFixed(2)));
+        }
+    }
+    
+    console.log("Categorías:", categorias);
+    console.log("Promedios:", promedios);
+
+    // 5) Destruir instancia previa si existe
+    if (centroIndicadoresChartInstance) {
+        centroIndicadoresChartInstance.destroy();
+    }
+    
+    // Verificar que el elemento del DOM exista
+    const ctxCategoria = document.getElementById('centroIndicadoresChart');
+    if (!ctxCategoria) {
+        console.error("No se encontró el elemento 'centroIndicadoresChart' en el DOM");
+        return;
+    }
+
+    // 6) Crear gráfico de barras solo si hay datos
+    if (categorias.length > 0) {
+        try {
+            centroIndicadoresChartInstance = new Chart(ctxCategoria.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: categorias,
                     datasets: [{
                         label: 'Cumplimiento promedio (%)',
                         data: promedios,
-                        backgroundColor: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            if (value >= 25) return '#27ae60';
-                            else if (value >= 80) return '#f39c12';
-                            else return '#e74c3c';
+                        backgroundColor: function(ctx) {
+                            const v = ctx.raw;
+                            return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
                         },
                         borderColor: 'rgba(0, 0, 0, 0.1)',
                         borderWidth: 1
@@ -3770,29 +3671,120 @@ function actualizarGraficosDetalleCentro() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Cumplimiento por Categoría'
+                        legend: { display: false },
+                        title: { 
+                            display: true, 
+                            text: 'Cumplimiento por Categoría',
+                            font: {
+                                size: 16
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            title: {
-                                display: true,
-                                text: 'Cumplimiento (%)'
+                            title: { 
+                                display: true, 
+                                text: 'Cumplimiento (%)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: { 
+                                display: true, 
+                                text: 'Categoría',
+                                font: {
+                                    weight: 'bold'
+                                }
                             }
                         }
                     }
                 }
             });
+        } catch (error) {
+            console.error("Error al crear gráfico de categorías:", error);
         }
+    } else {
+        console.warn("No hay datos suficientes para crear el gráfico de categorías");
+        // Mostrar mensaje en el canvas
+        const ctx = ctxCategoria.getContext('2d');
+        ctx.clearRect(0, 0, ctxCategoria.width, ctxCategoria.height);
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#666';
+        ctx.fillText('No hay datos suficientes para esta visualización', 
+                    ctxCategoria.width / 2, ctxCategoria.height / 2);
+    }
+}
+
+// Modificación de la función actualizarDetalleCentro para asegurar que llame correctamente
+function actualizarDetalleCentro() {
+    if (!iaapsData) {
+        console.error("Datos IAAPS no disponibles");
+        return;
+    }
+    
+    console.log("Actualizando detalle del centro:", currentCentro);
+    
+    if (currentCentro === 'comunal') {
+        document.getElementById('establecimientosCard').style.display = 'none';
+        document.getElementById('centroCumplimientoTitle').textContent = 'Cumplimiento IAAPS Comunal';
+    } else {
+        const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+        if (centro) {
+            document.getElementById('centroCumplimientoTitle').textContent = `Cumplimiento IAAPS - ${centro.nombre}`;
+            
+            // Verificar si tiene establecimientos
+            const tieneEstablecimientos = establecimientosMap[currentCentro] && establecimientosMap[currentCentro].length > 0;
+            document.getElementById('establecimientosCard').style.display = tieneEstablecimientos ? 'block' : 'none';
+            
+            if (tieneEstablecimientos) {
+                actualizarTablaEstablecimientos();
+            }
+        } else {
+            console.error("Centro no encontrado:", currentCentro);
+        }
+    }
+    
+    // Actualizar gráficos y tabla de indicadores del centro
+    // Envolver en setTimeout para asegurar que el DOM esté actualizado
+    setTimeout(() => {
+        actualizarGraficosDetalleCentro();
+        actualizarTablaIndicadoresCentro();
+    }, 50);
+}
+
+// Asegurarse de que Chart.js tenga la configuración correcta
+function configurarChart() {
+    // Configuración global para todos los gráficos
+    Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#666';
+    
+    // Configurar animaciones más suaves
+    Chart.defaults.animation.duration = 1000;
+    Chart.defaults.animation.easing = 'easeOutQuart';
+    
+    // Configurar colores para modo oscuro si está activo
+    if (document.body.classList.contains('dark-mode')) {
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+    }
+}
+
+// Llamar a la configuración cuando se carga la página
+document.addEventListener('DOMContentLoaded', configurarChart);
+
+// También configurar cuando se cambia el modo oscuro
+document.getElementById('darkModeToggle').addEventListener('change', configurarChart);
+
+
         
-        // Función para actualizar la tabla de indicadores del centro
+        
+             // Función para actualizar la tabla de indicadores del centro
         function actualizarTablaIndicadoresCentro() {
             const tableBody = document.getElementById('centroIndicadoresTableBody');
             tableBody.innerHTML = '';
@@ -4202,111 +4194,7 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
             tableBody.appendChild(row);
         }
         
-        // Función para actualizar la vista comparativa
-        function actualizarVistaComparativa() {
-            // Actualizar gráfico comparativo
-            actualizarGraficoComparativo();
-            
-            // Actualizar tabla comparativa
-            actualizarTablaComparativa();
-        }
-        
-        // Función para actualizar el gráfico comparativo
-        function actualizarGraficoComparativo() {
-            // Preparar datos para el gráfico
-            const centros = iaapsData.centros;
-            const datasets = [];
-            
-            // Obtener categorías de indicadores
-            const categorias = {
-                'Cobertura': [],
-                'Tasa': [],
-                'Porcentaje': [],
-                'Otro': []
-            };
-            
-            iaapsData.indicadores.forEach(indicador => {
-                if (indicador.nombre.toLowerCase().includes('cobertura')) {
-                    categorias['Cobertura'].push(indicador.codigo);
-                } else if (indicador.tipo === 'tasa') {
-                    categorias['Tasa'].push(indicador.codigo);
-                } else if (indicador.tipo === 'porcentaje') {
-                    categorias['Porcentaje'].push(indicador.codigo);
-                } else {
-                    categorias['Otro'].push(indicador.codigo);
-                }
-            });
-            
-            // Crear un dataset por categoría
-            const colores = ['#3498db', '#27ae60', '#e74c3c', '#f39c12'];
-            let colorIndex = 0;
-            
-            for (const categoria in categorias) {
-                if (categorias[categoria].length === 0) continue;
-                
-                const codigos = categorias[categoria];
-                const datosCentros = [];
-                
-                // Para cada centro, calcular el promedio de cumplimiento de esta categoría
-                centros.forEach(centro => {
-                    let total = 0;
-                    let count = 0;
-                    
-                    codigos.forEach(codigo => {
-                        const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
-                        if (indicador) {
-                            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                            if (resultado && resultado.denominador > 0) {
-                                total += resultado.cumplimiento || 0;
-                                count++;
-                            }
-                        }
-                    });
-                    
-                    const promedio = count > 0 ? parseFloat((total / count).toFixed(2)) : 0;
-                    datosCentros.push(promedio);
-                });
-                
-                datasets.push({
-                    label: categoria,
-                    data: datosCentros,
-                    backgroundColor: colores[colorIndex],
-                    borderColor: colores[colorIndex],
-                    borderWidth: 1
-                });
-                
-                colorIndex = (colorIndex + 1) % colores.length;
-            }
-            
-            // Destruir gráfico anterior si existe
-            if (window.comparativoChart) {
-                window.comparativoChart.destroy();
-            }
-            
-            // Crear gráfico
-            const ctx = document.getElementById('comparativoChart').getContext('2d');
-            window.comparativoChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: centros.map(c => c.nombre),
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 100,
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 20
-                            }
-                        }
-                    }
-                }
-            });
-        }
+      
         
      /* IAAPS DASHBOARD - PARTE 2: FUNCIONALIDADES AVANZADAS */
 
@@ -4319,68 +4207,270 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
  * - Funcionalidades premium
  */
 
-// Continuación de actualizarTablaComparativa()
-function actualizarTablaComparativa() {
-    const tableBody = document.getElementById('comparativoTableBody');
-    tableBody.innerHTML = '';
+// Variable global para la instancia del gráfico comparativo
+let comparativoChartInstance = null;
+
+/**
+ * Actualiza la vista comparativa completa
+ * Esta función coordina la actualización de gráficos y tablas en la vista comparativa
+ */
+function actualizarVistaComparativa() {
+    if (!iaapsData) {
+        console.error("Datos IAAPS no disponibles");
+        return;
+    }
     
-    // Ordenar indicadores por código
-    const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
-        const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
-        const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
-        return codigoA - codigoB;
-    });
+    console.log("Actualizando vista comparativa...");
     
-    indicadoresOrdenados.forEach(indicador => {
-        const row = document.createElement('tr');
+    // Actualizar gráfico comparativo
+    setTimeout(() => {
+        actualizarGraficoComparativo();
+    }, 50);
+    
+    // Actualizar tabla comparativa
+    setTimeout(() => {
+        actualizarTablaComparativa();
+    }, 100);
+}
+
+/**
+ * Actualiza el gráfico comparativo de radar
+ * Versión mejorada con mejor manejo de errores y visualización
+ */
+function actualizarGraficoComparativo() {
+    console.log("Actualizando gráfico comparativo...");
+    
+    // Verificar que el elemento exista en el DOM
+    const canvasElement = document.getElementById('comparativoChart');
+    if (!canvasElement) {
+        console.error("No se encontró el elemento 'comparativoChart' en el DOM");
+        return;
+    }
+    
+    try {
+        // Preparar datos para el gráfico
+        const centros = iaapsData.centros.filter(c => c.codigo !== 'comunal');
         
-        // Primera columna: nombre del indicador
-        const tdIndicador = document.createElement('td');
-        tdIndicador.innerHTML = `<strong>${indicador.codigo}</strong> - ${indicador.nombre}`;
-        row.appendChild(tdIndicador);
+        // Obtener categorías de indicadores
+        const categorias = {
+            'Cobertura': [],
+            'Tasa': [],
+            'Porcentaje': [],
+            'Otro': []
+        };
         
-        // Segunda columna: meta
-        const tdMeta = document.createElement('td');
-        tdMeta.className = 'text-center';
-        tdMeta.textContent = indicador.tipo === 'porcentaje' ? 
-            indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2);
-        row.appendChild(tdMeta);
-        
-        // Columna para cada centro
-        iaapsData.centros.forEach(centro => {
-            if (centro.codigo === 'comunal') {
-                const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                if (resultado) {
-                    const tdCentro = document.createElement('td');
-                    tdCentro.className = 'text-center table-percentage-cell';
-                    
-                    // Calcular color según porcentaje de cumplimiento
-                    let color = '';
-                    let textColor = '';
-                    
-                    if (resultado.cumplimiento >= 25) {
-                        color = '#27ae60';
-                        textColor = '#fff';
-                    } else if (resultado.cumplimiento >= 80) {
-                        color = '#f39c12';
-                        textColor = '#fff';
-                    } else {
-                        color = '#e74c3c';
-                        textColor = '#fff';
-                    }
-                    
-                    // Limitar cumplimiento máximo a 100% para la visualización
-                    const cumplimientoMostrado = Math.min(resultado.cumplimiento, 100);
-                    
-                    // Crear visualización de porcentaje con barra de fondo
-                    tdCentro.innerHTML = `
-                        <div class="table-percentage-bg" style="background-color: ${color}; width: ${cumplimientoMostrado}%;"></div>
-                        <span class="table-percentage-text">${resultado.cumplimiento.toFixed(2)}%</span>
-                    `;
-                    
-                    row.appendChild(tdCentro);
-                }
+        // Clasificar los indicadores en categorías
+        iaapsData.indicadores.forEach(indicador => {
+            if (indicador.nombre.toLowerCase().includes('cobertura')) {
+                categorias['Cobertura'].push(indicador.codigo);
+            } else if (indicador.tipo === 'tasa') {
+                categorias['Tasa'].push(indicador.codigo);
+            } else if (indicador.tipo === 'porcentaje') {
+                categorias['Porcentaje'].push(indicador.codigo);
             } else {
+                categorias['Otro'].push(indicador.codigo);
+            }
+        });
+        
+        // Crear datasets para el gráfico
+        const datasets = [];
+        const colores = [
+            { border: 'rgb(52, 152, 219)', background: 'rgba(52, 152, 219, 0.2)' }, // Azul
+            { border: 'rgb(39, 174, 96)', background: 'rgba(39, 174, 96, 0.2)' },   // Verde
+            { border: 'rgb(231, 76, 60)', background: 'rgba(231, 76, 60, 0.2)' },   // Rojo
+            { border: 'rgb(243, 156, 18)', background: 'rgba(243, 156, 18, 0.2)' }  // Amarillo
+        ];
+        
+        let colorIndex = 0;
+        
+        // Para cada categoría, calcular cumplimiento promedio por centro
+        for (const categoria in categorias) {
+            if (categorias[categoria].length === 0) continue;
+            
+            const codigos = categorias[categoria];
+            const datosCentros = [];
+            
+            // Para cada centro, calcular el promedio de cumplimiento de esta categoría
+            centros.forEach(centro => {
+                let total = 0;
+                let count = 0;
+                
+                codigos.forEach(codigo => {
+                    const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
+                    if (indicador) {
+                        const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+                        if (resultado && resultado.denominador > 0) {
+                            total += resultado.cumplimiento || 0;
+                            count++;
+                        }
+                    }
+                });
+                
+                const promedio = count > 0 ? parseFloat((total / count).toFixed(2)) : 0;
+                datosCentros.push(promedio);
+            });
+            
+            // Solo añadir el dataset si tiene datos
+            if (datosCentros.some(v => v > 0)) {
+                datasets.push({
+                    label: categoria,
+                    data: datosCentros,
+                    backgroundColor: colores[colorIndex].background,
+                    borderColor: colores[colorIndex].border,
+                    borderWidth: 2,
+                    pointBackgroundColor: colores[colorIndex].border,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colores[colorIndex].border
+                });
+                
+                colorIndex = (colorIndex + 1) % colores.length;
+            }
+        }
+        
+        // Destruir gráfico anterior si existe
+        if (comparativoChartInstance) {
+            comparativoChartInstance.destroy();
+        }
+        
+        // Verificar si hay datos para mostrar
+        if (datasets.length === 0 || centros.length === 0) {
+            console.warn("No hay datos suficientes para crear el gráfico comparativo");
+            
+            // Mostrar mensaje en el canvas
+            const ctx = canvasElement.getContext('2d');
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#666';
+            ctx.fillText('No hay datos suficientes para esta visualización', 
+                        canvasElement.width / 2, canvasElement.height / 2);
+            return;
+        }
+        
+        // Crear gráfico
+        const ctx = canvasElement.getContext('2d');
+        comparativoChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: centros.map(c => c.nombre),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 12
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Comparativo de Cumplimiento por Categoría',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label} - ${context.raw.toFixed(2)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log("Gráfico comparativo actualizado correctamente");
+    } catch (error) {
+        console.error("Error al actualizar gráfico comparativo:", error);
+        
+        // Mostrar mensaje de error en el canvas
+        try {
+            const ctx = canvasElement.getContext('2d');
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('Error al generar la visualización', 
+                        canvasElement.width / 2, canvasElement.height / 2);
+            ctx.font = '14px Arial';
+            ctx.fillText('Consulte la consola para más detalles', 
+                        canvasElement.width / 2, canvasElement.height / 2 + 30);
+        } catch (e) {
+            console.error("Error adicional al mostrar mensaje de error:", e);
+        }
+    }
+}
+
+/**
+ * Actualiza la tabla comparativa con datos de todos los centros e indicadores
+ * Versión mejorada con mejor formateo y manejo de errores
+ */
+function actualizarTablaComparativa() {
+    console.log("Actualizando tabla comparativa...");
+    
+    const tableBody = document.getElementById('comparativoTableBody');
+    if (!tableBody) {
+        console.error("No se encontró el elemento 'comparativoTableBody' en el DOM");
+        return;
+    }
+    
+    try {
+        tableBody.innerHTML = '';
+        
+        // Ordenar indicadores por código
+        const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
+            const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
+            const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
+            return codigoA - codigoB;
+        });
+        
+        // Crear una fila para cada indicador
+        indicadoresOrdenados.forEach(indicador => {
+            const row = document.createElement('tr');
+            
+            // Primera columna: nombre del indicador
+            const tdIndicador = document.createElement('td');
+            tdIndicador.innerHTML = `<strong>${indicador.codigo}</strong> - ${indicador.nombre}`;
+            row.appendChild(tdIndicador);
+            
+            // Segunda columna: meta
+            const tdMeta = document.createElement('td');
+            tdMeta.className = 'text-center';
+            tdMeta.textContent = indicador.tipo === 'porcentaje' ? 
+                indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2);
+            row.appendChild(tdMeta);
+            
+            // Columna para cada centro
+            iaapsData.centros.forEach(centro => {
                 const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
                 if (resultado) {
                     const tdCentro = document.createElement('td');
@@ -4388,17 +4478,13 @@ function actualizarTablaComparativa() {
                     
                     // Calcular color según porcentaje de cumplimiento
                     let color = '';
-                    let textColor = '';
                     
-                    if (resultado.cumplimiento >= 25) {
-                        color = '#27ae60';
-                        textColor = '#fff';
+                    if (resultado.cumplimiento >= 95) {
+                        color = '#27ae60'; // Verde - Cumplido
                     } else if (resultado.cumplimiento >= 80) {
-                        color = '#f39c12';
-                        textColor = '#fff';
+                        color = '#f39c12'; // Amarillo - Parcial
                     } else {
-                        color = '#e74c3c';
-                        textColor = '#fff';
+                        color = '#e74c3c'; // Rojo - Crítico
                     }
                     
                     // Limitar cumplimiento máximo a 100% para la visualización
@@ -4417,12 +4503,91 @@ function actualizarTablaComparativa() {
                     tdCentro.textContent = '-';
                     row.appendChild(tdCentro);
                 }
-            }
+            });
+            
+            tableBody.appendChild(row);
         });
         
-        tableBody.appendChild(row);
-    });
+        // Agregar evento para interactividad (opcional)
+        const filas = tableBody.querySelectorAll('tr');
+        filas.forEach(fila => {
+            fila.addEventListener('mouseover', function() {
+                this.style.backgroundColor = document.body.classList.contains('dark-mode') ?
+                    'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)';
+            });
+            
+            fila.addEventListener('mouseout', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+        
+        console.log("Tabla comparativa actualizada correctamente");
+    } catch (error) {
+        console.error("Error al actualizar tabla comparativa:", error);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="${iaapsData.centros.length + 2}" class="text-center text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error al cargar la tabla comparativa. Consulte la consola para más detalles.
+                </td>
+            </tr>
+        `;
+    }
 }
+
+/**
+ * Función auxiliar para exportar el gráfico comparativo a imagen
+ * Nueva funcionalidad útil
+ */
+function exportarGraficoComparativoImagen() {
+    if (!comparativoChartInstance) {
+        mostrarNotificacion('No hay gráfico para exportar', 'error');
+        return;
+    }
+    
+    try {
+        const canvas = document.getElementById('comparativoChart');
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = `IAAPS_Comparativo_${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        
+        mostrarNotificacion('Imagen exportada correctamente', 'success');
+    } catch (error) {
+        console.error("Error al exportar imagen:", error);
+        mostrarNotificacion('Error al exportar imagen', 'error');
+    }
+}
+
+// Añadir botón de exportar imagen (opcional, puedes implementarlo en tu HTML)
+function agregarBotonExportarImagen() {
+    const btnContainer = document.querySelector('#comparativo-content .card-header div');
+    if (btnContainer) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-outline-primary ms-2';
+        btn.innerHTML = '<i class="fas fa-image me-1"></i> PNG';
+        btn.id = 'exportarComparativoImgBtn';
+        btn.addEventListener('click', exportarGraficoComparativoImagen);
+        btnContainer.appendChild(btn);
+    }
+}
+
+// Ejecutar cuando se cargue la página
+document.addEventListener('DOMContentLoaded', () => {
+    // Escuchar cambios de pestaña para actualizar gráficos cuando se seleccione "Comparativo"
+    const comparativoTab = document.getElementById('comparativo-tab');
+    if (comparativoTab) {
+        comparativoTab.addEventListener('shown.bs.tab', () => {
+            setTimeout(actualizarVistaComparativa, 100);
+        });
+    }
+    
+    // Agregar botón de exportar imagen (opcional)
+    setTimeout(agregarBotonExportarImagen, 1000);
+});
 
 // Función para buscar indicadores
 function buscarIndicadores(searchTerm) {
@@ -4866,7 +5031,7 @@ function exportarPDF(tipo) {
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
                 doc.setFontSize(8);
-                doc.text(`Página ${i} de ${pageCount} - IAAPS Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+                doc.text(`Página ${i} de ${pageCount} - INFOGES Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
                     align: 'center'
                 });
             }
