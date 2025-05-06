@@ -1397,82 +1397,92 @@
     </div>
 
     <script>
-// Normalizar valores numéricos (coma → punto)
-function toNumber(val) {
-  if (val == null) return 0;
-  return parseFloat(String(val).replace(',', '.')) || 0;
-}
+        // Global variables
+        let excelData = null;
+        let allCenters = [];
+        let allIndicators = [];
+        let selectedCenter = null;
+        let selectedIndicator = null;
+        let allCharts = {};
+        let darkMode = false;
 
-// Variables globales\let excelData = null;
-let allCenters = [];
-let allIndicators = [];
-let selectedCenter = null;
-let selectedIndicator = null;
-let allCharts = {};
-let darkMode = false;
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the application
+            initApp();
+        });
 
-// Esperar carga del DOM
-document.addEventListener('DOMContentLoaded', () => {
-  initApp();
-});
+        async function initApp() {
+            setupEventListeners();
+            loadExcelData();
+        }
 
-// Inicialización de la aplicación
-async function initApp() {
-  setupEventListeners();
-  await loadExcelData();
-}
+        function setupEventListeners() {
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                toggleDarkMode();
+            });
+            
+            // Tab navigation
+            const tabLinks = document.querySelectorAll('.nav-link');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.getAttribute('data-tab'));
+                });
+            });
 
-// Configuración de todos los listeners
-function setupEventListeners() {
-  // Modo oscuro
-  document.getElementById('darkModeToggle')
-    .addEventListener('click', () => toggleDarkMode());
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                globalSearch(this.value);
+            });
 
-  // Navegación de pestañas
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      switchTab(link.dataset.tab);
-    });
-  });
+            document.getElementById('centerSearchInput').addEventListener('input', function() {
+                filterCenters(this.value);
+            });
 
-  // Búsquedas globales y filtrados
-  document.getElementById('searchInput').addEventListener('input', e => globalSearch(e.target.value));
-  document.getElementById('centerSearchInput').addEventListener('input', e => filterCenters(e.target.value));
-  document.getElementById('indicatorSearchInput').addEventListener('input', e => filterIndicators(e.target.value));
+            document.getElementById('indicatorSearchInput').addEventListener('input', function() {
+                filterIndicators(this.value);
+            });
 
-  // Botones de exportar/informes
-  document.getElementById('exportDataBtn').addEventListener('click', exportData);
-  document.getElementById('generateReportBtn').addEventListener('click', generateReport);
-  document.getElementById('centerReportBtn').addEventListener('click', generateCenterReport);
-  document.getElementById('indicatorExportBtn').addEventListener('click', exportIndicatorData);
-  document.getElementById('generatePlanBtn').addEventListener('click', generateImprovementPlan);
+            // Export and report buttons
+            document.getElementById('exportDataBtn').addEventListener('click', exportData);
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+            document.getElementById('centerReportBtn').addEventListener('click', generateCenterReport);
+            document.getElementById('indicatorExportBtn').addEventListener('click', exportIndicatorData);
+            document.getElementById('generatePlanBtn').addEventListener('click', generateImprovementPlan);
 
-  // Vista de detalle
-  document.getElementById('closeDetail').addEventListener('click', closeDetailView);
-  document.getElementById('detailView').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeDetailView();
-  });
+            // Detail view
+            document.getElementById('closeDetail').addEventListener('click', closeDetailView);
+            document.getElementById('detailView').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDetailView();
+                }
+            });
 
-  // Filtros de comparación
-  document.getElementById('applyComparisonFilters')
-    .addEventListener('click', applyComparisonFilters);
+            // Comparison filters
+            document.getElementById('applyComparisonFilters').addEventListener('click', applyComparisonFilters);
 
-  // Tipo de gráfico para cumplimiento por centro
-  document.querySelectorAll('#centerChartTypeButtons .chart-type-button')
-    .forEach(btn => {
-      btn.addEventListener('click', () => {
-        updateCenterComplianceChartType(btn.dataset.type);
-        document.querySelectorAll('#centerChartTypeButtons .chart-type-button')
-          .forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
+            // Chart type buttons for center compliance chart
+            const chartTypeButtons = document.querySelectorAll('#centerChartTypeButtons .chart-type-button');
+            chartTypeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const chartType = this.getAttribute('data-type');
+                    updateCenterComplianceChartType(chartType);
+                    
+                    // Update active button
+                    chartTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
 
-  // Selector de período
-  document.getElementById('periodoSelector').addEventListener('change', e => loadPeriodData(e.target.value));
-}
-
+            // Period selector
+            document.getElementById('periodoSelector').addEventListener('change', function() {
+                const period = this.value;
+                loadPeriodData(period);
+            });
+        }
 
         async function loadExcelData() {
             try {
@@ -3800,8 +3810,6 @@ function setupEventListeners() {
         window.showIndicatorDetails = showIndicatorDetails;
         window.showIndicatorChart = showIndicatorChart;
         window.loadExcelData = loadExcelData;
-
-        
     </script>
 </body>
 </html>
