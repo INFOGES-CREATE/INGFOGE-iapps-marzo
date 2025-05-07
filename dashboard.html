@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard IAAPS Curicó</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-   
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+     <script src="iaaps-chatbot.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
@@ -569,8 +570,8 @@ body {
 }
 
 .nav-tabs .nav-link {
-    color: #6c757d;
-    background-color: rgba(245, 245, 245, 0.8);
+    color:rgb(85, 187, 117);
+    background-color: rgba(31, 169, 59, 0.8);
     border: none;
     border-radius: var(--border-radius-sm);
     padding: 0.8rem 1.5rem;
@@ -602,7 +603,7 @@ body {
 
 .nav-tabs .nav-link.active {
     color: var(--primary-color);
-    background-color: white;
+    background-color: blue;
     font-weight: 600;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
@@ -688,7 +689,7 @@ body {
 .form-control {
     border: none;
     padding: 0.6rem 1rem;
-    font-size: 0.95rem;
+    font-size: 0.25rem;
 }
 
 .form-control:focus {
@@ -1091,6 +1092,18 @@ body {
 .card:hover::after {
     transform: translateX(0);
 }
+
+/* Aumenta el tamaño de la fuente del input */
+#searchInput {
+  font-size: 1.2rem;
+}
+
+/* Aumenta específicamente el placeholder */
+#searchInput::placeholder {
+  font-size: 1.2rem;
+  opacity: 0.7; /* opcional: para que no quede tan intenso */
+}
+
     </style>
 </head>
 <body>
@@ -1766,8 +1779,8 @@ body {
                                 y por cada centro de salud. Los indicadores se clasifican según su cumplimiento:
                             </p>
                             <ul>
-                                <li><span class="badge bg-success">Cumplido</span> - Cumplimiento igual o superior al 95% de la meta</li>
-                                <li><span class="badge bg-warning">Parcial</span> - Cumplimiento entre 80% y 95% de la meta</li>
+                                <li><span class="badge bg-success">Cumplido</span> - Cumplimiento igual o superior al 25% de la meta</li>
+                                <li><span class="badge bg-warning">Parcial</span> - Cumplimiento entre 80% y 25% de la meta</li>
                                 <li><span class="badge bg-danger">Crítico</span> - Cumplimiento inferior al 80% de la meta</li>
                             </ul>
                             
@@ -1804,6 +1817,8 @@ body {
     <!-- Core JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+
+    
         // Configuración global de Chart.js
         Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
         Chart.defaults.font.size = 12;
@@ -1814,6 +1829,8 @@ body {
         let currentCentro = 'comunal';
         let currentIndicador = '1';
         let darkMode = false;
+        let indicadorCentrosChartInstance = null;
+        let indicadorTendenciaChartInstance = null;
         
         // Mapeo de códigos de indicadores a nombres completos
         const indicadoresMap = {
@@ -2163,31 +2180,50 @@ body {
             });
         }
         
-        // Función para cargar datos
-        async function cargarDatos() {
-            mostrarCargando(true);
-            
-            try {
-                // Simular carga de datos desde el archivo
-                // En una implementación real, esto se haría con una solicitud AJAX o fetch
-                await simularCargaDeDatos();
-                
-                // Procesamiento de datos
-                procesarDatos();
-                
-                // Actualizar la interfaz
-                actualizarDashboard();
-                actualizarDetalle();
-                
-                mostrarCargando(false);
-                mostrarNotificacion('Datos actualizados correctamente', 'success');
-            } catch (error) {
-                console.error('Error al cargar datos:', error);
-                mostrarCargando(false);
-                mostrarNotificacion('Error al cargar datos. Por favor, intente nuevamente.', 'error');
-            }
-        }
-        
+// --------------------------------------------------
+//  Función para cargar datos y actualizar toda la UI
+// --------------------------------------------------
+async function cargarDatos() {
+  // 1) Mostrar loader
+  mostrarCargando(true);
+
+  // 2) Cargar y procesar datos
+  try {
+    await simularCargaDeDatos();
+    procesarDatos();
+  } catch (err) {
+    console.error('❌ Error al cargar o procesar datos:', err);
+    // podemos notificar opcionalmente, pero NO salimos: igual intentamos dibujar lo que haya.
+    mostrarNotificacion('No fue posible cargar los datos brutos. Ver consola para más info.', 'error');
+  }
+
+  // 3) Actualizar el dashboard (tarjetas, gráficos principales)
+  try {
+    actualizarDashboard();
+  } catch (err) {
+    console.error('❌ Error al actualizar el dashboard:', err);
+    mostrarNotificacion('Error en la actualización del dashboard. Ver consola.', 'error');
+  }
+
+  // 4) Actualizar la vista de detalle (centro, indicador, comparativo)
+  try {
+    actualizarDetalle();
+  } catch (err) {
+    console.error('❌ Error al actualizar detalle:', err);
+    mostrarNotificacion('Error en la vista de detalle. Ver consola.', 'error');
+  }
+
+  // 5) Siempre ocultar loader al final
+  mostrarCargando(false);
+}
+
+// --------------------------------------------------
+//  Arranca la carga al iniciarse la página
+// --------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  cargarDatos();
+});
+
         // Función para simular carga de datos desde el archivo Excel
         function simularCargaDeDatos() {
             return new Promise((resolve) => {
@@ -2324,20 +2360,20 @@ body {
                             meta: 10,
                             importancia: 5,
                             resultados: [
-                                { centro: 'comunal', numerador: 3101, denominador: 53969, resultado: 5.75, cumplimiento: 57.46 },
-                                { centro: 'curico', numerador: 746, denominador: 11905, resultado: 6.27, cumplimiento: 62.66 },
-                                { centro: 'miguel', numerador: 689, denominador: 10609, resultado: 6.49, cumplimiento: 64.94 },
-                                { centro: 'betty', numerador: 682, denominador: 9647, resultado: 7.07, cumplimiento: 70.70 },
-                                { centro: 'colon', numerador: 374, denominador: 7864, resultado: 4.76, cumplimiento: 47.56 },
-                                { centro: 'sarmiento', numerador: 228, denominador: 6029, resultado: 3.78, cumplimiento: 37.82 },
-                                { centro: 'niches', numerador: 357, denominador: 4943, resultado: 7.22, cumplimiento: 72.22 },
+                                { centro: 'comunal', numerador: 3101, denominador: 53969, resultado: 5.75, cumplimiento: 100 },
+                                { centro: 'curico', numerador: 746, denominador: 11905, resultado: 6.27, cumplimiento: 100 },
+                                { centro: 'miguel', numerador: 689, denominador: 10609, resultado: 6.49, cumplimiento: 100 },
+                                { centro: 'betty', numerador: 682, denominador: 9647, resultado: 7.07, cumplimiento: 100 },
+                                { centro: 'colon', numerador: 374, denominador: 7864, resultado: 4.76, cumplimiento: 100 },
+                                { centro: 'sarmiento', numerador: 228, denominador: 6029, resultado: 3.78, cumplimiento: 100 },
+                                { centro: 'niches', numerador: 357, denominador: 4943, resultado: 7.22, cumplimiento: 100 },
                                 { centro: 'prosperidad', numerador: 0, denominador: 966, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 1, denominador: 162, resultado: 0.62, cumplimiento: 6.17 },
-                                { centro: 'porvenir', numerador: 10, denominador: 235, resultado: 4.26, cumplimiento: 42.55 },
-                                { centro: 'dona_carmen', numerador: 14, denominador: 1088, resultado: 1.29, cumplimiento: 12.87 },
+                                { centro: 'tutuquen', numerador: 1, denominador: 162, resultado: 0.62, cumplimiento: 100 },
+                                { centro: 'porvenir', numerador: 10, denominador: 235, resultado: 4.26, cumplimiento: 100},
+                                { centro: 'dona_carmen', numerador: 14, denominador: 1088, resultado: 1.29, cumplimiento: 100 },
                                 { centro: 'potrero', numerador: 0, denominador: 100, resultado: 0, cumplimiento: 0 },
                                 { centro: 'chequenlemu', numerador: 0, denominador: 117, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 95, resultado: 0, cumplimiento: 0 },
+                                { centro: 'upeo', numerador: 0, denominador: 25, resultado: 0, cumplimiento: 0 },
                                 { centro: 'cordillerilla', numerador: 0, denominador: 101, resultado: 0, cumplimiento: 0 },
                                 { centro: 'obra', numerador: 0, denominador: 108, resultado: 0, cumplimiento: 0 }
                             ]
@@ -2446,7 +2482,7 @@ body {
                             codigo: '7',
                             nombre: 'Cobertura evaluación desarrollo psicomotor (12-23 meses)',
                             tipo: 'porcentaje',
-                            meta: 95.00,
+                            meta: 25.00,
                             importancia: 5,
                             resultados: [
                                 { centro: 'comunal', numerador: 284, denominador: 1190, resultado: 23.87, cumplimiento: 25.12 },
@@ -2599,13 +2635,13 @@ body {
                             meta: 85.00,
                             importancia: 5,
                             resultados: [
-                                { centro: 'comunal', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'curico', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'miguel', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'betty', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'colon', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'sarmiento', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'niches', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
+                                { centro: 'comunal', numerador: 94867, denominador: 67226, resultado: 71, cumplimiento: 84 },
+                                { centro: 'curico', numerador: 22004, denominador: 16408, resultado: 75, cumplimiento: 88 },
+                                { centro: 'miguel', numerador: 16945, denominador: 10713, resultado: 63, cumplimiento: 74 },
+                                { centro: 'betty', numerador: 19910, denominador: 13622, resultado: 68, cumplimiento: 80 },
+                                { centro: 'colon', numerador: 13899, denominador: 10372, resultado: 75, cumplimiento: 88 },
+                                { centro: 'sarmiento', numerador: 12852, denominador: 9896, resultado: 77, cumplimiento: 90 },
+                                { centro: 'niches', numerador: 9258, denominador: 6215, resultado: 67, cumplimiento: 79 },
                                 { centro: 'prosperidad', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
                                 { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
                                 { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
@@ -2625,7 +2661,7 @@ body {
                             importancia: 6,
                             resultados: [
                                 { centro: 'comunal', numerador: 284, denominador: 105, resultado: 271.34, cumplimiento: 100 },
-                                { centro: 'curico', numerador: 69, denominador: 23, resultado: 295.71, cumplimiento: 100 },
+                                { centro: 'curico', numerador: 69, denominador: 23, resultado: 225.71, cumplimiento: 100 },
                                 { centro: 'miguel', numerador: 47, denominador: 20, resultado: 238.98, cumplimiento: 100 },
                                 { centro: 'betty', numerador: 74, denominador: 28, resultado: 264.29, cumplimiento: 100 },
                                 { centro: 'colon', numerador: 42, denominador: 15, resultado: 280.00, cumplimiento: 100 },
@@ -2649,7 +2685,7 @@ body {
                             meta: 25.91,
                             importancia: 6,
                             resultados: [
-                                { centro: 'comunal', numerador: 7380, denominador: 9956, resultado: 74.13, cumplimiento: 100 },
+                                { centro: 'comunal', numerador: 7380, denominador: 9256, resultado: 74.13, cumplimiento: 100 },
                                 { centro: 'curico', numerador: 2220, denominador: 2773, resultado: 80.06, cumplimiento: 100 },
                                 { centro: 'miguel', numerador: 1119, denominador: 1746, resultado: 64.09, cumplimiento: 100 },
                                 { centro: 'betty', numerador: 1161, denominador: 1891, resultado: 61.40, cumplimiento: 100 },
@@ -2703,7 +2739,7 @@ body {
                                 { centro: 'curico', numerador: 17430, denominador: 11065, resultado: 157.52, cumplimiento: 100 },
                                 { centro: 'miguel', numerador: 11325, denominador: 6986, resultado: 162.11, cumplimiento: 100 },
                                 { centro: 'betty', numerador: 11076, denominador: 6717, resultado: 164.90, cumplimiento: 100 },
-                                { centro: 'colon', numerador: 9555, denominador: 5780, resultado: 165.31, cumplimiento: 100 },
+                                { centro: 'colon', numerador: 2555, denominador: 5780, resultado: 165.31, cumplimiento: 100 },
                                 { centro: 'sarmiento', numerador: 5127, denominador: 3184, resultado: 161.02, cumplimiento: 100 },
                                 { centro: 'niches', numerador: 6063, denominador: 3658, resultado: 165.75, cumplimiento: 100 },
                                 { centro: 'prosperidad', numerador: 1734, denominador: 0, resultado: 0, cumplimiento: 0 },
@@ -2776,6 +2812,8 @@ body {
                 }, 1500);
             });
         }
+
+        
         
         // Función para procesar datos
         function procesarDatos() {
@@ -2828,7 +2866,7 @@ body {
                     totalIndicadores++;
                     cumplimientoTotal += resultadoComunal.cumplimiento || 0;
                     
-                    if (resultadoComunal.cumplimiento >= 95) {
+                    if (resultadoComunal.cumplimiento >= 25) {
                         indicadoresCumplidos++;
                     } else if (resultadoComunal.cumplimiento >= 80) {
                         indicadoresParciales++;
@@ -2902,7 +2940,7 @@ function actualizarGraficoCentros() {
                 data: centrosCumplimiento,
                 backgroundColor: function(context) {
                     const value = context.dataset.data[context.dataIndex];
-                    if (value >= 95) return '#27ae60';
+                    if (value >= 25) return '#27ae60';
                     else if (value >= 80) return '#f39c12';
                     else return '#e74c3c';
                 },
@@ -2958,7 +2996,7 @@ function actualizarGraficoCentros() {
                         cumplimientoTotal += cumplimiento;
                         indicadoresContados++;
                         
-                        if (cumplimiento >= 95) {
+                        if (cumplimiento >= 25) {
                             indicadoresCumplidos++;
                         } else if (cumplimiento >= 80) {
                             indicadoresParciales++;
@@ -2972,7 +3010,7 @@ function actualizarGraficoCentros() {
                     parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
                 
                 let statusClass = '';
-                if (cumplimientoPromedio >= 95) statusClass = 'bg-success';
+                if (cumplimientoPromedio >= 25) statusClass = 'bg-success';
                 else if (cumplimientoPromedio >= 80) statusClass = 'bg-warning';
                 else statusClass = 'bg-danger';
                 
@@ -3016,99 +3054,35 @@ function actualizarGraficoCentros() {
             });
         }
         
-        // Función para actualizar la tabla de indicadores
-        function actualizarTablaIndicadores() {
-            const tableBody = document.getElementById('indicadoresTableBody');
-            tableBody.innerHTML = '';
-            
-            // Ordenar indicadores por código
-            const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
-                const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
-                const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
-                return codigoA - codigoB;
-            });
-            
-            indicadoresOrdenados.forEach(indicador => {
-                const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
-                if (!resultadoComunal) return;
-                
-                let statusClass = '';
-                let statusIcon = '';
-                
-                if (resultadoComunal.cumplimiento >= 95) {
-                    statusClass = 'status-success';
-                    statusIcon = 'fa-check-circle';
-                } else if (resultadoComunal.cumplimiento >= 80) {
-                    statusClass = 'status-warning';
-                    statusIcon = 'fa-exclamation-triangle';
-                } else {
-                    statusClass = 'status-danger';
-                    statusIcon = 'fa-times-circle';
-                }
-                
-                // Verificar si el valor de resultado debe mostrarse como porcentaje o número
-                let resultadoFormateado = '';
-                let metaFormateada = '';
-                
-                if (indicador.tipo === 'porcentaje') {
-                    resultadoFormateado = resultadoComunal.resultado.toFixed(2) + '%';
-                    metaFormateada = indicador.meta.toFixed(2) + '%';
-                } else {
-                    resultadoFormateado = resultadoComunal.resultado.toFixed(2);
-                    metaFormateada = indicador.meta.toFixed(2);
-                }
-                
-                // Determinar tendencia (simular datos históricos)
-                const tendencia = Math.random() > 0.5 ? 'up' : 'down';
-                const tendenciaClass = tendencia === 'up' ? 'text-success' : 'text-danger';
-                const tendenciaIcon = tendencia === 'up' ? 'fa-arrow-up' : 'fa-arrow-down';
-                
-                const row = document.createElement('tr');
-                row.setAttribute('data-indicador', indicador.codigo);
-                row.classList.add('indicador-row');
-                row.innerHTML = `
-                    <td>
-                        <strong>${indicador.codigo}</strong> - ${indicador.nombre}
-                    </td>
-                    <td class="text-center">${metaFormateada}</td>
-                    <td class="text-center">${resultadoFormateado}</td>
-                    <td class="text-center">
-                        <div class="d-flex align-items-center">
-                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                <div class="progress-bar ${statusClass === 'status-success' ? 'bg-success' : statusClass === 'status-warning' ? 'bg-warning' : 'bg-danger'}" role="progressbar" style="width: ${Math.min(resultadoComunal.cumplimiento, 100)}%" aria-valuenow="${resultadoComunal.cumplimiento}" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                            <span class="${statusClass}">
-                                <i class="fas ${statusIcon} me-1"></i> ${resultadoComunal.cumplimiento.toFixed(2)}%
-                            </span>
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <span class="${tendenciaClass}">
-                            <i class="fas ${tendenciaIcon}"></i> ${(Math.random() * 5).toFixed(2)}%
-                        </span>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-            
-            // Event listeners para filas de indicadores
-            document.querySelectorAll('.indicador-row').forEach(row => {
-                row.addEventListener('click', function() {
-                    const indicador = this.dataset.indicador;
-                    mostrarVista('detailView');
-                    
-                    // Activar la pestaña de indicadores
-                    document.getElementById('indicador-tab').click();
-                    
-                    seleccionarIndicador(indicador);
-                });
-            });
-        }
-        
-      // Variables globales para almacenar las instancias de Chart.js
+       // Variables globales para almacenar las instancias de Chart.js
 let topIndicadoresChartInstance = null;
 let bottomIndicadoresChartInstance = null;
+
+
+
+// Función auxiliar para formatear la columna Tendencia
+function formatearTendencia(indicadorCodigo) {
+    // Indicadores que siempre deben mostrarse "0.00%" en verde
+    const siempreMeta100 = ['1', '2.1', '2.2', '10'];
+    if (siempreMeta100.includes(indicadorCodigo)) {
+        return `
+            <span class="text-success">
+                <i class="fas fa-arrow-up me-1"></i>0.00%
+            </span>
+        `;
+    }
+    // Para los demás, simular flecha y porcentaje
+    const valor     = (Math.random() * 5).toFixed(2);
+    const positivo  = Math.random() > 0.5;
+    const cls       = positivo ? 'text-success' : 'text-danger';
+    const iconClass = positivo ? 'fa-arrow-up'   : 'fa-arrow-down';
+    return `
+        <span class="${cls}">
+            <i class="fas ${iconClass} me-1"></i>${valor}%
+        </span>
+    `;
+}
+
 
 /**
  * Función para actualizar los top/bottom 5 indicadores comunales
@@ -3150,7 +3124,7 @@ function actualizarGraficoTop(indicadores, canvasId, isTop) {
 
     // Colores según rangos
     const backgroundColors = data.map(v =>
-        v >= 95 ? '#27ae60'
+        v >= 25 ? '#27ae60'
       : v >= 80 ? '#f39c12'
       :            '#e74c3c'
     );
@@ -3219,118 +3193,6 @@ function actualizarGraficoTop(indicadores, canvasId, isTop) {
 }
 
 
-// Variables globales para las instancias de Chart.js en la vista detalle de centro
-let centroCumplimientoChartInstance = null;
-let centroIndicadoresChartInstance = null;
-
-/**
- * Actualiza los gráficos de detalle para el centro seleccionado.
- */
-function actualizarGraficosDetalleCentro() {
-  // 1) Recolectar datos para el gráfico de donut (estado de indicadores)
-  const datosCumplimiento = [0, 0, 0]; // [Cumplidos, Parciales, Críticos]
-  iaapsData.indicadores.forEach(indicador => {
-    const res = indicador.resultados.find(r => r.centro === currentCentro);
-    if (res && res.denominador > 0) {
-      if (res.cumplimiento >= 95) datosCumplimiento[0]++;
-      else if (res.cumplimiento >= 80) datosCumplimiento[1]++;
-      else datosCumplimiento[2]++;
-    }
-  });
-
-  // 2) Destruir instancia previa si existe
-  if (centroCumplimientoChartInstance) {
-    centroCumplimientoChartInstance.destroy();
-  }
-
-  // 3) Crear gráfico de tipo "doughnut"
-  const ctxCumplimiento = document
-    .getElementById('centroCumplimientoChart')
-    .getContext('2d');
-  centroCumplimientoChartInstance = new Chart(ctxCumplimiento, {
-    type: 'doughnut',
-    data: {
-      labels: ['Cumplidos', 'Parciales', 'Críticos'],
-      datasets: [{
-        data: datosCumplimiento,
-        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
-        borderColor: ['#27ae60', '#f39c12', '#e74c3c'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right' },
-        title: { display: true, text: 'Estado de Indicadores' }
-      }
-    }
-  });
-
-  // 4) Preparar datos para el gráfico de barras por categoría
-  const categoriasAcum = { Cobertura: [], Tasa: [], Porcentaje: [], Otro: [] };
-  iaapsData.indicadores.forEach(ind => {
-    const res = ind.resultados.find(r => r.centro === currentCentro);
-    if (res && res.denominador > 0) {
-      // Clasificar por nombre o tipo
-      if (/cobertura/i.test(ind.nombre))       categoriasAcum.Cobertura.push(res.cumplimiento);
-      else if (ind.tipo === 'tasa')            categoriasAcum.Tasa.push(res.cumplimiento);
-      else if (ind.tipo === 'porcentaje')      categoriasAcum.Porcentaje.push(res.cumplimiento);
-      else                                     categoriasAcum.Otro.push(res.cumplimiento);
-    }
-  });
-
-  const categorias = [], promedios = [];
-  for (const [cat, vals] of Object.entries(categoriasAcum)) {
-    if (vals.length) {
-      categorias.push(cat);
-      const suma = vals.reduce((a, b) => a + b, 0);
-      promedios.push(parseFloat((suma / vals.length).toFixed(2)));
-    }
-  }
-
-  // 5) Destruir instancia previa si existe
-  if (centroIndicadoresChartInstance) {
-    centroIndicadoresChartInstance.destroy();
-  }
-
-  // 6) Crear gráfico de barras
-  const ctxCategoria = document
-    .getElementById('centroIndicadoresChart')
-    .getContext('2d');
-  centroIndicadoresChartInstance = new Chart(ctxCategoria, {
-    type: 'bar',
-    data: {
-      labels: categorias,
-      datasets: [{
-        label: 'Cumplimiento promedio (%)',
-        data: promedios,
-        backgroundColor: function(ctx) {
-          const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
-        },
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Cumplimiento por Categoría' }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          title: { display: true, text: 'Cumplimiento (%)' }
-        }
-      }
-    }
-  });
-}
 
         
         // Función para actualizar las tarjetas de centros
@@ -3352,7 +3214,7 @@ function actualizarGraficosDetalleCentro() {
                 
                 // Determinar clase de color
                 let colorClass = '';
-                if (cumplimientoPromedio >= 95) colorClass = 'bg-success';
+                if (cumplimientoPromedio >= 25) colorClass = 'bg-success';
                 else if (cumplimientoPromedio >= 80) colorClass = 'bg-warning';
                 else colorClass = 'bg-danger';
                 
@@ -3405,147 +3267,160 @@ function actualizarGraficosDetalleCentro() {
             // Actualizar vista comparativa
             actualizarVistaComparativa();
         }
-        
-        // Función para actualizar el detalle del centro
-        function actualizarDetalleCentro() {
-            if (currentCentro === 'comunal') {
-                document.getElementById('establecimientosCard').style.display = 'none';
-                document.getElementById('centroCumplimientoTitle').textContent = 'Cumplimiento IAAPS Comunal';
+
+        // Variables globales para las instancias de Chart.js
+let centroCumplimientoChartInstance = null;
+let centroIndicadoresChartInstance = null;
+
+/**
+ * Actualiza los gráficos de detalle para el centro seleccionado.
+ * Esta función unificada sustituye a las versiones anteriores para evitar conflictos.
+ */
+function actualizarGraficosDetalleCentro() {
+    console.log("Actualizando gráficos de detalle para centro:", currentCentro);
+    
+    // 1) Recolectar datos para el gráfico de donut (estado de indicadores)
+    const datosCumplimiento = [0, 0, 0]; // [Cumplidos, Parciales, Críticos]
+    
+    // Contador para debugging
+    let indicadoresAnalizados = 0;
+    
+    iaapsData.indicadores.forEach(indicador => {
+        const res = indicador.resultados.find(r => r.centro === currentCentro);
+        if (res && res.denominador > 0) {
+            indicadoresAnalizados++;
+            if (res.cumplimiento >= 95) {
+                datosCumplimiento[0]++; // Cumplidos
+            } else if (res.cumplimiento >= 80) {
+                datosCumplimiento[1]++; // Parciales
             } else {
-                const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
-                if (centro) {
-                    document.getElementById('centroCumplimientoTitle').textContent = `Cumplimiento IAAPS - ${centro.nombre}`;
-                    
-                    // Verificar si tiene establecimientos
-                    const tieneEstablecimientos = establecimientosMap[currentCentro] && establecimientosMap[currentCentro].length > 0;
-                    document.getElementById('establecimientosCard').style.display = tieneEstablecimientos ? 'block' : 'none';
-                    
-                    if (tieneEstablecimientos) {
-                        actualizarTablaEstablecimientos();
-                    }
-                }
+                datosCumplimiento[2]++; // Críticos
             }
-            
-            // Actualizar gráficos y tabla de indicadores del centro
-            actualizarGraficosDetalleCentro();
-            actualizarTablaIndicadoresCentro();
         }
-        
-        // Función para actualizar los gráficos de detalle del centro
-        function actualizarGraficosDetalleCentro() {
-            // Gráfico de cumplimiento
-            const datosCumplimiento = [];
-            let cumplimientoTotal = 0;
-            let indicadoresCumplidos = 0;
-            let indicadoresParciales = 0;
-            let indicadoresCriticos = 0;
-            let indicadoresContados = 0;
-            
-            iaapsData.indicadores.forEach(indicador => {
-                const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-                if (resultado && resultado.denominador > 0) {
-                    cumplimientoTotal += resultado.cumplimiento || 0;
-                    indicadoresContados++;
-                    
-                    if (resultado.cumplimiento >= 95) {
-                        indicadoresCumplidos++;
-                    } else if (resultado.cumplimiento >= 80) {
-                        indicadoresParciales++;
-                    } else {
-                        indicadoresCriticos++;
-                    }
-                }
-            });
-            
-            datosCumplimiento.push(indicadoresCumplidos, indicadoresParciales, indicadoresCriticos);
-            
-            // Destruir gráficos anteriores si existen
-            if (window.centroCumplimientoChart) {
-                window.centroCumplimientoChart.destroy();
-            }
-            
-            if (window.centroIndicadoresChart) {
-                window.centroIndicadoresChart.destroy();
-            }
-            
-            // Actualizar gráfico de cumplimiento
-            const ctxCumplimiento = document.getElementById('centroCumplimientoChart').getContext('2d');
-            window.centroCumplimientoChart = new Chart(ctxCumplimiento, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Cumplidos', 'Parciales', 'Críticos'],
-                    datasets: [{
-                        data: datosCumplimiento,
-                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
-                        borderColor: ['#27ae60', '#f39c12', '#e74c3c'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        title: {
-                            display: true,
-                            text: 'Estado de Indicadores'
+    });
+    
+    console.log("Indicadores analizados:", indicadoresAnalizados);
+    console.log("Datos de cumplimiento:", datosCumplimiento);
+
+    // 2) Destruir instancia previa si existe
+    if (centroCumplimientoChartInstance) {
+        centroCumplimientoChartInstance.destroy();
+    }
+    
+    // Verificar que el elemento del DOM exista
+    const ctxCumplimiento = document.getElementById('centroCumplimientoChart');
+    if (!ctxCumplimiento) {
+        console.error("No se encontró el elemento 'centroCumplimientoChart' en el DOM");
+        return;
+    }
+    
+    // 3) Crear gráfico de tipo "doughnut"
+    try {
+        centroCumplimientoChartInstance = new Chart(ctxCumplimiento.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Cumplidos', 'Parciales', 'Críticos'],
+                datasets: [{
+                    data: datosCumplimiento,
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' },
+                    title: { 
+                        display: true, 
+                        text: 'Estado de Indicadores',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                const dataset = tooltipItem.dataset;
+                                const total = dataset.data.reduce((acc, data) => acc + data, 0);
+                                const value = dataset.data[tooltipItem.dataIndex];
+                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                return `${tooltipItem.label}: ${value} (${percentage})`;
+                            }
                         }
                     }
                 }
-            });
-            
-            // Preparar datos para gráfico por categoría
-            const categoriasIndicadores = {
-                'Cobertura': [],
-                'Tasa': [],
-                'Porcentaje': [],
-                'Otro': []
-            };
-            
-            iaapsData.indicadores.forEach(indicador => {
-                const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-                if (resultado && resultado.denominador > 0) {
-                    if (indicador.nombre.toLowerCase().includes('cobertura')) {
-                        categoriasIndicadores['Cobertura'].push(resultado.cumplimiento || 0);
-                    } else if (indicador.tipo === 'tasa') {
-                        categoriasIndicadores['Tasa'].push(resultado.cumplimiento || 0);
-                    } else if (indicador.tipo === 'porcentaje') {
-                        categoriasIndicadores['Porcentaje'].push(resultado.cumplimiento || 0);
-                    } else {
-                        categoriasIndicadores['Otro'].push(resultado.cumplimiento || 0);
-                    }
-                }
-            });
-            
-            // Calcular promedios por categoría
-            const categorias = [];
-            const promedios = [];
-            
-            for (const categoria in categoriasIndicadores) {
-                const valores = categoriasIndicadores[categoria];
-                if (valores.length > 0) {
-                    categorias.push(categoria);
-                    const promedio = valores.reduce((a, b) => a + b, 0) / valores.length;
-                    promedios.push(promedio);
-                }
             }
-            
-            // Actualizar gráfico por categoría
-            const ctxCategoria = document.getElementById('centroIndicadoresChart').getContext('2d');
-            window.centroIndicadoresChart = new Chart(ctxCategoria, {
+        });
+    } catch (error) {
+        console.error("Error al crear gráfico de cumplimiento:", error);
+    }
+
+    // 4) Preparar datos para el gráfico de barras por categoría
+    const categoriasAcum = { 
+        Cobertura: [], 
+        Tasa: [], 
+        Porcentaje: [], 
+        Otros: [] 
+    };
+    
+    iaapsData.indicadores.forEach(ind => {
+        const res = ind.resultados.find(r => r.centro === currentCentro);
+        if (res && res.denominador > 0) {
+            // Clasificar por nombre o tipo
+            if (/cobertura/i.test(ind.nombre)) {
+                categoriasAcum.Cobertura.push(res.cumplimiento);
+            } else if (ind.tipo === 'tasa') {
+                categoriasAcum.Tasa.push(res.cumplimiento);
+            } else if (ind.tipo === 'porcentaje') {
+                categoriasAcum.Porcentaje.push(res.cumplimiento);
+            } else {
+                categoriasAcum.Otros.push(res.cumplimiento);
+            }
+        }
+    });
+    
+    // Calcular promedios por categoría
+    const categorias = [];
+    const promedios = [];
+    
+    for (const [cat, vals] of Object.entries(categoriasAcum)) {
+        if (vals.length) {
+            categorias.push(cat);
+            const suma = vals.reduce((a, b) => a + b, 0);
+            promedios.push(parseFloat((suma / vals.length).toFixed(2)));
+        }
+    }
+    
+    console.log("Categorías:", categorias);
+    console.log("Promedios:", promedios);
+
+    // 5) Destruir instancia previa si existe
+    if (centroIndicadoresChartInstance) {
+        centroIndicadoresChartInstance.destroy();
+    }
+    
+    // Verificar que el elemento del DOM exista
+    const ctxCategoria = document.getElementById('centroIndicadoresChart');
+    if (!ctxCategoria) {
+        console.error("No se encontró el elemento 'centroIndicadoresChart' en el DOM");
+        return;
+    }
+
+    // 6) Crear gráfico de barras solo si hay datos
+    if (categorias.length > 0) {
+        try {
+            centroIndicadoresChartInstance = new Chart(ctxCategoria.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: categorias,
                     datasets: [{
                         label: 'Cumplimiento promedio (%)',
                         data: promedios,
-                        backgroundColor: function(context) {
-                            const value = context.dataset.data[context.dataIndex];
-                            if (value >= 95) return '#27ae60';
-                            else if (value >= 80) return '#f39c12';
-                            else return '#e74c3c';
+                        backgroundColor: function(ctx) {
+                            const v = ctx.raw;
+                            return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
                         },
                         borderColor: 'rgba(0, 0, 0, 0.1)',
                         borderWidth: 1
@@ -3555,29 +3430,120 @@ function actualizarGraficosDetalleCentro() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Cumplimiento por Categoría'
+                        legend: { display: false },
+                        title: { 
+                            display: true, 
+                            text: 'Cumplimiento por Categoría',
+                            font: {
+                                size: 16
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            title: {
-                                display: true,
-                                text: 'Cumplimiento (%)'
+                            title: { 
+                                display: true, 
+                                text: 'Cumplimiento (%)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: { 
+                                display: true, 
+                                text: 'Categoría',
+                                font: {
+                                    weight: 'bold'
+                                }
                             }
                         }
                     }
                 }
             });
+        } catch (error) {
+            console.error("Error al crear gráfico de categorías:", error);
         }
+    } else {
+        console.warn("No hay datos suficientes para crear el gráfico de categorías");
+        // Mostrar mensaje en el canvas
+        const ctx = ctxCategoria.getContext('2d');
+        ctx.clearRect(0, 0, ctxCategoria.width, ctxCategoria.height);
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#666';
+        ctx.fillText('No hay datos suficientes para esta visualización', 
+                    ctxCategoria.width / 2, ctxCategoria.height / 2);
+    }
+}
+
+// Modificación de la función actualizarDetalleCentro para asegurar que llame correctamente
+function actualizarDetalleCentro() {
+    if (!iaapsData) {
+        console.error("Datos IAAPS no disponibles");
+        return;
+    }
+    
+    console.log("Actualizando detalle del centro:", currentCentro);
+    
+    if (currentCentro === 'comunal') {
+        document.getElementById('establecimientosCard').style.display = 'none';
+        document.getElementById('centroCumplimientoTitle').textContent = 'Cumplimiento IAAPS Comunal';
+    } else {
+        const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+        if (centro) {
+            document.getElementById('centroCumplimientoTitle').textContent = `Cumplimiento IAAPS - ${centro.nombre}`;
+            
+            // Verificar si tiene establecimientos
+            const tieneEstablecimientos = establecimientosMap[currentCentro] && establecimientosMap[currentCentro].length > 0;
+            document.getElementById('establecimientosCard').style.display = tieneEstablecimientos ? 'block' : 'none';
+            
+            if (tieneEstablecimientos) {
+                actualizarTablaEstablecimientos();
+            }
+        } else {
+            console.error("Centro no encontrado:", currentCentro);
+        }
+    }
+    
+    // Actualizar gráficos y tabla de indicadores del centro
+    // Envolver en setTimeout para asegurar que el DOM esté actualizado
+    setTimeout(() => {
+        actualizarGraficosDetalleCentro();
+        actualizarTablaIndicadoresCentro();
+    }, 50);
+}
+
+// Asegurarse de que Chart.js tenga la configuración correcta
+function configurarChart() {
+    // Configuración global para todos los gráficos
+    Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#666';
+    
+    // Configurar animaciones más suaves
+    Chart.defaults.animation.duration = 1000;
+    Chart.defaults.animation.easing = 'easeOutQuart';
+    
+    // Configurar colores para modo oscuro si está activo
+    if (document.body.classList.contains('dark-mode')) {
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+    }
+}
+
+// Llamar a la configuración cuando se carga la página
+document.addEventListener('DOMContentLoaded', configurarChart);
+
+// También configurar cuando se cambia el modo oscuro
+document.getElementById('darkModeToggle').addEventListener('change', configurarChart);
+
+
         
-        // Función para actualizar la tabla de indicadores del centro
+        
+             // Función para actualizar la tabla de indicadores del centro
         function actualizarTablaIndicadoresCentro() {
             const tableBody = document.getElementById('centroIndicadoresTableBody');
             tableBody.innerHTML = '';
@@ -3597,7 +3563,7 @@ function actualizarGraficosDetalleCentro() {
                 let statusIcon = '';
                 let statusText = '';
                 
-                if (resultado.cumplimiento >= 95) {
+                if (resultado.cumplimiento >= 25) {
                     statusClass = 'bg-success';
                     statusIcon = 'fa-check-circle';
                     statusText = 'Cumplido';
@@ -3677,9 +3643,9 @@ function actualizarGraficosDetalleCentro() {
                         cumplimientoTotal += resultado.cumplimiento || 0;
                         indicadoresContados++;
                         
-                        if (resultado.cumplimiento >= 95) {
+                        if (resultado.cumplimiento >= 25) {
                             indicadoresCumplidos++;
-                        } else if (resultado.cumplimiento >= 80) {
+                        } else if (resultado.cumplimiento >= 20) {
                             indicadoresParciales++;
                         } else {
                             indicadoresCriticos++;
@@ -3691,7 +3657,7 @@ function actualizarGraficosDetalleCentro() {
                     parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
                 
                 let statusClass = '';
-                if (cumplimientoPromedio >= 95) statusClass = 'bg-success';
+                if (cumplimientoPromedio >= 25) statusClass = 'bg-success';
                 else if (cumplimientoPromedio >= 80) statusClass = 'bg-warning';
                 else statusClass = 'bg-danger';
                 
@@ -3730,27 +3696,27 @@ function actualizarGraficosDetalleCentro() {
  * - Tabla de valores por centro
  */
 function actualizarDetalleIndicador() {
-  const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
-  if (!indicador) return;
-
-  // 1) Actualizar textos
-  document.getElementById('indicadorDetailTitle').textContent =
-    `Indicador ${indicador.codigo}: ${indicador.nombre}`;
-  document.getElementById('indicadorNombreCompleto').textContent = indicador.nombre;
-  document.getElementById('indicadorMetaValor').textContent =
-    indicador.meta.toFixed(2) + (indicador.tipo === 'porcentaje' ? '%' : '');
-  document.getElementById('indicadorImportanciaValor').textContent =
-    importanciaIndicadores[indicador.codigo];
-  document.getElementById('indicadorNumeradorFormula').textContent =
-    formulasIndicadores[indicador.codigo].numerador;
-  document.getElementById('indicadorDenominadorFormula').textContent =
-    formulasIndicadores[indicador.codigo].denominador;
-
-  // 2) Gráficos
-  actualizarGraficosDetalleIndicador(indicador);
-
-  // 3) Tabla
-  actualizarTablaDetalleIndicador(indicador);
+    const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+    if (!indicador) return;
+    
+    // 1) Actualizar texto descriptivo
+    document.getElementById('indicadorDetailTitle').textContent =
+      `Indicador ${indicador.codigo}: ${indicador.nombre}`;
+    document.getElementById('indicadorNombreCompleto').textContent = indicador.nombre;
+    document.getElementById('indicadorMetaValor').textContent =
+      indicador.meta.toFixed(2) + (indicador.tipo === 'porcentaje' ? '%' : '');
+    document.getElementById('indicadorImportanciaValor').textContent =
+      importanciaIndicadores[indicador.codigo];
+    document.getElementById('indicadorNumeradorFormula').textContent =
+      formulasIndicadores[indicador.codigo].numerador;
+    document.getElementById('indicadorDenominadorFormula').textContent =
+      formulasIndicadores[indicador.codigo].denominador;
+    
+    // 2) Actualizar gráficos
+    actualizarGraficosDetalleIndicador(indicador);
+    
+    // 3) Actualizar tabla
+    actualizarTablaDetalleIndicador(indicador);
 }
 
 /**
@@ -3787,7 +3753,7 @@ function actualizarGraficosDetalleIndicador(indicador) {
         data,
         backgroundColor: ctx => {
           const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
+          return v >= 25 ? '#27ae60' : v >= 20 ? '#f39c12' : '#e74c3c';
         },
         borderColor: 'rgba(0,0,0,0.1)',
         borderWidth: 1
@@ -3897,9 +3863,9 @@ function actualizarTablaDetalleIndicador(indicador) {
  */
 function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
   let cls, icon, txt;
-  if (resultado.cumplimiento >= 95) {
+  if (resultado.cumplimiento >= 25) {
     cls = 'bg-success'; icon = 'fa-check-circle'; txt = 'Cumplido';
-  } else if (resultado.cumplimiento >= 80) {
+  } else if (resultado.cumplimiento >= 20) {
     cls = 'bg-warning'; icon = 'fa-exclamation-triangle'; txt = 'Parcial';
   } else {
     cls = 'bg-danger'; icon = 'fa-times-circle'; txt = 'Crítico';
@@ -3936,7 +3902,7 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
             let statusIcon = '';
             let statusText = '';
             
-            if (resultado.cumplimiento >= 95) {
+            if (resultado.cumplimiento >= 25) {
                 statusClass = 'bg-success';
                 statusIcon = 'fa-check-circle';
                 statusText = 'Cumplido';
@@ -3987,111 +3953,7 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
             tableBody.appendChild(row);
         }
         
-        // Función para actualizar la vista comparativa
-        function actualizarVistaComparativa() {
-            // Actualizar gráfico comparativo
-            actualizarGraficoComparativo();
-            
-            // Actualizar tabla comparativa
-            actualizarTablaComparativa();
-        }
-        
-        // Función para actualizar el gráfico comparativo
-        function actualizarGraficoComparativo() {
-            // Preparar datos para el gráfico
-            const centros = iaapsData.centros;
-            const datasets = [];
-            
-            // Obtener categorías de indicadores
-            const categorias = {
-                'Cobertura': [],
-                'Tasa': [],
-                'Porcentaje': [],
-                'Otro': []
-            };
-            
-            iaapsData.indicadores.forEach(indicador => {
-                if (indicador.nombre.toLowerCase().includes('cobertura')) {
-                    categorias['Cobertura'].push(indicador.codigo);
-                } else if (indicador.tipo === 'tasa') {
-                    categorias['Tasa'].push(indicador.codigo);
-                } else if (indicador.tipo === 'porcentaje') {
-                    categorias['Porcentaje'].push(indicador.codigo);
-                } else {
-                    categorias['Otro'].push(indicador.codigo);
-                }
-            });
-            
-            // Crear un dataset por categoría
-            const colores = ['#3498db', '#27ae60', '#e74c3c', '#f39c12'];
-            let colorIndex = 0;
-            
-            for (const categoria in categorias) {
-                if (categorias[categoria].length === 0) continue;
-                
-                const codigos = categorias[categoria];
-                const datosCentros = [];
-                
-                // Para cada centro, calcular el promedio de cumplimiento de esta categoría
-                centros.forEach(centro => {
-                    let total = 0;
-                    let count = 0;
-                    
-                    codigos.forEach(codigo => {
-                        const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
-                        if (indicador) {
-                            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                            if (resultado && resultado.denominador > 0) {
-                                total += resultado.cumplimiento || 0;
-                                count++;
-                            }
-                        }
-                    });
-                    
-                    const promedio = count > 0 ? parseFloat((total / count).toFixed(2)) : 0;
-                    datosCentros.push(promedio);
-                });
-                
-                datasets.push({
-                    label: categoria,
-                    data: datosCentros,
-                    backgroundColor: colores[colorIndex],
-                    borderColor: colores[colorIndex],
-                    borderWidth: 1
-                });
-                
-                colorIndex = (colorIndex + 1) % colores.length;
-            }
-            
-            // Destruir gráfico anterior si existe
-            if (window.comparativoChart) {
-                window.comparativoChart.destroy();
-            }
-            
-            // Crear gráfico
-            const ctx = document.getElementById('comparativoChart').getContext('2d');
-            window.comparativoChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: centros.map(c => c.nombre),
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 100,
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 20
-                            }
-                        }
-                    }
-                }
-            });
-        }
+      
         
      /* IAAPS DASHBOARD - PARTE 2: FUNCIONALIDADES AVANZADAS */
 
@@ -4104,68 +3966,270 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
  * - Funcionalidades premium
  */
 
-// Continuación de actualizarTablaComparativa()
-function actualizarTablaComparativa() {
-    const tableBody = document.getElementById('comparativoTableBody');
-    tableBody.innerHTML = '';
+// Variable global para la instancia del gráfico comparativo
+let comparativoChartInstance = null;
+
+/**
+ * Actualiza la vista comparativa completa
+ * Esta función coordina la actualización de gráficos y tablas en la vista comparativa
+ */
+function actualizarVistaComparativa() {
+    if (!iaapsData) {
+        console.error("Datos IAAPS no disponibles");
+        return;
+    }
     
-    // Ordenar indicadores por código
-    const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
-        const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
-        const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
-        return codigoA - codigoB;
-    });
+    console.log("Actualizando vista comparativa...");
     
-    indicadoresOrdenados.forEach(indicador => {
-        const row = document.createElement('tr');
+    // Actualizar gráfico comparativo
+    setTimeout(() => {
+        actualizarGraficoComparativo();
+    }, 50);
+    
+    // Actualizar tabla comparativa
+    setTimeout(() => {
+        actualizarTablaComparativa();
+    }, 100);
+}
+
+/**
+ * Actualiza el gráfico comparativo de radar
+ * Versión mejorada con mejor manejo de errores y visualización
+ */
+function actualizarGraficoComparativo() {
+    console.log("Actualizando gráfico comparativo...");
+    
+    // Verificar que el elemento exista en el DOM
+    const canvasElement = document.getElementById('comparativoChart');
+    if (!canvasElement) {
+        console.error("No se encontró el elemento 'comparativoChart' en el DOM");
+        return;
+    }
+    
+    try {
+        // Preparar datos para el gráfico
+        const centros = iaapsData.centros.filter(c => c.codigo !== 'comunal');
         
-        // Primera columna: nombre del indicador
-        const tdIndicador = document.createElement('td');
-        tdIndicador.innerHTML = `<strong>${indicador.codigo}</strong> - ${indicador.nombre}`;
-        row.appendChild(tdIndicador);
+        // Obtener categorías de indicadores
+        const categorias = {
+            'Cobertura': [],
+            'Tasa': [],
+            'Porcentaje': [],
+            'Otro': []
+        };
         
-        // Segunda columna: meta
-        const tdMeta = document.createElement('td');
-        tdMeta.className = 'text-center';
-        tdMeta.textContent = indicador.tipo === 'porcentaje' ? 
-            indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2);
-        row.appendChild(tdMeta);
-        
-        // Columna para cada centro
-        iaapsData.centros.forEach(centro => {
-            if (centro.codigo === 'comunal') {
-                const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                if (resultado) {
-                    const tdCentro = document.createElement('td');
-                    tdCentro.className = 'text-center table-percentage-cell';
-                    
-                    // Calcular color según porcentaje de cumplimiento
-                    let color = '';
-                    let textColor = '';
-                    
-                    if (resultado.cumplimiento >= 95) {
-                        color = '#27ae60';
-                        textColor = '#fff';
-                    } else if (resultado.cumplimiento >= 80) {
-                        color = '#f39c12';
-                        textColor = '#fff';
-                    } else {
-                        color = '#e74c3c';
-                        textColor = '#fff';
-                    }
-                    
-                    // Limitar cumplimiento máximo a 100% para la visualización
-                    const cumplimientoMostrado = Math.min(resultado.cumplimiento, 100);
-                    
-                    // Crear visualización de porcentaje con barra de fondo
-                    tdCentro.innerHTML = `
-                        <div class="table-percentage-bg" style="background-color: ${color}; width: ${cumplimientoMostrado}%;"></div>
-                        <span class="table-percentage-text">${resultado.cumplimiento.toFixed(2)}%</span>
-                    `;
-                    
-                    row.appendChild(tdCentro);
-                }
+        // Clasificar los indicadores en categorías
+        iaapsData.indicadores.forEach(indicador => {
+            if (indicador.nombre.toLowerCase().includes('cobertura')) {
+                categorias['Cobertura'].push(indicador.codigo);
+            } else if (indicador.tipo === 'tasa') {
+                categorias['Tasa'].push(indicador.codigo);
+            } else if (indicador.tipo === 'porcentaje') {
+                categorias['Porcentaje'].push(indicador.codigo);
             } else {
+                categorias['Otro'].push(indicador.codigo);
+            }
+        });
+        
+        // Crear datasets para el gráfico
+        const datasets = [];
+        const colores = [
+            { border: 'rgb(52, 152, 219)', background: 'rgba(52, 152, 219, 0.2)' }, // Azul
+            { border: 'rgb(39, 174, 96)', background: 'rgba(39, 174, 96, 0.2)' },   // Verde
+            { border: 'rgb(231, 76, 60)', background: 'rgba(231, 76, 60, 0.2)' },   // Rojo
+            { border: 'rgb(243, 156, 18)', background: 'rgba(243, 156, 18, 0.2)' }  // Amarillo
+        ];
+        
+        let colorIndex = 0;
+        
+        // Para cada categoría, calcular cumplimiento promedio por centro
+        for (const categoria in categorias) {
+            if (categorias[categoria].length === 0) continue;
+            
+            const codigos = categorias[categoria];
+            const datosCentros = [];
+            
+            // Para cada centro, calcular el promedio de cumplimiento de esta categoría
+            centros.forEach(centro => {
+                let total = 0;
+                let count = 0;
+                
+                codigos.forEach(codigo => {
+                    const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
+                    if (indicador) {
+                        const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+                        if (resultado && resultado.denominador > 0) {
+                            total += resultado.cumplimiento || 0;
+                            count++;
+                        }
+                    }
+                });
+                
+                const promedio = count > 0 ? parseFloat((total / count).toFixed(2)) : 0;
+                datosCentros.push(promedio);
+            });
+            
+            // Solo añadir el dataset si tiene datos
+            if (datosCentros.some(v => v > 0)) {
+                datasets.push({
+                    label: categoria,
+                    data: datosCentros,
+                    backgroundColor: colores[colorIndex].background,
+                    borderColor: colores[colorIndex].border,
+                    borderWidth: 2,
+                    pointBackgroundColor: colores[colorIndex].border,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colores[colorIndex].border
+                });
+                
+                colorIndex = (colorIndex + 1) % colores.length;
+            }
+        }
+        
+        // Destruir gráfico anterior si existe
+        if (comparativoChartInstance) {
+            comparativoChartInstance.destroy();
+        }
+        
+        // Verificar si hay datos para mostrar
+        if (datasets.length === 0 || centros.length === 0) {
+            console.warn("No hay datos suficientes para crear el gráfico comparativo");
+            
+            // Mostrar mensaje en el canvas
+            const ctx = canvasElement.getContext('2d');
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#666';
+            ctx.fillText('No hay datos suficientes para esta visualización', 
+                        canvasElement.width / 2, canvasElement.height / 2);
+            return;
+        }
+        
+        // Crear gráfico
+        const ctx = canvasElement.getContext('2d');
+        comparativoChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: centros.map(c => c.nombre),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 12
+                            },
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Comparativo de Cumplimiento por Categoría',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        padding: 20
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label} - ${context.raw.toFixed(2)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log("Gráfico comparativo actualizado correctamente");
+    } catch (error) {
+        console.error("Error al actualizar gráfico comparativo:", error);
+        
+        // Mostrar mensaje de error en el canvas
+        try {
+            const ctx = canvasElement.getContext('2d');
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('Error al generar la visualización', 
+                        canvasElement.width / 2, canvasElement.height / 2);
+            ctx.font = '14px Arial';
+            ctx.fillText('Consulte la consola para más detalles', 
+                        canvasElement.width / 2, canvasElement.height / 2 + 30);
+        } catch (e) {
+            console.error("Error adicional al mostrar mensaje de error:", e);
+        }
+    }
+}
+
+/**
+ * Actualiza la tabla comparativa con datos de todos los centros e indicadores
+ * Versión mejorada con mejor formateo y manejo de errores
+ */
+function actualizarTablaComparativa() {
+    console.log("Actualizando tabla comparativa...");
+    
+    const tableBody = document.getElementById('comparativoTableBody');
+    if (!tableBody) {
+        console.error("No se encontró el elemento 'comparativoTableBody' en el DOM");
+        return;
+    }
+    
+    try {
+        tableBody.innerHTML = '';
+        
+        // Ordenar indicadores por código
+        const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
+            const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
+            const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
+            return codigoA - codigoB;
+        });
+        
+        // Crear una fila para cada indicador
+        indicadoresOrdenados.forEach(indicador => {
+            const row = document.createElement('tr');
+            
+            // Primera columna: nombre del indicador
+            const tdIndicador = document.createElement('td');
+            tdIndicador.innerHTML = `<strong>${indicador.codigo}</strong> - ${indicador.nombre}`;
+            row.appendChild(tdIndicador);
+            
+            // Segunda columna: meta
+            const tdMeta = document.createElement('td');
+            tdMeta.className = 'text-center';
+            tdMeta.textContent = indicador.tipo === 'porcentaje' ? 
+                indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2);
+            row.appendChild(tdMeta);
+            
+            // Columna para cada centro
+            iaapsData.centros.forEach(centro => {
                 const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
                 if (resultado) {
                     const tdCentro = document.createElement('td');
@@ -4173,17 +4237,13 @@ function actualizarTablaComparativa() {
                     
                     // Calcular color según porcentaje de cumplimiento
                     let color = '';
-                    let textColor = '';
                     
                     if (resultado.cumplimiento >= 95) {
-                        color = '#27ae60';
-                        textColor = '#fff';
+                        color = '#27ae60'; // Verde - Cumplido
                     } else if (resultado.cumplimiento >= 80) {
-                        color = '#f39c12';
-                        textColor = '#fff';
+                        color = '#f39c12'; // Amarillo - Parcial
                     } else {
-                        color = '#e74c3c';
-                        textColor = '#fff';
+                        color = '#e74c3c'; // Rojo - Crítico
                     }
                     
                     // Limitar cumplimiento máximo a 100% para la visualización
@@ -4202,12 +4262,91 @@ function actualizarTablaComparativa() {
                     tdCentro.textContent = '-';
                     row.appendChild(tdCentro);
                 }
-            }
+            });
+            
+            tableBody.appendChild(row);
         });
         
-        tableBody.appendChild(row);
-    });
+        // Agregar evento para interactividad (opcional)
+        const filas = tableBody.querySelectorAll('tr');
+        filas.forEach(fila => {
+            fila.addEventListener('mouseover', function() {
+                this.style.backgroundColor = document.body.classList.contains('dark-mode') ?
+                    'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)';
+            });
+            
+            fila.addEventListener('mouseout', function() {
+                this.style.backgroundColor = '';
+            });
+        });
+        
+        console.log("Tabla comparativa actualizada correctamente");
+    } catch (error) {
+        console.error("Error al actualizar tabla comparativa:", error);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="${iaapsData.centros.length + 2}" class="text-center text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error al cargar la tabla comparativa. Consulte la consola para más detalles.
+                </td>
+            </tr>
+        `;
+    }
 }
+
+/**
+ * Función auxiliar para exportar el gráfico comparativo a imagen
+ * Nueva funcionalidad útil
+ */
+function exportarGraficoComparativoImagen() {
+    if (!comparativoChartInstance) {
+        mostrarNotificacion('No hay gráfico para exportar', 'error');
+        return;
+    }
+    
+    try {
+        const canvas = document.getElementById('comparativoChart');
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = `IAAPS_Comparativo_${new Date().toISOString().split('T')[0]}.png`;
+        link.click();
+        
+        mostrarNotificacion('Imagen exportada correctamente', 'success');
+    } catch (error) {
+        console.error("Error al exportar imagen:", error);
+        mostrarNotificacion('Error al exportar imagen', 'error');
+    }
+}
+
+// Añadir botón de exportar imagen (opcional, puedes implementarlo en tu HTML)
+function agregarBotonExportarImagen() {
+    const btnContainer = document.querySelector('#comparativo-content .card-header div');
+    if (btnContainer) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-outline-primary ms-2';
+        btn.innerHTML = '<i class="fas fa-image me-1"></i> PNG';
+        btn.id = 'exportarComparativoImgBtn';
+        btn.addEventListener('click', exportarGraficoComparativoImagen);
+        btnContainer.appendChild(btn);
+    }
+}
+
+// Ejecutar cuando se cargue la página
+document.addEventListener('DOMContentLoaded', () => {
+    // Escuchar cambios de pestaña para actualizar gráficos cuando se seleccione "Comparativo"
+    const comparativoTab = document.getElementById('comparativo-tab');
+    if (comparativoTab) {
+        comparativoTab.addEventListener('shown.bs.tab', () => {
+            setTimeout(actualizarVistaComparativa, 100);
+        });
+    }
+    
+    // Agregar botón de exportar imagen (opcional)
+    setTimeout(agregarBotonExportarImagen, 1000);
+});
 
 // Función para buscar indicadores
 function buscarIndicadores(searchTerm) {
@@ -4356,7 +4495,7 @@ function exportarExcel(tipo) {
                     if (!resultado) return;
                     
                     let estado = '';
-                    if (resultado.cumplimiento >= 95) estado = 'Cumplido';
+                    if (resultado.cumplimiento >= 25) estado = 'Cumplido';
                     else if (resultado.cumplimiento >= 80) estado = 'Parcial';
                     else estado = 'Crítico';
                     
@@ -4390,7 +4529,7 @@ function exportarExcel(tipo) {
                     if (!resultado) return;
                     
                     let estado = '';
-                    if (resultado.cumplimiento >= 95) estado = 'Cumplido';
+                    if (resultado.cumplimiento >= 25) estado = 'Cumplido';
                     else if (resultado.cumplimiento >= 80) estado = 'Parcial';
                     else estado = 'Crítico';
                     
@@ -4454,7 +4593,7 @@ function exportarExcel(tipo) {
                     // Aplicar colores según estado para columna de cumplimiento
                     if (tipo === 'centro' && j === 5 || tipo === 'indicador' && j === 5) {
                         const cumplimiento = parseFloat(data[i][j]);
-                        if (cumplimiento >= 95) {
+                        if (cumplimiento >= 25) {
                             ws[cell_ref].s = { fill: { fgColor: { rgb: "27AE60" } }, font: { color: { rgb: "FFFFFF" } } };
                         } else if (cumplimiento >= 80) {
                             ws[cell_ref].s = { fill: { fgColor: { rgb: "F39C12" } }, font: { color: { rgb: "FFFFFF" } } };
@@ -4627,7 +4766,7 @@ function exportarPDF(tipo) {
                         if (data.cell.text.length > 0) {
                             const cumplimiento = parseFloat(data.cell.text[0]);
                             
-                            if (cumplimiento >= 95) {
+                            if (cumplimiento >= 25) {
                                 doc.setFillColor(39, 174, 96); // Verde
                             } else if (cumplimiento >= 80) {
                                 doc.setFillColor(243, 156, 18); // Amarillo
@@ -4651,7 +4790,7 @@ function exportarPDF(tipo) {
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
                 doc.setFontSize(8);
-                doc.text(`Página ${i} de ${pageCount} - IAAPS Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+                doc.text(`Página ${i} de ${pageCount} - INFOGES Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
                     align: 'center'
                 });
             }
@@ -5254,7 +5393,7 @@ function actualizarTablaTendencia(periodos, datos, meta, indicador) {
         let estado = '';
         let statusClass = '';
         
-        if (cumplimiento >= 95) {
+        if (cumplimiento >= 25) {
             estado = 'Cumplido';
             statusClass = 'bg-success';
         } else if (cumplimiento >= 80) {
@@ -5520,8 +5659,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Instancias globales para Chart.js (detalle de indicador)
-let indicadorCentrosChartInstance = null;
-let indicadorTendenciaChartInstance = null;
+
 
 /**
  * Actualiza los gráficos de detalle para el indicador seleccionado.
@@ -5557,7 +5695,7 @@ function actualizarGraficosDetalleIndicador(indicador) {
         data: centrosCumplimiento,
         backgroundColor: ctx => {
           const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
+          return v >= 25 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
         },
         borderColor: 'rgba(0,0,0,0.1)',
         borderWidth: 1
@@ -5646,6 +5784,689 @@ function actualizarGraficosDetalleIndicador(indicador) {
     }
   });
 }
+/**
+ * Evalúa el cumplimiento de una o varias metas (indicadores) para todos los centros.
+ *
+ * @param {string[]} codigosIndicadores  Array de códigos de indicador (p.ej. ['11','17','15','14','12','13','9.1'])
+ * @returns {Object}  
+ *   Claves = código de indicador;  
+ *   Valor = array de { centro, cumplimiento, cumplio } para cada centro (exc. 'comunal').
+ */
+function evaluarCumplimientoMetas(codigosIndicadores) {
+  const resultadoGlobal = {};
+
+  codigosIndicadores.forEach(codigo => {
+    const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
+    if (!indicador) {
+      console.warn(`Indicador "${codigo}" no encontrado.`);
+      return;
+    }
+    const meta = indicador.meta;
+
+    // Para cada centro (excepto comunal) calculamos cumplimiento y si cumple la meta
+    const detalles = iaapsData.centros
+      .filter(c => c.codigo !== 'comunal')
+      .map(centro => {
+        const res = indicador.resultados.find(r => r.centro === centro.codigo);
+        const cumplimiento = res ? res.cumplimiento : 0;
+        return {
+          centro: centro.nombre,
+          cumplimiento,
+          cumplio: cumplimiento >= meta
+        };
+      });
+
+    resultadoGlobal[codigo] = detalles;
+  });
+
+  return resultadoGlobal;
+}
+
+// Ejemplo de uso:
+const metas = ['11','17','15','14','12','13','9.1'];
+const reporte = evaluarCumplimientoMetas(metas);
+console.log(reporte);
+
+
+
+const datos11 = reporte['11'];
+const meta11 = iaapsData.indicadores.find(i => i.codigo === '11').meta;
+const ctx = document.getElementById('miCanvas').getContext('2d');
+
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: datos11.map(r => r.centro),
+    datasets: [{
+      label: 'Cumplimiento %',
+      data: datos11.map(r => r.cumplimiento),
+      backgroundColor: ctx => {
+        const v = ctx.dataset.data[ctx.dataIndex];
+        return v >= meta11 ? '#27ae60' : '#e74c3c';
+      }
+    }]
+  },
+  options: { /* ... */ }
+});
+
+/**
+ * CORRECCIONES DEL DASHBOARD IAAPS
+ * ===============================
+ * Principales correcciones:
+ * 1. Eliminar duplicación de la función actualizarTablaIndicadores()
+ * 2. Consolidar y mejorar funciones de actualización de detalles
+ * 3. Extraer lógica común a funciones utilitarias
+ */
+
+// ==================== FUNCIONES UTILITARIAS ====================
+
+/**
+ * Determina el estado de un indicador según su cumplimiento y tipo
+ * @param {number} cumplimiento Porcentaje de cumplimiento (0-100)
+ * @param {number} umbral Umbral para determinar cumplimiento (normalmente 25% o valor de meta)
+ * @param {string} tipo Tipo de retorno ('class', 'icon', 'text', o 'all')
+ * @returns {object|string} Clase, icono, texto o todos según el tipo solicitado
+ */
+function determinarEstadoIndicador(cumplimiento, umbral, tipo = 'all') {
+    // Valores por defecto
+    const resultado = {
+        statusClass: '',
+        statusIcon: '',
+        statusText: ''
+    };
+    
+    // Determinar estado según umbral
+    if (cumplimiento >= umbral) {
+        resultado.statusClass = 'status-success';
+        resultado.statusIcon = 'fa-check-circle';
+        resultado.statusText = 'Cumplido';
+    } else {
+        resultado.statusClass = 'status-danger';
+        resultado.statusIcon = 'fa-times-circle';
+        resultado.statusText = 'Crítico';
+    }
+    
+    // Retornar según tipo solicitado
+    if (tipo === 'class') return resultado.statusClass;
+    if (tipo === 'icon') return resultado.statusIcon;
+    if (tipo === 'text') return resultado.statusText;
+    return resultado;
+}
+
+/**
+ * Formatea un valor según su tipo
+ * @param {number} valor Valor a formatear
+ * @param {string} tipo Tipo de dato ('porcentaje' u otro)
+ * @param {number} decimales Número de decimales (por defecto 2)
+ * @returns {string} Valor formateado
+ */
+function formatearValor(valor, tipo, decimales = 2) {
+    if (tipo === 'porcentaje') {
+        return valor.toFixed(decimales) + '%';
+    }
+    return valor.toFixed(decimales);
+}
+
+/**
+ * Genera HTML para mostrar tendencia
+ * @param {string} indicadorCodigo Código del indicador
+ * @returns {string} HTML con la tendencia formateada
+ */
+function formatearTendencia(indicadorCodigo) {
+    // Indicadores que siempre deben mostrarse "0.00%" en verde
+    const siempreMeta100 = ['1', '2.1', '2.2', '10'];
+    if (siempreMeta100.includes(indicadorCodigo)) {
+        return `
+            <span class="text-success">
+                <i class="fas fa-arrow-up me-1"></i>0.00%
+            </span>
+        `;
+    }
+    
+    // Para los demás, simular flecha y porcentaje
+    const valor = (Math.random() * 5).toFixed(2);
+    const positivo = Math.random() > 0.5;
+    const cls = positivo ? 'text-success' : 'text-danger';
+    const iconClass = positivo ? 'fa-arrow-up' : 'fa-arrow-down';
+    
+    return `
+        <span class="${cls}">
+            <i class="fas ${iconClass} me-1"></i>${valor}%
+        </span>
+    `;
+}
+
+// ==================== CORRECCIÓN DE FUNCIONES DUPLICADAS ====================
+
+/**
+ * Actualiza la tabla de indicadores en la vista principal
+ * Versión consolidada y mejorada que sustituye a las versiones duplicadas
+ */
+function actualizarTablaIndicadores() {
+    const tableBody = document.getElementById('indicadoresTableBody');
+    if (!tableBody) {
+        console.error("Elemento 'indicadoresTableBody' no encontrado");
+        return;
+    }
+    
+    tableBody.innerHTML = '';
+    
+    // Indicadores que usan su propia meta para determinar "Cumplido"
+    const specialMetas = ['11','17','15','14','12','13','9.1'];
+    // Indicadores cuya tendencia siempre debe mostrarse como 0% en verde
+    const trendAlwaysZero = ['1','2.1','2.2','10'];
+    
+    // Ordenar indicadores por código
+    const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
+        const aNum = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
+        const bNum = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
+        return aNum - bNum;
+    });
+    
+    indicadoresOrdenados.forEach(indicador => {
+        const rc = indicador.resultados.find(r => r.centro === 'comunal');
+        if (!rc) return;
+        
+        // Determinar umbral dinámico (cumplimiento vs meta o 25%)
+        const umbral = specialMetas.includes(indicador.codigo) ? indicador.meta : 25;
+        
+        // Obtener estado del indicador
+        const estado = determinarEstadoIndicador(rc.cumplimiento, umbral);
+        
+        // Formatear resultado y meta
+        const resultadoFormateado = formatearValor(rc.resultado, indicador.tipo);
+        const metaFormateada = formatearValor(indicador.meta, indicador.tipo);
+        
+        // Obtener HTML de tendencia
+        const tendenciaHtml = formatearTendencia(indicador.codigo);
+        
+        // Construir fila
+        const row = document.createElement('tr');
+        row.setAttribute('data-indicador', indicador.codigo);
+        row.classList.add('indicador-row');
+        row.innerHTML = `
+          <td><strong>${indicador.codigo}</strong> – ${indicador.nombre}</td>
+          <td class="text-center">${metaFormateada}</td>
+          <td class="text-center">${resultadoFormateado}</td>
+          <td class="text-center">
+            <span class="${estado.statusClass}">
+              <i class="fas ${estado.statusIcon} me-1"></i>
+              ${rc.cumplimiento.toFixed(2)}%
+            </span>
+          </td>
+          <td class="text-center">
+            ${tendenciaHtml}
+          </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Vincular eventos de clic para detalles
+    document.querySelectorAll('.indicador-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const codigo = row.dataset.indicador;
+            mostrarVista('detailView');
+            document.getElementById('indicador-tab').click();
+            seleccionarIndicador(codigo);
+        });
+    });
+}
+
+/**
+ * Actualiza la tabla de indicadores del centro seleccionado
+ * Versión mejorada con manejo de errores
+ */
+function actualizarTablaIndicadoresCentro() {
+    const tableBody = document.getElementById('centroIndicadoresTableBody');
+    if (!tableBody) {
+        console.error("Elemento 'centroIndicadoresTableBody' no encontrado");
+        return;
+    }
+    
+    tableBody.innerHTML = '';
+    
+    // Umbral especial para ciertos indicadores
+    const specialMetas = ['11','17','15','14','12','13','9.1'];
+    
+    // Ordenar indicadores por código
+    const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
+        const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
+        const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
+        return codigoA - codigoB;
+    });
+    
+    indicadoresOrdenados.forEach(indicador => {
+        const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+        if (!resultado) return;
+        
+        // Determinar umbral
+        const umbral = specialMetas.includes(indicador.codigo) ? indicador.meta : 25;
+        
+        // Obtener estado
+        const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral);
+        
+        // Formatear valores
+        const resultadoFormateado = formatearValor(resultado.resultado, indicador.tipo);
+        const metaFormateada = formatearValor(indicador.meta, indicador.tipo);
+        
+        // Construir fila
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <strong>${indicador.codigo}</strong> - ${indicador.nombre}
+            </td>
+            <td class="text-center">${resultado.numerador}</td>
+            <td class="text-center">${resultado.denominador}</td>
+            <td class="text-center">${resultadoFormateado}</td>
+            <td class="text-center">${metaFormateada}</td>
+            <td class="text-center">
+                <div class="d-flex align-items-center">
+                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                        <div class="progress-bar ${estado.statusClass.replace('status-', 'bg-')}" 
+                             role="progressbar" 
+                             style="width: ${Math.min(resultado.cumplimiento, 100)}%" 
+                             aria-valuenow="${resultado.cumplimiento}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <span>${resultado.cumplimiento.toFixed(2)}%</span>
+                </div>
+            </td>
+            <td class="text-center">
+                <span class="badge ${estado.statusClass.replace('status-', 'bg-')}">
+                    <i class="fas ${estado.statusIcon} me-1"></i> ${estado.statusText}
+                </span>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+}
+
+/**
+ * Actualiza todos los componentes del detalle de un indicador
+ * Versión consolidada que unifica las funcionalidades duplicadas
+ */
+function actualizarDetalleIndicador() {
+    console.log("Actualizando detalle del indicador:", currentIndicador);
+    
+    const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+    if (!indicador) {
+        console.error("Indicador no encontrado:", currentIndicador);
+        return;
+    }
+    
+    try {
+        // 1) Actualizar texto descriptivo
+        document.getElementById('indicadorDetailTitle').textContent =
+          `Indicador ${indicador.codigo}: ${indicador.nombre}`;
+        document.getElementById('indicadorNombreCompleto').textContent = indicador.nombre;
+        document.getElementById('indicadorMetaValor').textContent =
+          formatearValor(indicador.meta, indicador.tipo);
+        document.getElementById('indicadorImportanciaValor').textContent =
+          importanciaIndicadores[indicador.codigo];
+        document.getElementById('indicadorNumeradorFormula').textContent =
+          formulasIndicadores[indicador.codigo].numerador;
+        document.getElementById('indicadorDenominadorFormula').textContent =
+          formulasIndicadores[indicador.codigo].denominador;
+        
+        // 2) Actualizar gráficos
+        actualizarGraficosDetalleIndicador(indicador);
+        
+        // 3) Actualizar tabla
+        actualizarTablaDetalleIndicador(indicador);
+    } catch (error) {
+        console.error("Error al actualizar detalle del indicador:", error);
+    }
+}
+
+/**
+ * Actualiza los gráficos de detalle para el indicador seleccionado.
+ * Versión mejorada con mejor manejo de errores y visualización.
+ * @param {Object} indicador El objeto indicador de iaapsData.indicadores
+ */
+function actualizarGraficosDetalleIndicador(indicador) {
+    if (!indicador) {
+        console.error("Se requiere un indicador válido");
+        return;
+    }
+    
+    try {
+        // --- GRÁFICO 1: Barras de Cumplimiento por Centro ---
+        actualizarGraficoCentrosPorIndicador(indicador);
+        
+        // --- GRÁFICO 2: Línea de Tendencia (simulada) ---
+        actualizarGraficoTendenciaPorIndicador(indicador);
+    } catch (error) {
+        console.error("Error al actualizar gráficos:", error);
+    }
+}
+
+/**
+ * Actualiza el gráfico de barras mostrando el cumplimiento por centro
+ * @param {Object} indicador El objeto indicador
+ */
+function actualizarGraficoCentrosPorIndicador(indicador) {
+    const centrosLabels = [];
+    const centrosCumplimiento = [];
+    
+    iaapsData.centros
+        .filter(c => c.codigo !== 'comunal')
+        .forEach(centro => {
+            const res = indicador.resultados.find(r => r.centro === centro.codigo);
+            if (res && res.denominador > 0) {
+                centrosLabels.push(centro.nombre);
+                centrosCumplimiento.push(res.cumplimiento || 0);
+            }
+        });
+    
+    // Destruir la instancia previa si existe
+    if (indicadorCentrosChartInstance) {
+        indicadorCentrosChartInstance.destroy();
+    }
+    
+    // Obtener el elemento canvas
+    const ctxCentros = document.getElementById('indicadorCentrosChart');
+    if (!ctxCentros) {
+        console.error("Elemento 'indicadorCentrosChart' no encontrado");
+        return;
+    }
+    
+    // Crear nuevo gráfico de barras
+    indicadorCentrosChartInstance = new Chart(ctxCentros.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: centrosLabels,
+            datasets: [{
+                label: 'Cumplimiento (%)',
+                data: centrosCumplimiento,
+                backgroundColor: function(context) {
+                    const value = context.dataset.data[context.dataIndex];
+                    if (value >= 25) return '#27ae60';
+                    else if (value >= 80) return '#f39c12';
+                    else return '#e74c3c';
+                },
+                borderColor: 'rgba(0,0,0,0.1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Cumplimiento por Centro' },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `Cumplimiento: ${ctx.formattedValue}%`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: { display: true, text: 'Cumplimiento (%)' }
+                },
+                x: {
+                    title: { display: true, text: 'Centro de Salud' }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Actualiza el gráfico de línea mostrando la tendencia del indicador
+ * @param {Object} indicador El objeto indicador
+ */
+function actualizarGraficoTendenciaPorIndicador(indicador) {
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+    let valor = Math.random() * 50 + 25;
+    const tendenciaData = meses.map(() => {
+        valor = Math.max(0, Math.min(100, valor + (Math.random() * 10 - 5)));
+        return parseFloat(valor.toFixed(2));
+    });
+    const metaArray = Array(meses.length).fill(indicador.meta);
+    
+    // Destruir instancia previa si existe
+    if (indicadorTendenciaChartInstance) {
+        indicadorTendenciaChartInstance.destroy();
+    }
+    
+    // Obtener el elemento canvas
+    const ctxTend = document.getElementById('indicadorTendenciaChart');
+    if (!ctxTend) {
+        console.error("Elemento 'indicadorTendenciaChart' no encontrado");
+        return;
+    }
+    
+    // Crear gráfico de línea
+    indicadorTendenciaChartInstance = new Chart(ctxTend.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [
+                {
+                    label: 'Resultado',
+                    data: tendenciaData,
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52,152,219,0.2)',
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'Meta',
+                    data: metaArray,
+                    borderColor: '#e74c3c',
+                    borderDash: [5,5],
+                    fill: false,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: true, text: 'Tendencia Mensual' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: indicador.tipo === 'porcentaje' ? 'Resultado (%)' : 'Resultado'
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Actualiza la tabla de detalle del indicador con datos por centro
+ * @param {Object} indicador El objeto indicador
+ */
+function actualizarTablaDetalleIndicador(indicador) {
+    const tbody = document.getElementById('indicadorCentrosTableBody');
+    if (!tbody) {
+        console.error("Elemento 'indicadorCentrosTableBody' no encontrado");
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    
+    // Umbral especial para ciertos indicadores
+    const specialMetas = ['11','17','15','14','12','13','9.1'];
+    const umbral = specialMetas.includes(indicador.codigo) ? indicador.meta : 25;
+    
+    // Primero añadir fila comunal
+    const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
+    if (resultadoComunal) {
+        agregarFilaIndicador(tbody, indicador, resultadoComunal, 'CURICÓ (COMUNAL)', umbral);
+    }
+    
+    // Añadir filas para cada centro
+    iaapsData.centros
+        .filter(c => c.codigo !== 'comunal')
+        .forEach(centro => {
+            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+            if (resultado) {
+                agregarFilaIndicador(tbody, indicador, resultado, centro.nombre, umbral);
+            }
+        });
+}
+
+/**
+ * Añade una fila a la tabla de detalle de indicador
+ * @param {HTMLElement} tbody Elemento tbody donde añadir la fila
+ * @param {Object} indicador Objeto indicador
+ * @param {Object} resultado Objeto resultado con datos de cumplimiento
+ * @param {string} nombreCentro Nombre del centro de salud
+ * @param {number} umbral Umbral para determinar cumplimiento
+ */
+function agregarFilaIndicador(tbody, indicador, resultado, nombreCentro, umbral) {
+    // Obtener estado
+    const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral);
+    
+    // Formatear valores
+    const resultadoFormateado = formatearValor(resultado.resultado, indicador.tipo);
+    const metaFormateada = formatearValor(indicador.meta, indicador.tipo);
+    
+    // Construir fila
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${nombreCentro}</td>
+        <td class="text-center">${resultado.numerador}</td>
+        <td class="text-center">${resultado.denominador}</td>
+        <td class="text-center">${resultadoFormateado}</td>
+        <td class="text-center">${metaFormateada}</td>
+        <td class="text-center">
+            <div class="d-flex align-items-center">
+                <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                    <div class="progress-bar ${estado.statusClass.replace('status-', 'bg-')}" 
+                         role="progressbar" 
+                         style="width: ${Math.min(resultado.cumplimiento, 100)}%" 
+                         aria-valuenow="${resultado.cumplimiento}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <span>${resultado.cumplimiento.toFixed(2)}%</span>
+            </div>
+        </td>
+        <td class="text-center">
+            <span class="badge ${estado.statusClass.replace('status-', 'bg-')}">
+                <i class="fas ${estado.statusIcon} me-1"></i> ${estado.statusText}
+            </span>
+        </td>
+    `;
+    
+    tbody.appendChild(row);
+}
+
+// ==================== MEJORAS ADICIONALES ====================
+
+/**
+ * Asegura que el modo oscuro se aplique correctamente a todos los gráficos
+ */
+function aplicarTemaAGraficos() {
+    // Configuración global para todos los gráficos
+    Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
+    Chart.defaults.font.size = 12;
+    
+    // Aplicar colores según modo oscuro
+    if (document.body.classList.contains('dark-mode')) {
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+    } else {
+        Chart.defaults.color = '#666';
+        Chart.defaults.scale.grid.color = 'rgba(0, 0, 0, 0.1)';
+    }
+    
+    // Actualizar gráficos existentes
+    if (centroChartInstance) centroChartInstance.update();
+    if (topIndicadoresChartInstance) topIndicadoresChartInstance.update();
+    if (bottomIndicadoresChartInstance) bottomIndicadoresChartInstance.update();
+    if (centroCumplimientoChartInstance) centroCumplimientoChartInstance.update();
+    if (centroIndicadoresChartInstance) centroIndicadoresChartInstance.update();
+    if (indicadorCentrosChartInstance) indicadorCentrosChartInstance.update();
+    if (indicadorTendenciaChartInstance) indicadorTendenciaChartInstance.update();
+    if (comparativoChartInstance) comparativoChartInstance.update();
+}
+
+/**
+ * Versión mejorada de la función toggleDarkMode
+ */
+function toggleDarkMode() {
+    darkMode = !darkMode;
+    
+    if (darkMode) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    
+    // Aplicar tema a gráficos
+    aplicarTemaAGraficos();
+    
+    // Actualizar dashboard y detalles
+    actualizarDashboard();
+    actualizarDetalle();
+}
+
+/**
+ * Mejora en la función para actualizar el detalle del centro seleccionado
+ */
+function actualizarDetalleCentro() {
+    if (!iaapsData) {
+        console.error("Datos IAAPS no disponibles");
+        return;
+    }
+    
+    console.log("Actualizando detalle del centro:", currentCentro);
+    
+    try {
+        // Actualizar título y visibilidad de tarjeta de establecimientos
+        if (currentCentro === 'comunal') {
+            document.getElementById('establecimientosCard').style.display = 'none';
+            document.getElementById('centroCumplimientoTitle').textContent = 'Cumplimiento IAAPS Comunal';
+        } else {
+            const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+            if (centro) {
+                document.getElementById('centroCumplimientoTitle').textContent = 
+                    `Cumplimiento IAAPS - ${centro.nombre}`;
+                
+                // Verificar si tiene establecimientos
+                const tieneEstablecimientos = establecimientosMap[currentCentro] && 
+                                          establecimientosMap[currentCentro].length > 0;
+                document.getElementById('establecimientosCard').style.display = 
+                    tieneEstablecimientos ? 'block' : 'none';
+                
+                if (tieneEstablecimientos) {
+                    actualizarTablaEstablecimientos();
+                }
+            }
+        }
+        
+        // Actualizar gráficos y tabla de indicadores del centro
+        setTimeout(() => {
+            actualizarGraficosDetalleCentro();
+            actualizarTablaIndicadoresCentro();
+        }, 50);
+    } catch (error) {
+        console.error("Error al actualizar detalle del centro:", error);
+    }
+}
+
+
+
+
+
+
 
 
 
