@@ -402,6 +402,11 @@ body {
     font-weight: 500;
 }
 
+.highlight-cumpl-blue {
+  background-color: #cce5ff !important;
+}
+
+
 .progress {
     height: 10px;
     margin-top: auto;
@@ -568,6 +573,17 @@ body {
     flex-wrap: wrap;
     gap: 0.5rem;
 }
+
+/* resalta el td de cumplimiento cuando la meta es 17, 13, 14 o 15 */
+.highlight-cumpl-blue {
+  background-color: #cce5ff;   /* azul muy claro */
+  color: #004085;              /* texto azul oscuro */
+  border-radius: 0.25rem;      /* bordes redondeados */
+  padding: 0.2rem 0.5rem;      /* pequeño acolchado */
+  display: inline-block;       /* que parezca un botón */
+  font-weight: 500;
+}
+
 
 .nav-tabs .nav-link {
     color:rgb(85, 187, 117);
@@ -1103,6 +1119,13 @@ body {
   font-size: 1.2rem;
   opacity: 0.7; /* opcional: para que no quede tan intenso */
 }
+
+/* Estilos para la celda de cumplimiento cuando la meta es 17,13,14 o 15 */
+#centroCumplimientoTableBody td.highlight-cumpl {
+  /* Azul claro */
+  background-color: #cce5ff !important;
+}
+
 
     </style>
 </head>
@@ -2285,22 +2308,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             meta: 100,
                             importancia: 4,
                             resultados: [
-                                { centro: 'comunal', numerador: 270, denominador: 270, resultado: 100, cumplimiento: 100 },
-                                { centro: 'curico', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'miguel', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'betty', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'colon', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'sarmiento', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'niches', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'prosperidad', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'tutuquen', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'porvenir', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'dona_carmen', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'potrero', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'chequenlemu', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'upeo', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'cordillerilla', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 },
-                                { centro: 'obra', numerador: 18, denominador: 18, resultado: 100, cumplimiento: 100 }
+                                { centro: 'comunal', numerador: 6, denominador: 6, resultado: 100, cumplimiento: 100 },
+                                { centro: 'curico', numerador: 1, denominador:1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'miguel', numerador: 1, denominador: 1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'betty', numerador: 1, denominador: 1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'colon', numerador: 1, denominador: 1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'sarmiento', numerador: 1, denominador: 1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'niches', numerador: 1, denominador: 1, resultado: 100, cumplimiento: 100 },
+                                { centro: 'prosperidad', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'dona_carmen', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 }
                             ]
                         },
                         {
@@ -2310,22 +2333,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             meta: 100,
                             importancia: 4,
                             resultados: [
-                                { centro: 'comunal', numerador: 540, denominador: 540, resultado: 100, cumplimiento: 100 },
-                                { centro: 'curico', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'miguel', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'betty', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'colon', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'sarmiento', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'niches', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'prosperidad', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'tutuquen', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'porvenir', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'dona_carmen', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'potrero', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'chequenlemu', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'upeo', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'cordillerilla', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 },
-                                { centro: 'obra', numerador: 36, denominador: 36, resultado: 100, cumplimiento: 100 }
+                                { centro: 'comunal', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'curico', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'miguel', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'betty', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'colon', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'sarmiento', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'niches', numerador: 14, denominador: 14, resultado: 100, cumplimiento: 100 },
+                                { centro: 'prosperidad', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'dona_carmen', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 },
+                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 }
                             ]
                         },
                         {
@@ -5960,6 +5983,8 @@ function actualizarTablaIndicadores() {
     const specialMetas = ['11','17','15','14','12','13','9.1'];
     // Indicadores cuya tendencia siempre debe mostrarse como 0% en verde
     const trendAlwaysZero = ['1','2.1','2.2','10'];
+
+    
     
     // Ordenar indicadores por código
     const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
@@ -6466,6 +6491,21 @@ function actualizarDetalleCentro() {
         console.error("Error al actualizar detalle del centro:", error);
     }
 }
+
+function highlightByMeta() {
+  const metas = ['17','13','14','15'];
+  document
+    .querySelectorAll('#centroCumplimientoTableBody tr')
+    .forEach(tr => {
+      // tomamos el texto de la celda "Meta" (índice 1)
+      const metaText = tr.cells[1].textContent.trim().replace('%','');
+      if (metas.includes(metaText)) {
+        // agregamos la clase a la celda de cumplimiento (índice 5)
+        tr.cells[5].classList.add('highlight-cumpl');
+      }
+    });
+}
+
 
 
 
