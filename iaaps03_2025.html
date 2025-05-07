@@ -1882,25 +1882,34 @@ body {
         };
         
         // Mapeo de códigos de centros a nombres completos
-        const centrosMap = {
-            'comunal': 'CURICÓ TOTAL COMUNAL',
-            'curico': 'CURICO CENTRO',
-            'miguel': 'MIGUEL ANGEL ARENAS',
-            'betty': 'BETTY MUÑOZ',
-            'colon': 'COLON',
-            'sarmiento': 'SARMIENTO',
-            'niches': 'LOS NICHES'
-        };
-        
-        // Mapeo de establecimientos asociados a cada centro
-        const establecimientosMap = {
-            'curico': [],
-            'miguel': ['PROSPERIDAD'],
-            'betty': ['PSR PORVENIR'],
-            'colon': ["PSR TUTUQUEN"],
-            'sarmiento': ['DOÑA CARMEN', 'PSR POTRERO GRANDE', 'PSR CHEQUENLEMU', 'PSR UPEO', 'PSR CORDILLERILLA'],
-            'niches': ['PSR LA OBRA']
-        };
+      const centrosMap = {
+    'comunal':   'CURICÓ TOTAL COMUNAL',
+    'curico':    'CURICO CENTRO',
+    'miguel':    'MIGUEL ÁNGEL ARENAS',
+    'betty':     'BETTY MUÑOZ',
+    'colon':     'COLÓN',
+    'sarmiento': 'SARMIENTO',
+    'niches':    'LOS NICHES'
+};
+
+// Mapeo de establecimientos asociados a cada centro
+const establecimientosMap = {
+    'comunal':   [],
+    'curico':    ['SAPU CURICÓ CENTRO'],
+    'miguel':    ['PROSPERIDAD','SAR AGUAS NEGRAS' ],
+    'betty':     ['PSR PORVENIR'],
+    'colon':     ['SAR BOMBERO GARRIDO', 'PSR TUTUQUEN', ],
+    'sarmiento': ['SUR SARMIENTO', 'CECOSF DOÑA CARMEN DE SARMIENTO'],
+    'niches':    [
+        'SUR LOS NICHES',
+        'PSR POTRERO GRANDE',
+        'PSR CHEQUENLEMU',
+        'PSR UPEO',
+        'PSR CORDILLERILLA',
+        'PSR LA OBRA'
+    ]
+};
+
         
         // Importancia relativa de cada indicador
         const importanciaIndicadores = {
@@ -2254,27 +2263,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 // En una implementación real, se cargaría desde el archivo Excel
                 
                 // Esta es una estructura de datos simplificada
-                iaapsData = {
-                    centros: [
-                        { codigo: 'comunal', nombre: 'CURICO TOTAL COMUNAL' },
-                        { codigo: 'curico', nombre: 'CURICO CENTRO' },
-                        { codigo: 'miguel', nombre: 'MIGUEL ANGEL ARENAS' },
-                        { codigo: 'betty', nombre: 'BETTY MUÑOZ' },
-                        { codigo: 'colon', nombre: 'COLON' },
-                        { codigo: 'sarmiento', nombre: 'SARMIENTO' },
-                        { codigo: 'niches', nombre: 'LOS NICHES' }
-                    ],
-                    establecimientos: [
-                        { codigo: 'prosperidad', nombre: 'PROSPERIDAD', centro: 'miguel' },
-                        { codigo: 'tutuquen', nombre: 'PSR TUTUQUEN', centro: 'colon' },
-                        { codigo: 'porvenir', nombre: 'PSR PORVENIR', centro: 'betty' },
-                        { codigo: 'dona_carmen', nombre: 'DOÑA CARMEN', centro: 'sarmiento' },
-                        { codigo: 'potrero', nombre: 'PSR POTRERO GRANDE', centro: 'sarmiento' },
-                        { codigo: 'chequenlemu', nombre: 'PSR CHEQUENLEMU', centro: 'sarmiento' },
-                        { codigo: 'upeo', nombre: 'PSR UPEO', centro: 'sarmiento' },
-                        { codigo: 'cordillerilla', nombre: 'PSR CORDILLERILLA', centro: 'sarmiento' },
-                        { codigo: 'obra', nombre: 'PSR LA OBRA', centro: 'niches' }
-                    ],
+iaapsData = {
+  centros: [
+    { codigo: 'comunal',   nombre: 'CURICO TOTAL COMUNAL' },
+    { codigo: 'curico',    nombre: 'CURICO CENTRO' },
+    { codigo: 'miguel',    nombre: 'MIGUEL ANGEL ARENAS' },
+    { codigo: 'betty',     nombre: 'BETY MUÑOZ' },
+    { codigo: 'colon',     nombre: 'COLON' },
+    { codigo: 'sarmiento', nombre: 'SARMIENTO' },
+    { codigo: 'niches',    nombre: 'LOS NICHES' }
+  ],
+  establecimientos: [
+    { codigo: 'prosperidad', nombre: 'PROSPERIDAD',          centro: 'miguel' },
+    { codigo: 'tutuquen',    nombre: 'PSR TUTUQUEN',         centro: 'colon' },
+    { codigo: 'porvenir',    nombre: 'PSR PORVENIR',         centro: 'betty' },
+    { codigo: 'dona_carmen', nombre: 'DOÑA CARMEN',          centro: 'sarmiento' },
+    { codigo: 'potrero',     nombre: 'PSR POTRERO GRANDE',   centro: 'sarmiento' },
+    { codigo: 'chequenlemu', nombre: 'PSR CHEQUENLEMU',      centro: 'sarmiento' },
+    { codigo: 'upeo',        nombre: 'PSR UPEO',             centro: 'sarmiento' },
+    { codigo: 'cordillerilla', nombre: 'PSR CORDILLERILLA',  centro: 'sarmiento' },
+    { codigo: 'sapu',        nombre: 'SAPU CURICO CENTRO',   centro: 'curico' },
+    { codigo: 'sar2',        nombre: 'SAR AGUAS NEGRAS',      centro: 'miguel' },
+    { codigo: 'sar1',        nombre: 'SAR BOMBERO GARRIDO',   centro: 'colon' },
+  ],
                     indicadores: [
                         {
                             codigo: '1',
