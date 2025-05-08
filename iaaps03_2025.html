@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
+     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -2278,10 +2280,10 @@ iaapsData = {
     { codigo: 'tutuquen',    nombre: 'PSR TUTUQUEN',         centro: 'colon' },
     { codigo: 'porvenir',    nombre: 'PSR PORVENIR',         centro: 'betty' },
     { codigo: 'dona_carmen', nombre: 'DOÑA CARMEN',          centro: 'sarmiento' },
-    { codigo: 'potrero',     nombre: 'PSR POTRERO GRANDE',   centro: 'sarmiento' },
-    { codigo: 'chequenlemu', nombre: 'PSR CHEQUENLEMU',      centro: 'sarmiento' },
-    { codigo: 'upeo',        nombre: 'PSR UPEO',             centro: 'sarmiento' },
-    { codigo: 'cordillerilla', nombre: 'PSR CORDILLERILLA',  centro: 'sarmiento' },
+    { codigo: 'potrero',     nombre: 'PSR POTRERO GRANDE',   centro: 'niches' },
+    { codigo: 'chequenlemu', nombre: 'PSR CHEQUENLEMU',      centro: 'niches' },
+    { codigo: 'upeo',        nombre: 'PSR UPEO',             centro: 'niches' },
+    { codigo: 'cordillerilla', nombre: 'PSR CORDILLERILLA',  centro: 'niches' },
     { codigo: 'sapu',        nombre: 'SAPU CURICO CENTRO',   centro: 'curico' },
     { codigo: 'sar2',        nombre: 'SAR AGUAS NEGRAS',      centro: 'miguel' },
     { codigo: 'sar1',        nombre: 'SAR BOMBERO GARRIDO',   centro: 'colon' },
@@ -2362,358 +2364,456 @@ iaapsData = {
                                 { centro: 'obra', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 }
                             ]
                         },
-                        {
-                            codigo: '3',
-                            nombre: 'Tasa de consultas médicas de morbilidad por habitante año',
-                            tipo: 'tasa',
-                            meta: 0.82,
-                            importancia: 6,
-                            resultados: [
-                                { centro: 'comunal', numerador: 32316, denominador: 150113, resultado: 0.22, cumplimiento: 26.25 },
-                                { centro: 'curico', numerador: 6873, denominador: 41532, resultado: 0.17, cumplimiento: 20.18 },
-                                { centro: 'miguel', numerador: 6487, denominador: 28763, resultado: 0.23, cumplimiento: 27.50 },
-                                { centro: 'betty', numerador: 5722, denominador: 28461, resultado: 0.20, cumplimiento: 24.52 },
-                                { centro: 'colon', numerador: 5051, denominador: 23785, resultado: 0.21, cumplimiento: 25.90 },
-                                { centro: 'sarmiento', numerador: 4134, denominador: 13722, resultado: 0.30, cumplimiento: 36.74 },
-                                { centro: 'niches', numerador: 2518, denominador: 13850, resultado: 0.18, cumplimiento: 22.17 },
-                                { centro: 'prosperidad', numerador: 523, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 56, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 123, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 707, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 12, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 40, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 40, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 19, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 11, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '4',
-                            nombre: 'Porcentaje de derivación al nivel secundario',
-                            tipo: 'porcentaje',
-                            meta: 10,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 3101, denominador: 53969, resultado: 5.75, cumplimiento: 100 },
-                                { centro: 'curico', numerador: 746, denominador: 11905, resultado: 6.27, cumplimiento: 100 },
-                                { centro: 'miguel', numerador: 689, denominador: 10609, resultado: 6.49, cumplimiento: 100 },
-                                { centro: 'betty', numerador: 682, denominador: 9647, resultado: 7.07, cumplimiento: 100 },
-                                { centro: 'colon', numerador: 374, denominador: 7864, resultado: 4.76, cumplimiento: 100 },
-                                { centro: 'sarmiento', numerador: 228, denominador: 6029, resultado: 3.78, cumplimiento: 100 },
-                                { centro: 'niches', numerador: 357, denominador: 4943, resultado: 7.22, cumplimiento: 100 },
-                                { centro: 'prosperidad', numerador: 0, denominador: 966, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 1, denominador: 162, resultado: 0.62, cumplimiento: 100 },
-                                { centro: 'porvenir', numerador: 10, denominador: 235, resultado: 4.26, cumplimiento: 100},
-                                { centro: 'dona_carmen', numerador: 14, denominador: 1088, resultado: 1.29, cumplimiento: 100 },
-                                { centro: 'potrero', numerador: 0, denominador: 100, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 117, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 25, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 101, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 108, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '5',
-                            nombre: 'Tasa de Visita Domiciliaria Integral',
-                            tipo: 'tasa',
-                            meta: 0.24,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 2474, denominador: 45489, resultado: 0.05, cumplimiento: 22.66 },
-                                { centro: 'curico', numerador: 542, denominador: 12585, resultado: 0.04, cumplimiento: 17.94 },
-                                { centro: 'miguel', numerador: 438, denominador: 8716, resultado: 0.05, cumplimiento: 20.94 },
-                                { centro: 'betty', numerador: 454, denominador: 8625, resultado: 0.05, cumplimiento: 21.93 },
-                                { centro: 'colon', numerador: 375, denominador: 7208, resultado: 0.05, cumplimiento: 21.68 },
-                                { centro: 'sarmiento', numerador: 247, denominador: 4158, resultado: 0.06, cumplimiento: 24.75 },
-                                { centro: 'niches', numerador: 221, denominador: 4197, resultado: 0.05, cumplimiento: 21.94 },
-                                { centro: 'prosperidad', numerador: 68, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 15, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 2, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 61, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 21, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 4, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 8, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 5, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 13, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '6.1.A',
-                            nombre: 'Cobertura EMP mujeres (20-64 años)',
-                            tipo: 'porcentaje',
-                            meta: 23.89,
-                            importancia: 3,
-                            resultados: [
-                                { centro: 'comunal', numerador: 4908, denominador: 49664, resultado: 9.88, cumplimiento: 41.37 },
-                                { centro: 'curico', numerador: 1030, denominador: 14597, resultado: 7.06, cumplimiento: 29.54 },
-                                { centro: 'miguel', numerador: 1106, denominador: 9172, resultado: 12.06, cumplimiento: 50.47 },
-                                { centro: 'betty', numerador: 838, denominador: 9642, resultado: 8.69, cumplimiento: 36.38 },
-                                { centro: 'colon', numerador: 689, denominador: 7738, resultado: 8.90, cumplimiento: 37.27 },
-                                { centro: 'sarmiento', numerador: 338, denominador: 4352, resultado: 7.77, cumplimiento: 32.51 },
-                                { centro: 'niches', numerador: 456, denominador: 4194, resultado: 10.87, cumplimiento: 45.51 },
-                                { centro: 'prosperidad', numerador: 128, denominador: -14, resultado: -914.29, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 51, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 40, denominador: -3, resultado: -1333.33, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 153, denominador: -9, resultado: -1700.00, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 11, denominador: -2, resultado: -550.00, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 12, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 15, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 11, denominador: -1, resultado: -1100.00, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 30, denominador: -2, resultado: -1500.00, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '6.1.B',
-                            nombre: 'Cobertura EMP hombres (20-64 años)',
-                            tipo: 'porcentaje',
-                            meta: 22.31,
-                            importancia: 4,
-                            resultados: [
-                                { centro: 'comunal', numerador: 2150, denominador: 41825, resultado: 5.14, cumplimiento: 23.04 },
-                                { centro: 'curico', numerador: 380, denominador: 10883, resultado: 3.49, cumplimiento: 15.65 },
-                                { centro: 'miguel', numerador: 538, denominador: 8935, resultado: 6.02, cumplimiento: 26.99 },
-                                { centro: 'betty', numerador: 369, denominador: 7094, resultado: 5.20, cumplimiento: 23.32 },
-                                { centro: 'colon', numerador: 254, denominador: 6471, resultado: 3.93, cumplimiento: 17.59 },
-                                { centro: 'sarmiento', numerador: 192, denominador: 4193, resultado: 4.58, cumplimiento: 20.52 },
-                                { centro: 'niches', numerador: 229, denominador: 4249, resultado: 5.39, cumplimiento: 24.16 },
-                                { centro: 'prosperidad', numerador: 44, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 27, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 15, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 56, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 3, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 5, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 11, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 4, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 23, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '6.2',
-                            nombre: 'Cobertura EMPAM (65+ años)',
-                            tipo: 'porcentaje',
-                            meta: 58.48,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 3334, denominador: 21097, resultado: 15.80, cumplimiento: 27.02 },
-                                { centro: 'curico', numerador: 837, denominador: 6609, resultado: 12.66, cumplimiento: 21.66 },
-                                { centro: 'miguel', numerador: 512, denominador: 3659, resultado: 13.99, cumplimiento: 23.93 },
-                                { centro: 'betty', numerador: 424, denominador: 3772, resultado: 11.24, cumplimiento: 19.22 },
-                                { centro: 'colon', numerador: 671, denominador: 3331, resultado: 20.14, cumplimiento: 34.45 },
-                                { centro: 'sarmiento', numerador: 259, denominador: 1592, resultado: 16.27, cumplimiento: 27.82 },
-                                { centro: 'niches', numerador: 354, denominador: 2134, resultado: 16.59, cumplimiento: 28.37 },
-                                { centro: 'prosperidad', numerador: 111, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 14, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 25, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 61, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 12, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 9, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 14, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 11, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 20, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '7',
-                            nombre: 'Cobertura evaluación desarrollo psicomotor (12-23 meses)',
-                            tipo: 'porcentaje',
-                            meta: 25.00,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 284, denominador: 1190, resultado: 23.87, cumplimiento: 25.12 },
-                                { centro: 'curico', numerador: 38, denominador: 267, resultado: 14.23, cumplimiento: 14.98 },
-                                { centro: 'miguel', numerador: 62, denominador: 234, resultado: 26.50, cumplimiento: 27.89 },
-                                { centro: 'betty', numerador: 61, denominador: 286, resultado: 21.33, cumplimiento: 22.45 },
-                                { centro: 'colon', numerador: 41, denominador: 209, resultado: 19.62, cumplimiento: 20.65 },
-                                { centro: 'sarmiento', numerador: 23, denominador: 85, resultado: 27.06, cumplimiento: 28.48 },
-                                { centro: 'niches', numerador: 38, denominador: 44, resultado: 86.36, cumplimiento: 90.91 },
-                                { centro: 'prosperidad', numerador: 6, denominador: 21, resultado: 28.57, cumplimiento: 30.08 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 1, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 0, denominador: 6, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 7, denominador: 20, resultado: 35.00, cumplimiento: 36.84 },
-                                { centro: 'potrero', numerador: 1, denominador: 9, resultado: 11.11, cumplimiento: 11.70 },
-                                { centro: 'chequenlemu', numerador: 2, denominador: 1, resultado: 200.00, cumplimiento: 100 },
-                                { centro: 'upeo', numerador: 1, denominador: 2, resultado: 50.00, cumplimiento: 52.63 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 4, denominador: 5, resultado: 80.00, cumplimiento: 84.21 }
-                            ]
-                        },
-                        {
-                            codigo: '8',
-                            nombre: 'Cobertura control adolescentes (10-19 años)',
-                            tipo: 'porcentaje',
-                            meta: 24.17,
-                            importancia: 6,
-                            resultados: [
-                                { centro: 'comunal', numerador: 1035, denominador: 20368, resultado: 5.08, cumplimiento: 21.02 },
-                                { centro: 'curico', numerador: 236, denominador: 5444, resultado: 4.34, cumplimiento: 17.94 },
-                                { centro: 'miguel', numerador: 129, denominador: 3687, resultado: 3.50, cumplimiento: 14.48 },
-                                { centro: 'betty', numerador: 165, denominador: 4039, resultado: 4.09, cumplimiento: 16.90 },
-                                { centro: 'colon', numerador: 254, denominador: 3281, resultado: 7.74, cumplimiento: 32.03 },
-                                { centro: 'sarmiento', numerador: 72, denominador: 2078, resultado: 3.46, cumplimiento: 14.34 },
-                                { centro: 'niches', numerador: 88, denominador: 1839, resultado: 4.79, cumplimiento: 19.80 },
-                                { centro: 'prosperidad', numerador: 31, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 7, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 12, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 39, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 1, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 1, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '9.1',
-                            nombre: 'Cobertura atención salud mental',
-                            tipo: 'porcentaje',
-                            meta: 27.11,
-                            importancia: 5.5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 10663, denominador: 33025, resultado: 32.29, cumplimiento: 100 },
-                                { centro: 'curico', numerador: 2678, denominador: 9137, resultado: 29.31, cumplimiento: 100 },
-                                { centro: 'miguel', numerador: 1786, denominador: 6328, resultado: 28.22, cumplimiento: 100 },
-                                { centro: 'betty', numerador: 2269, denominador: 6261, resultado: 36.24, cumplimiento: 100 },
-                                { centro: 'colon', numerador: 1501, denominador: 5233, resultado: 28.69, cumplimiento: 100 },
-                                { centro: 'sarmiento', numerador: 800, denominador: 3019, resultado: 26.50, cumplimiento: 97.75 },
-                                { centro: 'niches', numerador: 979, denominador: 3047, resultado: 32.13, cumplimiento: 100 },
-                                { centro: 'prosperidad', numerador: 138, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 23, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 69, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 217, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 56, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 17, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 20, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 37, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 73, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '9.2',
-                            nombre: 'Tasa controles salud mental',
-                            tipo: 'tasa',
-                            meta: 6.00,
-                            importancia: 3.3,
-                            resultados: [
-                                { centro: 'comunal', numerador: 12868, denominador: 10663, resultado: 1.21, cumplimiento: 20.11 },
-                                { centro: 'curico', numerador: 3029, denominador: 2678, resultado: 1.13, cumplimiento: 18.85 },
-                                { centro: 'miguel', numerador: 2291, denominador: 1786, resultado: 1.28, cumplimiento: 21.38 },
-                                { centro: 'betty', numerador: 2575, denominador: 2269, resultado: 1.13, cumplimiento: 18.91 },
-                                { centro: 'colon', numerador: 1936, denominador: 1501, resultado: 1.29, cumplimiento: 21.50 },
-                                { centro: 'sarmiento', numerador: 1239, denominador: 800, resultado: 1.55, cumplimiento: 25.81 },
-                                { centro: 'niches', numerador: 1086, denominador: 979, resultado: 1.11, cumplimiento: 18.49 },
-                                { centro: 'prosperidad', numerador: 157, denominador: 138, resultado: 1.14, cumplimiento: 18.96 },
-                                { centro: 'tutuquen', numerador: 30, denominador: 23, resultado: 1.30, cumplimiento: 21.74 },
-                                { centro: 'porvenir', numerador: 28, denominador: 69, resultado: 0.41, cumplimiento: 6.76 },
-                                { centro: 'dona_carmen', numerador: 301, denominador: 217, resultado: 1.39, cumplimiento: 23.12 },
-                                { centro: 'potrero', numerador: 38, denominador: 56, resultado: 0.68, cumplimiento: 11.31 },
-                                { centro: 'chequenlemu', numerador: 28, denominador: 17, resultado: 1.65, cumplimiento: 27.45 },
-                                { centro: 'upeo', numerador: 37, denominador: 20, resultado: 1.85, cumplimiento: 30.83 },
-                                { centro: 'cordillerilla', numerador: 38, denominador: 37, resultado: 1.03, cumplimiento: 17.12 },
-                                { centro: 'obra', numerador: 55, denominador: 73, resultado: 0.75, cumplimiento: 12.56 }
-                            ]
-                        },
-                        {
-                            codigo: '9.3',
-                            nombre: 'Personas egresadas por alta clínica',
-                            tipo: 'porcentaje',
-                            meta: 13.00,
-                            importancia: 2.2,
-                            resultados: [
-                                { centro: 'comunal', numerador: 82, denominador: 10663, resultado: 0.77, cumplimiento: 0.06 },
-                                { centro: 'curico', numerador: 14, denominador: 2678, resultado: 0.52, cumplimiento: 0.04 },
-                                { centro: 'miguel', numerador: 24, denominador: 1786, resultado: 1.34, cumplimiento: 0.10 },
-                                { centro: 'betty', numerador: 25, denominador: 2269, resultado: 1.10, cumplimiento: 0.08 },
-                                { centro: 'colon', numerador: 10, denominador: 1501, resultado: 0.67, cumplimiento: 0.05 },
-                                { centro: 'sarmiento', numerador: 8, denominador: 800, resultado: 1.00, cumplimiento: 0.08 },
-                                { centro: 'niches', numerador: 0, denominador: 979, resultado: 0, cumplimiento: 0 },
-                                { centro: 'prosperidad', numerador: 0, denominador: 138, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 23, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 1, denominador: 69, resultado: 1.45, cumplimiento: 0.11 },
-                                { centro: 'dona_carmen', numerador: 0, denominador: 217, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 0, denominador: 56, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 17, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 20, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 37, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 73, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '10',
-                            nombre: 'Cumplimiento GES en APS',
-                            tipo: 'porcentaje',
-                            meta: 100,
-                            importancia: 0,
-                            resultados: [
-                                { centro: 'comunal', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'curico', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'miguel', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'betty', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'colon', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'sarmiento', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'niches', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'prosperidad', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '11',
-                            nombre: 'Cobertura vacunación anti-influenza',
-                            tipo: 'porcentaje',
-                            meta: 85.00,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 94867, denominador: 67226, resultado: 71, cumplimiento: 84 },
-                                { centro: 'curico', numerador: 22004, denominador: 16408, resultado: 75, cumplimiento: 88 },
-                                { centro: 'miguel', numerador: 16945, denominador: 10713, resultado: 63, cumplimiento: 74 },
-                                { centro: 'betty', numerador: 19910, denominador: 13622, resultado: 68, cumplimiento: 80 },
-                                { centro: 'colon', numerador: 13899, denominador: 10372, resultado: 75, cumplimiento: 88 },
-                                { centro: 'sarmiento', numerador: 12852, denominador: 9896, resultado: 77, cumplimiento: 90 },
-                                { centro: 'niches', numerador: 9258, denominador: 6215, resultado: 67, cumplimiento: 79 },
-                                { centro: 'prosperidad', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '12',
-                            nombre: 'Ingreso precoz a control de embarazo',
-                            tipo: 'porcentaje',
-                            meta: 90.04,
-                            importancia: 6,
-                            resultados: [
-                                { centro: 'comunal', numerador: 284, denominador: 314, resultado: 90.45, cumplimiento: 100.45 },
-                                { centro: 'curico', numerador: 69, denominador: 70, resultado: 98.57, cumplimiento: 109.48 },
-                                { centro: 'miguel', numerador: 47, denominador: 59, resultado: 79.66, cumplimiento: 88.47 },
-                                { centro: 'betty', numerador: 74, denominador: 84, resultado: 88.10, cumplimiento: 97.84 },
-                                { centro: 'colon', numerador: 42, denominador: 45, resultado: 93.33, cumplimiento: 103.66 },
-                                { centro: 'sarmiento', numerador: 19, denominador: 21, resultado: 90.48, cumplimiento: 100.48 },
-                                { centro: 'niches', numerador: 16, denominador: 16, resultado: 100.00, cumplimiento: 111.06 },
-                                { centro: 'prosperidad', numerador: 8, denominador: 10, resultado: 80.00, cumplimiento: 88.45 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 7, denominador: 7, resultado: 100.00, cumplimiento: 111.06 },
-                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 2, denominador: 2, resultado: 100.00, cumplimiento: 111.06 }
-                            ]
-                        },
-                        {
-                           codigo: '13',
+                      {
+  codigo: '3',
+  nombre: 'Tasa de consultas médicas de morbilidad por habitante año',
+  tipo: 'tasa',
+  meta: 0.82,
+  importancia: 6,
+  resultados: [
+    // Centros principales AGREGADOS
+    { centro: 'comunal',    numerador: 32316, denominador: 150113, resultado: 0.22, cumplimiento: 26.25 },
+    { centro: 'curico',     numerador: 6873,  denominador: 41532,  resultado: 0.17, cumplimiento: 20.18 },
+    { centro: 'miguel',     numerador: 7010,  denominador: 28763,  resultado: 0.24, cumplimiento: 29.72 },
+    { centro: 'betty',      numerador: 5845,  denominador: 28461,  resultado: 0.21, cumplimiento: 25.06 },
+    { centro: 'colon',      numerador: 5107,  denominador: 23785,  resultado: 0.21, cumplimiento: 26.19 },
+    { centro: 'sarmiento',  numerador: 4841,  denominador: 13722,  resultado: 0.35, cumplimiento: 43.00 },
+    { centro: 'niches',     numerador: 2629,  denominador: 13850,  resultado: 0.19, cumplimiento: 23.15 },
+
+    // Establecimientos (SIN CAMBIOS)
+    { centro: 'prosperidad',   numerador: 523, denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'tutuquen',      numerador: 56,  denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'porvenir',      numerador: 123, denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'dona_carmen',   numerador: 707, denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'potrero',       numerador: 12,  denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'chequenlemu',   numerador: 40,  denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'upeo',          numerador: 40,  denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'cordillerilla', numerador: 19,  denominador: 0, resultado: 0, cumplimiento: 0 },
+    { centro: 'obra',          numerador: 11,  denominador: 0, resultado: 0, cumplimiento: 0 }
+  ]
+},
+
+{
+  codigo: '4',
+  nombre: 'Porcentaje de derivación al nivel secundario',
+  tipo: 'porcentaje',
+  meta: 10,
+  importancia: 5,
+  resultados: [
+    // Centros principales — valores AGREGADOS
+    { centro: 'comunal',   numerador: 3101, denominador: 53969, resultado: 5.75, cumplimiento: 57.46 },
+    { centro: 'curico',    numerador: 746,  denominador: 11905, resultado: 6.27, cumplimiento: 62.66 },
+    { centro: 'miguel',    numerador: 689,  denominador: 11575, resultado: 5.95, cumplimiento: 59.52 },
+    { centro: 'betty',     numerador: 692,  denominador:  9882, resultado: 7.00, cumplimiento: 70.03 },
+    { centro: 'colon',     numerador: 375,  denominador:  8026, resultado: 4.67, cumplimiento: 46.72 },
+    { centro: 'sarmiento', numerador: 242,  denominador:  7117, resultado: 3.40, cumplimiento: 34.02 },
+    { centro: 'niches',    numerador: 357,  denominador:  5186, resultado: 6.88, cumplimiento: 68.84 },
+
+    // Establecimientos (SIN CAMBIOS)
+    { centro: 'prosperidad',   numerador:   0, denominador:  966, resultado: 0,    cumplimiento: 0 },
+    { centro: 'tutuquen',      numerador:   1, denominador:  162, resultado: 0.62, cumplimiento: 100 },
+    { centro: 'porvenir',      numerador:  10, denominador:  235, resultado: 4.26, cumplimiento: 100 },
+    { centro: 'dona_carmen',   numerador:  14, denominador: 1088, resultado: 1.29, cumplimiento: 100 },
+    { centro: 'potrero',       numerador:   0, denominador:  100, resultado: 0,    cumplimiento: 0 },
+    { centro: 'chequenlemu',   numerador:   0, denominador:  117, resultado: 0,    cumplimiento: 0 },
+    { centro: 'upeo',          numerador:   0, denominador:   25, resultado: 0,    cumplimiento: 0 },
+    { centro: 'cordillerilla', numerador:   0, denominador:  101, resultado: 0,    cumplimiento: 0 },
+    { centro: 'obra',          numerador:   0, denominador:  108, resultado: 0,    cumplimiento: 0 }
+  ]
+},
+
+                       // 5) Tasa de Visita Domiciliaria Integral
+{
+  codigo: '5',
+  nombre: 'Tasa de Visita Domiciliaria Integral',
+  tipo: 'tasa',
+  meta: 0.24,
+  importancia: 5,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',   numerador: 2474, denominador: 45489, resultado: 0.05, cumplimiento: 22.68 },
+    { centro: 'curico',    numerador:  542, denominador: 12585, resultado: 0.04, cumplimiento: 17.94 },
+    { centro: 'miguel',    numerador:  506, denominador:  8716, resultado: 0.06, cumplimiento: 24.19 },
+    { centro: 'betty',     numerador:  456, denominador:  8625, resultado: 0.05, cumplimiento: 22.03 },
+    { centro: 'colon',     numerador:  390, denominador:  7208, resultado: 0.05, cumplimiento: 22.55 },
+    { centro: 'sarmiento', numerador:  308, denominador:  4158, resultado: 0.07, cumplimiento: 30.86 },
+    { centro: 'niches',    numerador:  259, denominador:  4197, resultado: 0.06, cumplimiento: 25.71 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:   68, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'tutuquen',      numerador:   15, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'porvenir',      numerador:    2, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'dona_carmen',   numerador:   61, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'potrero',       numerador:   21, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'chequenlemu',   numerador:    4, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'upeo',          numerador:    8, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'cordillerilla', numerador:    5, denominador:    0, resultado:  0.00, cumplimiento: 0 },
+    { centro: 'obra',          numerador:   13, denominador:    0, resultado:  0.00, cumplimiento: 0 }
+  ]
+},
+
+// 6.1.A) Cobertura EMP mujeres (20-64 años)
+{
+  codigo: '6.1.A',
+  nombre: 'Cobertura EMP mujeres (20-64 años)',
+  tipo: 'porcentaje',
+  meta: 23.89,
+  importancia: 3,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',   numerador:  4908, denominador: 49664, resultado:  9.88, cumplimiento: 41.37 },
+    { centro: 'curico',    numerador:  1030, denominador: 14597, resultado:  7.06, cumplimiento: 29.54 },
+    { centro: 'miguel',    numerador:  1234, denominador:  9158, resultado: 13.47, cumplimiento: 56.38 },
+    { centro: 'betty',     numerador:   878, denominador:  9639, resultado:  9.11, cumplimiento: 38.14 },
+    { centro: 'colon',     numerador:   740, denominador:  7738, resultado:  9.56, cumplimiento: 40.02 },
+    { centro: 'sarmiento', numerador:   491, denominador:  4343, resultado: 12.30, cumplimiento: 47.3 },
+    { centro: 'niches',    numerador:   536, denominador:  4192, resultado: 12.80, cumplimiento: 53.6 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:  128, denominador:  -14, resultado: -914.29, cumplimiento: 0 },
+    { centro: 'tutuquen',      numerador:   51, denominador:    0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'porvenir',      numerador:   40, denominador:   -3, resultado: -1333.33, cumplimiento: 0 },
+    { centro: 'dona_carmen',   numerador:  153, denominador:   -9, resultado: -1700.00, cumplimiento: 0 },
+    { centro: 'potrero',       numerador:   11, denominador:   -2, resultado:  -550.00, cumplimiento: 0 },
+    { centro: 'chequenlemu',   numerador:   12, denominador:    0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'upeo',          numerador:   15, denominador:    0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'cordillerilla', numerador:   11, denominador:   -1, resultado: -1100.00, cumplimiento: 0 },
+    { centro: 'obra',          numerador:   30, denominador:   -2, resultado: -1500.00, cumplimiento: 0 }
+  ]
+},
+                      // 6.1.B) Cobertura EMP hombres (20-64 años)
+{
+  codigo: '6.1.B',
+  nombre: 'Cobertura EMP hombres (20-64 años)',
+  tipo: 'porcentaje',
+  meta: 22.31,
+  importancia: 4,
+  resultados: [
+    // Centros principales, sumado con sus establecimientos
+    { centro: 'comunal',        numerador: 2150, denominador: 41825, resultado:  5.14, cumplimiento: 23.04 },
+    { centro: 'curico',         numerador:  380, denominador: 10883, resultado:  3.49, cumplimiento: 15.65 },
+    { centro: 'miguel',         numerador:  582, denominador:  8935, resultado:  6.52, cumplimiento: 29.19 },
+    { centro: 'betty',          numerador:  384, denominador:  7094, resultado:  5.41, cumplimiento: 24.26 },
+    { centro: 'colon',          numerador:  281, denominador:  6471, resultado:  4.34, cumplimiento: 19.47 },
+    { centro: 'sarmiento',      numerador:  248, denominador:  4193, resultado:  5.93, cumplimiento: 26.51 },
+    { centro: 'niches',         numerador:  274, denominador:  4249, resultado:  6.40, cumplimiento: 28.96 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',    numerador:   44, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'tutuquen',       numerador:   27, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'porvenir',       numerador:   15, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'dona_carmen',    numerador:   56, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'potrero',        numerador:    3, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'chequenlemu',    numerador:    5, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'upeo',           numerador:   11, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'cordillerilla',  numerador:    4, denominador:     0, resultado:    0.00, cumplimiento: 0 },
+    { centro: 'obra',           numerador:   23, denominador:     0, resultado:    0.00, cumplimiento: 0 }
+  ]
+},
+
+
+// 6.2) Cobertura EMPAM (65+ años)
+{
+  codigo: '6.2',
+  nombre: 'Cobertura EMPAM (65+ años)',
+  tipo: 'porcentaje',
+  meta: 58.48,
+  importancia: 5,
+  resultados: [
+    // Centros principales, sumado con sus establecimientos
+    { centro: 'comunal',        numerador: 3334, denominador: 21097, resultado: 15.80, cumplimiento: 27.02 },
+    { centro: 'curico',         numerador:  837, denominador:  6609, resultado: 12.66, cumplimiento: 21.66 },
+    { centro: 'miguel',         numerador:  623, denominador:  3659, resultado: 17.03, cumplimiento: 29.13 },
+    { centro: 'betty',          numerador:  449, denominador:  3772, resultado: 11.91, cumplimiento: 20.37 },
+    { centro: 'colon',          numerador:  685, denominador:  3331, resultado: 20.56, cumplimiento: 35.16 },
+    { centro: 'sarmiento',      numerador:  320, denominador:  1592, resultado: 20.11, cumplimiento: 34.40 },
+    { centro: 'niches',         numerador:  421, denominador:  2134, resultado: 19.70, cumplimiento: 33.70 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',    numerador:  111, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'tutuquen',       numerador:   14, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'porvenir',       numerador:   25, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'dona_carmen',    numerador:   61, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'potrero',        numerador:   12, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'chequenlemu',    numerador:    9, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'upeo',           numerador:   14, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'cordillerilla',  numerador:   11, denominador:     0, resultado: 0.00, cumplimiento: 0 },
+    { centro: 'obra',           numerador:   20, denominador:     0, resultado: 0.00, cumplimiento: 0 }
+  ]
+},
+   // 7) Cobertura evaluación desarrollo psicomotor (12-23 meses)
+{
+  codigo: '7',
+  nombre: 'Cobertura evaluación desarrollo psicomotor (12-23 meses)',
+  tipo: 'porcentaje',
+  meta: 25.00,
+  importancia: 5,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',    numerador: 284, denominador: 1190, resultado: 23.87, cumplimiento: 95.48 },
+    { centro: 'curico',     numerador:  38, denominador:  267, resultado: 14.23, cumplimiento: 56.92 },
+    { centro: 'miguel',     numerador:  68, denominador:  255, resultado: 26.67, cumplimiento:106.67 },
+    { centro: 'betty',      numerador:  61, denominador:  292, resultado: 20.89, cumplimiento: 83.56 },
+    { centro: 'colon',      numerador:  41, denominador:  210, resultado: 19.52, cumplimiento: 78.07 },
+    { centro: 'sarmiento',  numerador:  30, denominador:  105, resultado: 28.57, cumplimiento:114.29 },
+    { centro: 'niches',     numerador:  46, denominador:   61, resultado: 75.41, cumplimiento:301.64 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:   6, denominador:  21, resultado: 28.57, cumplimiento: 30.08 },
+    { centro: 'tutuquen',      numerador:   0, denominador:   1, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'porvenir',      numerador:   0, denominador:   6, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'dona_carmen',   numerador:   7, denominador:  20, resultado: 35.00, cumplimiento: 36.84 },
+    { centro: 'potrero',       numerador:   1, denominador:   9, resultado: 11.11, cumplimiento: 11.70 },
+    { centro: 'chequenlemu',   numerador:   2, denominador:   1, resultado:200.00, cumplimiento:100.00 },
+    { centro: 'upeo',          numerador:   1, denominador:   2, resultado: 50.00, cumplimiento: 52.63 },
+    { centro: 'cordillerilla', numerador:   0, denominador:   0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'obra',          numerador:   4, denominador:   5, resultado: 80.00, cumplimiento: 84.21 }
+  ]
+},
+
+// 8) Cobertura control adolescentes (10-19 años)
+{
+  codigo: '8',
+  nombre: 'Cobertura control adolescentes (10-19 años)',
+  tipo: 'porcentaje',
+  meta: 24.17,
+  importancia: 6,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',    numerador: 1035, denominador: 20368, resultado:  5.08, cumplimiento: 21.02 },
+    { centro: 'curico',     numerador:  236, denominador:  5444, resultado:  4.34, cumplimiento: 17.94 },
+    { centro: 'miguel',     numerador:  160, denominador:  3687, resultado:  4.34, cumplimiento: 17.96 },
+    { centro: 'betty',      numerador:  177, denominador:  4039, resultado:  4.38, cumplimiento: 18.13 },
+    { centro: 'colon',      numerador:  261, denominador:  3281, resultado:  7.96, cumplimiento: 32.93 },
+    { centro: 'sarmiento',  numerador:  111, denominador:  2078, resultado:  5.34, cumplimiento: 22.10 },
+    { centro: 'niches',     numerador:   90, denominador:  1839, resultado:  4.89, cumplimiento: 20.23 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:  31, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'tutuquen',      numerador:   7, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'porvenir',      numerador:  12, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'dona_carmen',   numerador:  39, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'potrero',       numerador:   1, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'chequenlemu',   numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'upeo',          numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'cordillerilla', numerador:   1, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'obra',          numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 }
+  ]
+},
+
+// 9.1) Cobertura atención salud mental
+{
+  codigo: '9.1',
+  nombre: 'Cobertura atención salud mental',
+  tipo: 'porcentaje',
+  meta: 27.11,
+  importancia: 5.5,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',    numerador: 10663, denominador: 33025, resultado: 32.29, cumplimiento: 119.14 },
+    { centro: 'curico',     numerador:  2678, denominador:  9137, resultado: 29.31, cumplimiento: 108.11 },
+    { centro: 'miguel',     numerador:  1924, denominador:  6328, resultado: 30.40, cumplimiento: 112.15 },
+    { centro: 'betty',      numerador:  2338, denominador:  6261, resultado: 37.34, cumplimiento: 137.74 },
+    { centro: 'colon',      numerador:  1524, denominador:  5233, resultado: 29.12, cumplimiento: 107.42 },
+    { centro: 'sarmiento',  numerador:  1017, denominador:  3019, resultado: 33.69, cumplimiento: 124.26 },
+    { centro: 'niches',     numerador:  1109, denominador:  3047, resultado: 36.40, cumplimiento: 134.25 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:  138, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'tutuquen',      numerador:   23, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'porvenir',      numerador:   69, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'dona_carmen',   numerador:  217, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'potrero',       numerador:   56, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'chequenlemu',   numerador:   17, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'upeo',          numerador:   20, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'cordillerilla', numerador:   37, denominador:    0, resultado:   0.00, cumplimiento:   0 },
+    { centro: 'obra',          numerador:   73, denominador:    0, resultado:   0.00, cumplimiento:   0 }
+  ]
+},
+
+
+// 9.2) Tasa controles salud mental
+{
+  codigo: '9.2',
+  nombre: 'Tasa controles salud mental',
+  tipo: 'tasa',
+  meta: 6.00,
+  importancia: 3.3,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',    numerador: 12868, denominador: 10663, resultado: 1.21, cumplimiento: 20.11 },
+    { centro: 'curico',     numerador:  3029, denominador:  2678, resultado: 1.13, cumplimiento: 18.84 },
+    { centro: 'miguel',     numerador:  2605, denominador:  2062, resultado: 1.26, cumplimiento: 21.06 },
+    { centro: 'betty',      numerador:  2631, denominador:  2407, resultado: 1.09, cumplimiento: 18.22 },
+    { centro: 'colon',      numerador:  1996, denominador:  1547, resultado: 1.29, cumplimiento: 21.51 },
+    { centro: 'sarmiento',  numerador:  1982, denominador:  1364, resultado: 1.45, cumplimiento: 24.23 },
+    { centro: 'niches',     numerador:  1337, denominador:  1255, resultado: 1.06, cumplimiento: 17.75 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:  157, denominador:  138, resultado: 1.14, cumplimiento: 18.96 },
+    { centro: 'tutuquen',      numerador:   30, denominador:   23, resultado: 1.30, cumplimiento: 21.74 },
+    { centro: 'porvenir',      numerador:   28, denominador:   69, resultado: 0.41, cumplimiento:  6.76 },
+    { centro: 'dona_carmen',   numerador:  301, denominador:  217, resultado: 1.39, cumplimiento: 23.12 },
+    { centro: 'potrero',       numerador:   38, denominador:   56, resultado: 0.68, cumplimiento: 11.31 },
+    { centro: 'chequenlemu',   numerador:   28, denominador:   17, resultado: 1.65, cumplimiento: 27.45 },
+    { centro: 'upeo',          numerador:   37, denominador:   20, resultado: 1.85, cumplimiento: 30.83 },
+    { centro: 'cordillerilla', numerador:   38, denominador:   37, resultado: 1.03, cumplimiento: 17.12 },
+    { centro: 'obra',          numerador:   55, denominador:   73, resultado: 0.75, cumplimiento: 12.56 },
+  ]
+},
+
+// 9.3) Personas egresadas por alta clínica
+{
+  codigo: '9.3',
+  nombre: 'Personas egresadas por alta clínica',
+  tipo: 'porcentaje',
+  meta: 13.00,
+  importancia: 2.2,
+  resultados: [
+    // Centros principales (agregados con sus establecimientos)
+    { centro: 'comunal',    numerador:   82, denominador: 10663, resultado:  0.77, cumplimiento:  5.92 },
+    { centro: 'curico',     numerador:   14, denominador:  2678, resultado:  0.52, cumplimiento:  4.00 },
+    { centro: 'miguel',     numerador:   24, denominador:  1924, resultado:  1.25, cumplimiento:  9.62 },
+    { centro: 'betty',      numerador:   26, denominador:  2338, resultado:  1.11, cumplimiento:  8.56 },
+    { centro: 'colon',      numerador:   10, denominador:  1502, resultado:  0.67, cumplimiento:  5.12 },
+    { centro: 'sarmiento',  numerador:    8, denominador:  1017, resultado:  0.79, cumplimiento:  6.05 },
+    { centro: 'niches',     numerador:    0, denominador:  1182, resultado:  0.00, cumplimiento:  0.00 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:    0, denominador:   138, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'tutuquen',      numerador:    0, denominador:    23, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'porvenir',      numerador:    1, denominador:    69, resultado:   1.45, cumplimiento:  11.15 },
+    { centro: 'dona_carmen',   numerador:    0, denominador:   217, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'potrero',       numerador:    0, denominador:    56, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'chequenlemu',   numerador:    0, denominador:    17, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'upeo',          numerador:    0, denominador:    20, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'cordillerilla', numerador:    0, denominador:    37, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'obra',          numerador:    0, denominador:    73, resultado:   0.00, cumplimiento:   0.00 },
+  ]
+},
+
+// 10) Cumplimiento GES en APS
+{
+  codigo: '10',
+  nombre: 'Cumplimiento GES en APS',
+  tipo: 'porcentaje',
+  meta: 100,
+  importancia: 0,
+  resultados: [
+    // Todos los valores siguen en cero (suma de ceros)
+    { centro: 'comunal',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'curico',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'miguel',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'betty',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'colon',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'sarmiento',    numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'niches',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'porvenir',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'dona_carmen',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'potrero',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'chequenlemu',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'upeo',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'cordillerilla', numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'obra',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 }
+  ]
+},
+
+
+// 10) Cumplimiento GES en APS
+{
+  codigo: '10',
+  nombre: 'Cumplimiento GES en APS',
+  tipo: 'porcentaje',
+  meta: 100,
+  importancia: 0,
+  resultados: [
+    // Todos los valores siguen en cero (suma de ceros)
+    { centro: 'comunal',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'curico',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'miguel',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'betty',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'colon',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'sarmiento',    numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'niches',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'porvenir',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'dona_carmen',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'potrero',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'chequenlemu',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'upeo',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'cordillerilla', numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'obra',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 }
+  ]
+},
+
+                      // 11) Cobertura vacunación anti-influenza
+{
+  codigo: '11',
+  nombre: 'Cobertura vacunación anti-influenza',
+  tipo: 'porcentaje',
+  meta: 85.00,
+  importancia: 5,
+  resultados: [
+    // Centros principales (sin establecimientos asociados en este indicador)
+    { centro: 'comunal', numerador: 94867, denominador: 67226, resultado: 71.00, cumplimiento: 84 },
+    { centro: 'curico',  numerador: 22004, denominador: 16408, resultado: 75.00, cumplimiento: 88 },
+    { centro: 'miguel',  numerador: 16945, denominador: 10713, resultado: 63.00, cumplimiento: 74 },
+    { centro: 'betty',   numerador: 19910, denominador: 13622, resultado: 68.00, cumplimiento: 80 },
+    { centro: 'colon',   numerador: 13899, denominador: 10372, resultado: 75.00, cumplimiento: 88 },
+    { centro: 'sarmiento', numerador:12852, denominador: 9896, resultado: 77.00, cumplimiento: 90 },
+    { centro: 'niches',  numerador:  9258, denominador:  6215, resultado: 67.00, cumplimiento: 79 },
+
+    // Establecimientos (sin cambios)
+    { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'porvenir',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'dona_carmen',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'potrero',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'chequenlemu',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'upeo',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'cordillerilla', numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
+    { centro: 'obra',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 }
+  ]
+},
+
+// 12) Ingreso precoz a control de embarazo
+{
+  codigo: '12',
+  nombre: 'Ingreso precoz a control de embarazo',
+  tipo: 'porcentaje',
+  meta: 90.04,
+  importancia: 6,
+  resultados: [
+    // Centros principales + sus establecimientos sumados
+    { centro: 'comunal',    numerador: 284, denominador: 314, resultado: 90.45, cumplimiento: 100.45 },
+    { centro: 'curico',     numerador:  69, denominador:  70, resultado: 98.57, cumplimiento: 109.48 },
+    { centro: 'miguel',     numerador:  55, denominador:  69, resultado: 79.71, cumplimiento:  88.57 },
+    { centro: 'betty',      numerador:  74, denominador:  84, resultado: 88.10, cumplimiento:  97.84 },
+    { centro: 'colon',      numerador:  42, denominador:  45, resultado: 93.33, cumplimiento: 103.66 },
+    { centro: 'sarmiento',  numerador:  26, denominador:  28, resultado: 92.86, cumplimiento: 103.11 },
+    { centro: 'niches',     numerador:  18, denominador:  18, resultado:100.00, cumplimiento: 111.06 },
+
+    // Establecimientos (sin cambios aparte de los que ya se sumaron arriba)
+    { centro: 'prosperidad',   numerador:  8, denominador:  10, resultado: 80.00, cumplimiento:  88.45 },
+    { centro: 'tutuquen',      numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'porvenir',      numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'dona_carmen',   numerador:  7, denominador:   7, resultado:100.00, cumplimiento: 111.06 },
+    { centro: 'potrero',       numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'chequenlemu',   numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'upeo',          numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'cordillerilla', numerador:  0, denominador:   0, resultado:  0.00, cumplimiento:   0.00 },
+    { centro: 'obra',          numerador:  2, denominador:   2, resultado:100.00, cumplimiento: 111.06 }
+  ]
+},
+{
+  codigo: '13',
   nombre: 'Cobertura regulación fertilidad adolescentes',
   tipo: 'porcentaje',
   meta: 25.91,
@@ -2721,15 +2821,15 @@ iaapsData = {
   resultados: [
     { centro: 'comunal',         numerador: 2460,  denominador: 9956,  resultado: 24.71, cumplimiento: 95.36 },
     { centro: 'curico',          numerador: 740,   denominador: 2773,  resultado: 26.69, cumplimiento: 102.99 },
-    { centro: 'miguel',          numerador: 373,   denominador: 1746,  resultado: 21.36, cumplimiento: 82.45 },
+    { centro: 'miguel',          numerador: 457,   denominador: 1746,  resultado: 26.17, cumplimiento: 101.02 },
+    { centro: 'betty',           numerador: 400,   denominador: 1891,  resultado: 21.15, cumplimiento: 81.64 },
+    { centro: 'colon',           numerador: 348,   denominador: 1579,  resultado: 22.04, cumplimiento: 85.06 },
+    { centro: 'sarmiento',       numerador: 299,   denominador: 1062,  resultado: 28.15, cumplimiento: 108.66 },
+    { centro: 'niches',          numerador: 216,   denominador: 905,   resultado: 23.87, cumplimiento: 92.12 },
     { centro: 'prosperidad',     numerador: 84,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'colon',           numerador: 343,   denominador: 1579,  resultado: 21.72, cumplimiento: 83.84 },
     { centro: 'tutuquen',        numerador: 5,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'betty',           numerador: 387,   denominador: 1891,  resultado: 20.47, cumplimiento: 78.99 },
     { centro: 'porvenir',        numerador: 13,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'sarmiento',       numerador: 192,   denominador: 1062,  resultado: 18.08, cumplimiento: 69.78 },
     { centro: 'dona_carmen',     numerador: 91,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'niches',          numerador: 204,   denominador: 905,   resultado: 22.54, cumplimiento: 87.00 },
     { centro: 'potrero',         numerador: 9,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'chequenlemu',     numerador: 0,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'upeo',            numerador: 2,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
@@ -2738,8 +2838,8 @@ iaapsData = {
     { centro: 'region_del_maule',numerador: 16809, denominador: 0,     resultado:  0.00, cumplimiento:  0.00 }
   ]
 },
-                        
-                        {
+
+   {
   codigo: '14',
   nombre: 'Cobertura DM2 (15+ años)',
   tipo: 'porcentaje',
@@ -2748,15 +2848,15 @@ iaapsData = {
   resultados: [
     { centro: 'comunal',        numerador: 10992, denominador: 16542, resultado: 66.45, cumplimiento: 93.59 },
     { centro: 'curico',         numerador: 2901,  denominador: 4868,  resultado: 59.59, cumplimiento: 83.93 },
-    { centro: 'miguel',         numerador: 1971,  denominador: 3100,  resultado: 63.58, cumplimiento: 89.55 },
+    { centro: 'miguel',         numerador: 2284,  denominador: 3100,  resultado: 73.68, cumplimiento: 103.77 },
+    { centro: 'betty',          numerador: 1864,  denominador: 2982,  resultado: 62.51, cumplimiento: 88.04 },
+    { centro: 'colon',          numerador: 1639,  denominador: 2564,  resultado: 63.92, cumplimiento: 90.03 },
+    { centro: 'sarmiento',      numerador: 1227,  denominador: 1419,  resultado: 86.47, cumplimiento: 121.79 },
+    { centro: 'niches',         numerador: 1077,  denominador: 1608,  resultado: 66.98, cumplimiento: 94.33 },
     { centro: 'prosperidad',    numerador: 313,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'colon',          numerador: 1582,  denominador: 2564,  resultado: 61.70, cumplimiento: 86.90 },
     { centro: 'tutuquen',       numerador: 57,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'betty',          numerador: 1801,  denominador: 2982,  resultado: 60.40, cumplimiento: 85.06 },
     { centro: 'porvenir',       numerador: 63,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'sarmiento',      numerador: 856,   denominador: 1419,  resultado: 60.32, cumplimiento: 84.96 },
     { centro: 'dona_carmen',    numerador: 192,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'niches',         numerador: 978,   denominador: 1608,  resultado: 60.82, cumplimiento: 85.66 },
     { centro: 'potrero',        numerador: 63,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'chequenlemu',    numerador: 23,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'upeo',           numerador: 41,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
@@ -2764,8 +2864,7 @@ iaapsData = {
     { centro: 'obra',           numerador: 99,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'region_del_maule', numerador: 89810, denominador: 0,    resultado:  0.00, cumplimiento:  0.00 }
   ]
-},
-                {
+},{
   codigo: '15',
   nombre: 'Cobertura HTA (15+ años)',
   tipo: 'porcentaje',
@@ -2774,15 +2873,15 @@ iaapsData = {
   resultados: [
     { centro: 'comunal',         numerador: 22072, denominador: 37391, resultado: 59.03, cumplimiento: 92.96 },
     { centro: 'curico',          numerador: 5810,  denominador: 11065, resultado: 52.51, cumplimiento: 82.69 },
-    { centro: 'miguel',          numerador: 3775,  denominador: 6986,  resultado: 54.04, cumplimiento: 85.10 },
+    { centro: 'miguel',          numerador: 4353,  denominador: 6986,  resultado: 62.31, cumplimiento: 98.13 },
+    { centro: 'betty',           numerador: 3864,  denominador: 6717,  resultado: 57.53, cumplimiento: 90.59 },
+    { centro: 'colon',           numerador: 3314,  denominador: 5780,  resultado: 57.34, cumplimiento: 90.29 },
+    { centro: 'sarmiento',       numerador: 2520,  denominador: 3184,  resultado: 79.15, cumplimiento: 124.64 },
+    { centro: 'niches',          numerador: 2211,  denominador: 3658,  resultado: 60.44, cumplimiento: 95.19 },
     { centro: 'prosperidad',     numerador: 578,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'colon',           numerador: 3185,  denominador: 5780,  resultado: 55.10, cumplimiento: 86.78 },
     { centro: 'tutuquen',        numerador: 129,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'betty',           numerador: 3692,  denominador: 6717,  resultado: 54.97, cumplimiento: 86.56 },
     { centro: 'porvenir',        numerador: 172,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'sarmiento',       numerador: 1709,  denominador: 3184,  resultado: 53.67, cumplimiento: 84.53 },
     { centro: 'dona_carmen',     numerador: 367,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'niches',          numerador: 2021,  denominador: 3658,  resultado: 55.25, cumplimiento: 87.01 },
     { centro: 'potrero',         numerador: 166,   denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'chequenlemu',     numerador: 77,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
     { centro: 'upeo',            numerador: 95,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
@@ -2791,58 +2890,63 @@ iaapsData = {
     { centro: 'region_del_maule',numerador: 173278,denominador: 0,     resultado:  0.00, cumplimiento:  0.00 }
   ]
 },
+{
+  codigo: '16',
+  nombre: 'Proporción niños sin caries (<3 años)',
+  tipo: 'porcentaje',
+  meta: 64.67,
+  importancia: 5,
+  resultados: [
+    // Centros principales con dependencias ya sumadas
+    { centro: 'comunal',     numerador:  597, denominador: 3780, resultado: 15.79, cumplimiento: 24.42 },
+    { centro: 'curico',      numerador:  114, denominador:  829, resultado: 13.75, cumplimiento: 21.26 },
+    { centro: 'miguel',      numerador:   96, denominador:  801, resultado: 11.99, cumplimiento: 18.54 },
+    { centro: 'betty',       numerador:  140, denominador:  914, resultado: 15.32, cumplimiento: 23.69 },
+    { centro: 'colon',       numerador:   99, denominador:  632, resultado: 15.66, cumplimiento: 24.22 },
+    { centro: 'sarmiento',   numerador:   92, denominador:  298, resultado: 30.87, cumplimiento: 47.73 },
+    { centro: 'niches',      numerador:   56, denominador:  306, resultado: 18.30, cumplimiento: 28.30 },
 
-                        {
-                            codigo: '16',
-                            nombre: 'Proporción niños sin caries (<3 años)',
-                            tipo: 'porcentaje',
-                            meta: 64.67,
-                            importancia: 5,
-                            resultados: [
-                                { centro: 'comunal', numerador: 597, denominador: 3780, resultado: 15.79, cumplimiento: 24.42 },
-                                { centro: 'curico', numerador: 114, denominador: 829, resultado: 13.75, cumplimiento: 21.26 },
-                                { centro: 'miguel', numerador: 83, denominador: 801, resultado: 10.36, cumplimiento: 16.02 },
-                                { centro: 'betty', numerador: 136, denominador: 914, resultado: 14.88, cumplimiento: 23.01 },
-                                { centro: 'colon', numerador: 99, denominador: 632, resultado: 15.66, cumplimiento: 24.22 },
-                                { centro: 'sarmiento', numerador: 68, denominador: 298, resultado: 22.82, cumplimiento: 35.28 },
-                                { centro: 'niches', numerador: 56, denominador: 306, resultado: 18.30, cumplimiento: 28.30 },
-                                { centro: 'prosperidad', numerador: 13, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 4, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'dona_carmen', numerador: 24, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'potrero', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 },
-                                { centro: 'obra', numerador: 0, denominador: 0, resultado: 0, cumplimiento: 0 }
-                            ]
-                        },
-                        {
-                            codigo: '17',
-                            nombre: 'Prevalencia normalidad menores de 2 años',
-                            tipo: 'porcentaje',
-                            meta: 61.13,
-                            importancia: 4,
-                            resultados: [
-                                { centro: 'comunal', numerador: 1362, denominador: 2276, resultado: 59.84, cumplimiento: 97.89 },
-                                { centro: 'curico', numerador: 324, denominador: 526, resultado: 61.60, cumplimiento: 100 },
-                                { centro: 'miguel', numerador: 264, denominador: 441, resultado: 59.86, cumplimiento: 97.93 },
-                                { centro: 'betty', numerador: 306, denominador: 531, resultado: 57.63, cumplimiento: 94.27 },
-                                { centro: 'colon', numerador: 226, denominador: 362, resultado: 62.43, cumplimiento: 100 },
-                                { centro: 'sarmiento', numerador: 90, denominador: 161, resultado: 55.90, cumplimiento: 91.45 },
-                                { centro: 'niches', numerador: 81, denominador: 131, resultado: 61.83, cumplimiento: 100 },
-                                { centro: 'prosperidad', numerador: 30, denominador: 48, resultado: 62.50, cumplimiento: 100 },
-                                { centro: 'tutuquen', numerador: 0, denominador: 2, resultado: 0, cumplimiento: 0 },
-                                { centro: 'porvenir', numerador: 5, denominador: 7, resultado: 71.43, cumplimiento: 100 },
-                                { centro: 'dona_carmen', numerador: 19, denominador: 40, resultado: 47.50, cumplimiento: 77.70 },
-                                { centro: 'potrero', numerador: 8, denominador: 12, resultado: 66.67, cumplimiento: 100 },
-                                { centro: 'chequenlemu', numerador: 0, denominador: 1, resultado: 0, cumplimiento: 0 },
-                                { centro: 'upeo', numerador: 2, denominador: 2, resultado: 100, cumplimiento: 100 },
-                                { centro: 'cordillerilla', numerador: 1, denominador: 2, resultado: 50, cumplimiento: 81.79 },
-                                { centro: 'obra', numerador: 6, denominador: 10, resultado: 60, cumplimiento: 98.15 }
-                            ]
-                        }
-                    ]
+    // Establecimientos dependientes (sin cambios)
+    { centro: 'prosperidad', numerador:   13, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'tutuquen',    numerador:    0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'porvenir',    numerador:    4, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'dona_carmen', numerador:   24, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'potrero',     numerador:    0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'chequenlemu', numerador:    0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'upeo',        numerador:    0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'cordillerilla',numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'obra',        numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00 }
+  ]
+},
+{
+  codigo: '17',
+  nombre: 'Prevalencia normalidad menores de 2 años',
+  tipo: 'porcentaje',
+  meta: 61.13,
+  importancia: 4,
+  resultados: [
+    // Centros principales con dependencias ya sumadas
+    { centro: 'comunal',     numerador: 1362, denominador: 2276, resultado: 59.84, cumplimiento: 97.89 },
+    { centro: 'curico',      numerador:  324, denominador:  526, resultado: 61.60, cumplimiento:100.77 },
+    { centro: 'miguel',      numerador:  294, denominador:  489, resultado: 60.12, cumplimiento: 98.35 },
+    { centro: 'betty',       numerador:  311, denominador:  538, resultado: 57.81, cumplimiento: 94.57 },
+    { centro: 'colon',       numerador:  226, denominador:  364, resultado: 62.09, cumplimiento:101.57 },
+    { centro: 'sarmiento',   numerador:  120, denominador:  218, resultado: 55.05, cumplimiento: 90.05 },
+    { centro: 'niches',      numerador:   98, denominador:  158, resultado: 62.03, cumplimiento:101.47 },
+
+    // Establecimientos dependientes (sin cambios)
+    { centro: 'prosperidad', numerador:   30, denominador:   48, resultado: 62.50, cumplimiento:100.00 },
+    { centro: 'tutuquen',    numerador:    0, denominador:    2, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'porvenir',    numerador:    5, denominador:    7, resultado: 71.43, cumplimiento:100.00 },
+    { centro: 'dona_carmen', numerador:   19, denominador:   40, resultado: 47.50, cumplimiento: 77.70 },
+    { centro: 'potrero',     numerador:    8, denominador:   12, resultado: 66.67, cumplimiento:100.00 },
+    { centro: 'chequenlemu', numerador:    0, denominador:    1, resultado:  0.00, cumplimiento:  0.00 },
+    { centro: 'upeo',        numerador:    2, denominador:    2, resultado:100.00, cumplimiento:100.00 },
+    { centro: 'cordillerilla',numerador:   1, denominador:    2, resultado: 50.00, cumplimiento: 81.79 },
+    { centro: 'obra',        numerador:    6, denominador:   10, resultado: 60.00, cumplimiento: 98.15 }
+  ]
+}
+                ]
                 };
                 
                 // Simular un retraso para mostrar el indicador de carga
