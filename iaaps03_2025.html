@@ -2968,45 +2968,68 @@ iaapsData = {
         }
         
         // Función para actualizar las tarjetas de resumen
-        function actualizarTarjetasResumen() {
-            // Calcular estadísticas generales
-            let totalIndicadores = 0;
-            let indicadoresCumplidos = 0;
-            let indicadoresParciales = 0;
-            let indicadoresCriticos = 0;
-            let cumplimientoTotal = 0;
+function actualizarTarjetasResumen() {
+    // Calcular estadísticas generales
+    let totalIndicadores = 0;
+    let indicadoresCumplidos = 0;
+    let indicadoresParciales = 0;
+    let indicadoresCriticos = 0;
+    let cumplimientoTotal = 0;
+    
+    // Variables para cálculo ponderado
+    let sumaPonderada = 0;
+    let sumaPonderaciones = 0;
+    
+    // Solo contar indicadores comunales
+    iaapsData.indicadores.forEach(indicador => {
+        const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
+        if (resultadoComunal) {
+            totalIndicadores++;
+            cumplimientoTotal += resultadoComunal.cumplimiento || 0;
             
-            // Solo contar indicadores comunales
-            iaapsData.indicadores.forEach(indicador => {
-                const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
-                if (resultadoComunal) {
-                    totalIndicadores++;
-                    cumplimientoTotal += resultadoComunal.cumplimiento || 0;
-                    
-                    if (resultadoComunal.cumplimiento >= 100) {
-                        indicadoresCumplidos++;
-                    } else if (resultadoComunal.cumplimiento >= 25) {
-                        indicadoresParciales++;
-                    } else {
-                        indicadoresCriticos++;
-                    }
+            if (resultadoComunal.cumplimiento >= 100) {
+                indicadoresCumplidos++;
+            } else if (resultadoComunal.cumplimiento >= 25) {
+                indicadoresParciales++;
+            } else {
+                indicadoresCriticos++;
+            }
+            
+            // Cálculo ponderado (ignorando indicador 10-GES)
+            if (indicador.codigo !== '10') {
+                // Extraer valor numérico de importancia
+                const importanciaStr = importanciaIndicadores[indicador.codigo] || '0%';
+                const importancia = parseFloat(importanciaStr.replace('%', '')) || 0;
+                
+                if (importancia > 0) {
+                    // Limitar cumplimiento máximo a 100%
+                    const cumplimientoEfectivo = Math.min(resultadoComunal.cumplimiento || 0, 100);
+                    sumaPonderada += cumplimientoEfectivo * importancia;
+                    sumaPonderaciones += importancia;
                 }
-            });
-            
-            const cumplimientoPromedio = totalIndicadores > 0 ? (cumplimientoTotal / totalIndicadores).toFixed(2) : 0;
-            
-            // Actualizar valores en la interfaz
-            document.getElementById('indicadorCumplidosValue').textContent = indicadoresCumplidos;
-            document.getElementById('indicadorParcialValue').textContent = indicadoresParciales;
-            document.getElementById('indicadorCriticosValue').textContent = indicadoresCriticos;
-            document.getElementById('cumplimientoComunalValue').textContent = cumplimientoPromedio + '%';
-            
-            // Actualizar barras de progreso
-            document.getElementById('indicadorCumplidosProgress').style.width = (indicadoresCumplidos / totalIndicadores * 100) + '%';
-            document.getElementById('indicadorParcialProgress').style.width = (indicadoresParciales / totalIndicadores * 100) + '%';
-            document.getElementById('indicadorCriticosProgress').style.width = (indicadoresCriticos / totalIndicadores * 100) + '%';
-            document.getElementById('cumplimientoComunalProgress').style.width = cumplimientoPromedio + '%';
+            }
         }
+    });
+    
+    // Cálculo simple (original)
+    const cumplimientoPromedio = totalIndicadores > 0 ? (cumplimientoTotal / totalIndicadores).toFixed(2) : 0;
+    
+    // Cálculo ponderado (nuevo)
+    const cumplimientoGlobal = sumaPonderaciones > 0 ? 
+        parseFloat((sumaPonderada / sumaPonderaciones).toFixed(2)) : 0;
+    
+    // Actualizar valores en la interfaz
+    document.getElementById('indicadorCumplidosValue').textContent = indicadoresCumplidos;
+    document.getElementById('indicadorParcialValue').textContent = indicadoresParciales;
+    document.getElementById('indicadorCriticosValue').textContent = indicadoresCriticos;
+    document.getElementById('cumplimientoComunalValue').textContent = cumplimientoGlobal + '%';
+    
+    // Actualizar barras de progreso
+    document.getElementById('indicadorCumplidosProgress').style.width = (indicadoresCumplidos / totalIndicadores * 100) + '%';
+    document.getElementById('indicadorParcialProgress').style.width = (indicadoresParciales / totalIndicadores * 100) + '%';
+    document.getElementById('indicadorCriticosProgress').style.width = (indicadoresCriticos / totalIndicadores * 100) + '%';
+    document.getElementById('cumplimientoComunalProgress').style.width = cumplimientoGlobal + '%';
+}
         
        // Declaración global (por ejemplo, justo después de tus imports y antes de cualquier función)
 let centroChartInstance = null;
@@ -6242,6 +6265,44 @@ function calcularCumplimientoGlobal(codigoCentro, indicadores) {
     return parseFloat((sumaPonderada / sumaPonderaciones).toFixed(2));
 }
 
+function diagnosticarDashboard() {
+    console.log("=== DIAGNÓSTICO DEL DASHBOARD ===");
+    
+    // Verificar datos IAAPS
+    console.log("iaapsData existe:", iaapsData ? "SÍ" : "NO");
+    if (!iaapsData) return "ERROR: iaapsData es null o undefined";
+    
+    console.log("iaapsData.indicadores existe:", iaapsData.indicadores ? "SÍ" : "NO");
+    if (!iaapsData.indicadores) return "ERROR: iaapsData.indicadores es null o undefined";
+    
+    console.log("iaapsData.centros existe:", iaapsData.centros ? "SÍ" : "NO");
+    if (!iaapsData.centros) return "ERROR: iaapsData.centros es null o undefined";
+    
+    // Verificar elementos DOM críticos
+    const elementosDOM = [
+        'indicadorCumplidosValue', 
+        'indicadorParcialValue',
+        'indicadorCriticosValue',
+        'cumplimientoComunalValue',
+        'indicadorCumplidosProgress',
+        'indicadorParcialProgress',
+        'indicadorCriticosProgress',
+        'cumplimientoComunalProgress'
+    ];
+    
+    let elementosFaltantes = [];
+    elementosDOM.forEach(id => {
+        if (!document.getElementById(id)) {
+            elementosFaltantes.push(id);
+        }
+    });
+    
+    if (elementosFaltantes.length > 0) {
+        return "ERROR: Faltan elementos DOM: " + elementosFaltantes.join(", ");
+    }
+    
+    return "OK: Diagnóstico completado sin problemas evidentes";
+}
 
 
 
