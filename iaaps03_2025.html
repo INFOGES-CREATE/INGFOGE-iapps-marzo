@@ -1154,8 +1154,13 @@ body {
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-sign-out-alt me-1"></i> Salir
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link active" href="#" id="dashboardLink">
-                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                            <i class="fas fa-tachometer-alt me-1"></i> Inicio
                         </a>
                     </li>
                     <li class="nav-item">
@@ -1335,7 +1340,6 @@ body {
                                             <th class="text-center">Meta</th>
                                             <th class="text-center">Actual</th>
                                             <th class="text-center">Cumplimiento</th>
-                                            <th class="text-center">Tendencia</th>
                                         </tr>
                                     </thead>
                                     <tbody id="indicadoresTableBody">
@@ -1664,7 +1668,6 @@ body {
                                         </div>
                                         <div class="col-md-6">
                                             <div class="chart-container">
-                                                <canvas id="indicadorTendenciaChart"></canvas>
                                             </div>
                                         </div>
                                     </div>
@@ -1855,7 +1858,6 @@ body {
         let currentIndicador = '1';
         let darkMode = false;
         let indicadorCentrosChartInstance = null;
-        let indicadorTendenciaChartInstance = null;
         
         // Mapeo de códigos de indicadores a nombres completos
         const indicadoresMap = {
@@ -2692,35 +2694,7 @@ iaapsData = {
   ]
 },
 
-// 10) Cumplimiento GES en APS
-{
-  codigo: '10',
-  nombre: 'Cumplimiento GES en APS',
-  tipo: 'porcentaje',
-  meta: 100,
-  importancia: 0,
-  resultados: [
-    // Todos los valores siguen en cero (suma de ceros)
-    { centro: 'comunal',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'curico',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'miguel',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'betty',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'colon',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'sarmiento',    numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'niches',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
 
-    // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'porvenir',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'dona_carmen',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'potrero',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'chequenlemu',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'upeo',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'cordillerilla', numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'obra',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 }
-  ]
-},
 
 
 // 10) Cumplimiento GES en APS
@@ -2814,7 +2788,7 @@ iaapsData = {
 },
 {
   codigo: '13',
-  nombre: 'Cobertura regulación fertilidad adolescentes',
+  nombre: 'Cobertura regulación fertilidad adolescentes (Solo referencial con REM P Dic 2024)',
   tipo: 'porcentaje',
   meta: 25.91,
   importancia: 6,
@@ -2841,7 +2815,7 @@ iaapsData = {
 
    {
   codigo: '14',
-  nombre: 'Cobertura DM2 (15+ años)',
+  nombre: 'Cobertura DM2 (15+ años), (Solo referencial con REM P Dic 2024)',
   tipo: 'porcentaje',
   meta: 71.00,
   importancia: 6,
@@ -2866,7 +2840,7 @@ iaapsData = {
   ]
 },{
   codigo: '15',
-  nombre: 'Cobertura HTA (15+ años)',
+  nombre: 'Cobertura HTA (15+ años), (Solo referencial con REM P Dic 2024)',
   tipo: 'porcentaje',
   meta: 63.50,
   importancia: 6,
@@ -2920,7 +2894,7 @@ iaapsData = {
 },
 {
   codigo: '17',
-  nombre: 'Prevalencia normalidad menores de 2 años',
+  nombre: 'Prevalencia normalidad menores de 2 años (Solo referencial con REM P Dic 2024)',
   tipo: 'porcentaje',
   meta: 61.13,
   importancia: 4,
@@ -3203,28 +3177,6 @@ let bottomIndicadoresChartInstance = null;
 
 
 
-// Función auxiliar para formatear la columna Tendencia
-function formatearTendencia(indicadorCodigo) {
-    // Indicadores que siempre deben mostrarse "0.00%" en verde
-    const siempreMeta100 = ['1', '2.1', '2.2', '10'];
-    if (siempreMeta100.includes(indicadorCodigo)) {
-        return `
-            <span class="text-success">
-                <i class="fas fa-arrow-up me-1"></i>0.00%
-            </span>
-        `;
-    }
-    // Para los demás, simular flecha y porcentaje
-    const valor     = (Math.random() * 5).toFixed(2);
-    const positivo  = Math.random() > 0.5;
-    const cls       = positivo ? 'text-success' : 'text-danger';
-    const iconClass = positivo ? 'fa-arrow-up'   : 'fa-arrow-down';
-    return `
-        <span class="${cls}">
-            <i class="fas ${iconClass} me-1"></i>${valor}%
-        </span>
-    `;
-}
 
 
 /**
@@ -5156,602 +5108,7 @@ function procesarComandoVoz(comando) {
     }
 }
 
-// Visualización de tendencias históricas
-function visualizarTendenciasHistoricas() {
-    // Agregar botón de tendencias históricas
-    const navbarMenu = document.querySelector('.navbar-nav');
-    const tendenciasLink = document.createElement('li');
-    tendenciasLink.className = 'nav-item';
-    tendenciasLink.innerHTML = `
-        <a class="nav-link" href="#" id="tendenciasLink">
-            <i class="fas fa-chart-line me-1"></i> Tendencias
-        </a>
-    `;
-    navbarMenu.appendChild(tendenciasLink);
-    
-    // Crear vista de tendencias
-    const container = document.querySelector('.container-fluid');
-    const tendenciasView = document.createElement('div');
-    tendenciasView.id = 'tendenciasView';
-    tendenciasView.style.display = 'none';
-    
-    tendenciasView.innerHTML = `
-        <div class="dashboard-header">
-            <h2><i class="fas fa-chart-line me-2"></i>Tendencias Históricas IAAPS</h2>
-            <p class="text-muted">Análisis de evolución temporal de indicadores IAAPS para la comuna de Curicó</p>
-        </div>
-        
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Filtro de Tendencias</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="tendenciasForm">
-                            <div class="mb-3">
-                                <label class="form-label">Tipo de Gráfico</label>
-                                <select class="form-select" id="tipoGraficoSelect">
-                                    <option value="line">Línea</option>
-                                    <option value="bar">Barras</option>
-                                    <option value="radar">Radar</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Periodo</label>
-                                <select class="form-select" id="periodoSelect">
-                                    <option value="mensual">Mensual</option>
-                                    <option value="trimestral">Trimestral</option>
-                                    <option value="anual">Anual</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Indicador</label>
-                                <select class="form-select" id="indicadorTendenciaSelect">
-                                    <!-- Se llenará dinámicamente -->
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Centro</label>
-                                <select class="form-select" id="centroTendenciaSelect">
-                                    <option value="comunal">CURICÓ (COMUNAL)</option>
-                                    <!-- Se llenará dinámicamente -->
-                                </select>
-                            </div>
-                            
-                            <button type="button" class="btn btn-primary" id="generarTendenciaBtn">
-                                <i class="fas fa-sync-alt me-1"></i> Generar Gráfico
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0" id="tendenciaChartTitle">Tendencia Histórica</h5>
-                        <div>
-                            <button class="btn btn-sm btn-outline-success" id="exportarTendenciaExcelBtn">
-                                <i class="fas fa-file-excel me-1"></i> Excel
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" id="exportarTendenciaPdfBtn">
-                                <i class="fas fa-file-pdf me-1"></i> PDF
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container" style="height: 400px;">
-                            <canvas id="tendenciaHistoricaChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Datos Históricos</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead id="tendenciaTableHead">
-                                    <!-- Se llenará dinámicamente -->
-                                </thead>
-                                <tbody id="tendenciaTableBody">
-                                    <!-- Se llenará dinámicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    container.appendChild(tendenciasView);
-    
-    // Event listener para el enlace de tendencias
-    document.getElementById('tendenciasLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        mostrarVista('tendenciasView');
-        
-        // Actualizar clase active en la navegación
-        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        this.classList.add('active');
-        
-        // Llenar select de indicadores
-        const indicadorSelect = document.getElementById('indicadorTendenciaSelect');
-        indicadorSelect.innerHTML = '';
-        
-        iaapsData.indicadores.forEach(indicador => {
-            const option = document.createElement('option');
-            option.value = indicador.codigo;
-            option.textContent = `${indicador.codigo} - ${indicador.nombre}`;
-            indicadorSelect.appendChild(option);
-        });
-        
-        // Llenar select de centros
-        const centroSelect = document.getElementById('centroTendenciaSelect');
-        centroSelect.innerHTML = '<option value="comunal">CURICÓ (COMUNAL)</option>';
-        
-        iaapsData.centros.filter(centro => centro.codigo !== 'comunal').forEach(centro => {
-            const option = document.createElement('option');
-            option.value = centro.codigo;
-            option.textContent = centro.nombre;
-            centroSelect.appendChild(option);
-        });
-        
-        // Event listener para generar tendencia
-        document.getElementById('generarTendenciaBtn').addEventListener('click', function() {
-            generarGraficoTendencia();
-        });
-        
-        // Event listeners para exportar tendencia
-        document.getElementById('exportarTendenciaExcelBtn').addEventListener('click', function() {
-            exportarTendenciaExcel();
-        });
-        
-        document.getElementById('exportarTendenciaPdfBtn').addEventListener('click', function() {
-            exportarTendenciaPDF();
-        });
-        
-        // Generar gráfico inicial
-        generarGraficoTendencia();
-    });
-}
 
-// Generar gráfico de tendencia histórica
-function generarGraficoTendencia() {
-    const tipoGrafico = document.getElementById('tipoGraficoSelect').value;
-    const periodo = document.getElementById('periodoSelect').value;
-    const indicadorCodigo = document.getElementById('indicadorTendenciaSelect').value;
-    const centroCodigo = document.getElementById('centroTendenciaSelect').value;
-    
-    // Obtener indicador y centro
-    const indicador = iaapsData.indicadores.find(i => i.codigo === indicadorCodigo);
-    const centro = iaapsData.centros.find(c => c.codigo === centroCodigo);
-    
-    if (!indicador || !centro) {
-        mostrarNotificacion('Error al generar tendencia', 'error');
-        return;
-    }
-    
-    // Actualizar título
-    document.getElementById('tendenciaChartTitle').textContent = 
-        `Tendencia Histórica: ${indicador.codigo} - ${centro.nombre}`;
-    
-    // Generar datos simulados para la tendencia
-    const periodos = [];
-    const datos = [];
-    const meta = [];
-    
-    if (periodo === 'mensual') {
-        // Datos mensuales (últimos 12 meses)
-        const meses = ['Abril 2024', 'Mayo 2024', 'Junio 2024', 'Julio 2024', 'Agosto 2024', 'Septiembre 2024', 
-                      'Octubre 2024', 'Noviembre 2024', 'Diciembre 2024', 'Enero 2025', 'Febrero 2025', 'Marzo 2025'];
-        
-        periodos.push(...meses);
-        
-        // Generar valores que aumentan gradualmente
-        let valorBase = Math.random() * 50 + 20; // Entre 20 y 70
-        
-        for (let i = 0; i < meses.length; i++) {
-            // Variación aleatoria entre -5 y +8
-            const variacion = (Math.random() * 13) - 5;
-            valorBase = Math.max(0, Math.min(100, valorBase + variacion));
-            datos.push(parseFloat(valorBase.toFixed(2)));
-            meta.push(indicador.meta);
-        }
-    } else if (periodo === 'trimestral') {
-        // Datos trimestrales (últimos 8 trimestres)
-        const trimestres = ['Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024', 'Q1 2025'];
-        
-        periodos.push(...trimestres);
-        
-        // Generar valores que aumentan gradualmente
-        let valorBase = Math.random() * 50 + 20; // Entre 20 y 70
-        
-        for (let i = 0; i < trimestres.length; i++) {
-            // Variación aleatoria entre -5 y +12
-            const variacion = (Math.random() * 17) - 5;
-            valorBase = Math.max(0, Math.min(100, valorBase + variacion));
-            datos.push(parseFloat(valorBase.toFixed(2)));
-            meta.push(indicador.meta);
-        }
-    } else { // anual
-        // Datos anuales (últimos 5 años)
-        const años = ['2021', '2022', '2023', '2024', '2025'];
-        
-        periodos.push(...años);
-        
-        // Generar valores que aumentan gradualmente
-        let valorBase = Math.random() * 40 + 20; // Entre 20 y 60
-        
-        for (let i = 0; i < años.length; i++) {
-            // Variación aleatoria entre -5 y +15
-            const variacion = (Math.random() * 20) - 5;
-            valorBase = Math.max(0, Math.min(100, valorBase + variacion));
-            datos.push(parseFloat(valorBase.toFixed(2)));
-            meta.push(indicador.meta);
-        }
-    }
-    
-    // Destruir gráfico anterior si existe
-    if (window.tendenciaHistoricaChart) {
-        window.tendenciaHistoricaChart.destroy();
-    }
-    
-    // Crear gráfico
-    const ctx = document.getElementById('tendenciaHistoricaChart').getContext('2d');
-    
-    if (tipoGrafico === 'radar') {
-        // Para el gráfico radar, se necesita otro tipo de datos
-        // Crear datos comparativos entre distintos centros para un periodo
-        const centrosLabels = iaapsData.centros.map(c => c.nombre);
-        const datosRadar = [];
-        
-        // Generar datos para cada centro
-        iaapsData.centros.forEach(c => {
-            const resultado = indicador.resultados.find(r => r.centro === c.codigo);
-            
-            if (resultado) {
-                datosRadar.push(resultado.cumplimiento);
-            } else {
-                datosRadar.push(0);
-            }
-        });
-        
-        window.tendenciaHistoricaChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: centrosLabels,
-                datasets: [{
-                    label: `Indicador ${indicador.codigo}`,
-                    data: datosRadar,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                    borderColor: 'rgb(52, 152, 219)',
-                    pointBackgroundColor: 'rgb(52, 152, 219)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(52, 152, 219)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        min: 0,
-                        max: 100,
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 20
-                        }
-                    }
-                }
-            }
-        });
-    } else {
-        window.tendenciaHistoricaChart = new Chart(ctx, {
-            type: tipoGrafico,
-            data: {
-                labels: periodos,
-                datasets: [
-                    {
-                        label: `${indicador.codigo} - ${centro.nombre}`,
-                        data: datos,
-                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                        borderColor: 'rgb(52, 152, 219)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Meta',
-                        data: meta,
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        borderColor: 'rgb(231, 76, 60)',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        fill: false,
-                        pointRadius: 0
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: indicador.tipo === 'porcentaje' ? 'Valor (%)' : 'Valor'
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    // Actualizar tabla de datos
-    actualizarTablaTendencia(periodos, datos, meta, indicador);
-}
-
-// Actualizar tabla de tendencia
-function actualizarTablaTendencia(periodos, datos, meta, indicador) {
-    const tableHead = document.getElementById('tendenciaTableHead');
-    const tableBody = document.getElementById('tendenciaTableBody');
-    
-    // Limpiar tabla
-    tableHead.innerHTML = '';
-    tableBody.innerHTML = '';
-    
-    // Crear encabezados
-    const trHead = document.createElement('tr');
-    trHead.innerHTML = `
-        <th>Periodo</th>
-        <th class="text-center">Resultado</th>
-        <th class="text-center">Meta</th>
-        <th class="text-center">Cumplimiento</th>
-        <th class="text-center">Estado</th>
-    `;
-    tableHead.appendChild(trHead);
-    
-    // Crear filas
-    periodos.forEach((periodo, index) => {
-        const resultado = datos[index];
-        const metaValor = meta[index];
-        const cumplimiento = (resultado / metaValor) * 100;
-        
-        let estado = '';
-        let statusClass = '';
-        
-        if (cumplimiento >= 25) {
-            estado = 'Cumplido';
-            statusClass = 'bg-success';
-        } else if (cumplimiento >= 80) {
-            estado = 'Parcial';
-            statusClass = 'bg-warning';
-        } else {
-            estado = 'Crítico';
-            statusClass = 'bg-danger';
-        }
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${periodo}</td>
-            <td class="text-center">${indicador.tipo === 'porcentaje' ? resultado + '%' : resultado}</td>
-            <td class="text-center">${indicador.tipo === 'porcentaje' ? metaValor + '%' : metaValor}</td>
-            <td class="text-center">
-                <div class="d-flex align-items-center">
-                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                        <div class="progress-bar ${statusClass}" role="progressbar" style="width: ${Math.min(cumplimiento, 100)}%" aria-valuenow="${cumplimiento}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <span>${cumplimiento.toFixed(2)}%</span>
-                </div>
-            </td>
-            <td class="text-center">
-                <span class="badge ${statusClass}">${estado}</span>
-            </td>
-        `;
-        
-        tableBody.appendChild(tr);
-    });
-}
-
-// Exportar tendencia a Excel
-function exportarTendenciaExcel() {
-    mostrarCargando(true);
-    
-    setTimeout(() => {
-        try {
-            const tipoGrafico = document.getElementById('tipoGraficoSelect').value;
-            const periodo = document.getElementById('periodoSelect').value;
-            const indicadorCodigo = document.getElementById('indicadorTendenciaSelect').value;
-            const centroCodigo = document.getElementById('centroTendenciaSelect').value;
-            
-            // Obtener indicador y centro
-            const indicador = iaapsData.indicadores.find(i => i.codigo === indicadorCodigo);
-            const centro = iaapsData.centros.find(c => c.codigo === centroCodigo);
-            
-            if (!indicador || !centro) {
-                mostrarCargando(false);
-                mostrarNotificacion('Error al exportar datos', 'error');
-                return;
-            }
-            
-            // Nombre del archivo
-            const nombreArchivo = `IAAPS_Tendencia_${indicador.codigo}_${centro.nombre}_${new Date().toISOString().split('T')[0]}.xlsx`;
-            
-            // Obtener datos de la tabla
-            const filas = Array.from(document.querySelectorAll('#tendenciaTableBody tr'));
-            const data = [
-                ['Periodo', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']
-            ];
-            
-            filas.forEach(fila => {
-                const celdas = Array.from(fila.querySelectorAll('td'));
-                const periodo = celdas[0].textContent;
-                const resultado = celdas[1].textContent;
-                const meta = celdas[2].textContent;
-                const cumplimiento = celdas[3].textContent.trim();
-                const estado = celdas[4].textContent;
-                
-                data.push([periodo, resultado, meta, cumplimiento, estado]);
-            });
-            
-            // Crear libro de Excel
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            
-            // Ajustar ancho de columnas
-            const wscols = data[0].map((col, i) => {
-                const maxLength = data.reduce((w, r) => Math.max(w, r[i] ? r[i].toString().length : 0), col.length);
-                return { wch: maxLength + 2 };
-            });
-            ws['!cols'] = wscols;
-            
-            XLSX.utils.book_append_sheet(wb, ws, "Tendencia");
-            XLSX.writeFile(wb, nombreArchivo);
-            
-            mostrarCargando(false);
-            mostrarNotificacion('Datos exportados correctamente', 'success');
-        } catch (error) {
-            console.error('Error al exportar a Excel:', error);
-            mostrarCargando(false);
-            mostrarNotificacion('Error al exportar datos', 'error');
-        }
-    }, 1000);
-}
-
-// Exportar tendencia a PDF
-function exportarTendenciaPDF() {
-    mostrarCargando(true);
-    
-    setTimeout(() => {
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const tipoGrafico = document.getElementById('tipoGraficoSelect').value;
-            const periodo = document.getElementById('periodoSelect').value;
-            const indicadorCodigo = document.getElementById('indicadorTendenciaSelect').value;
-            const centroCodigo = document.getElementById('centroTendenciaSelect').value;
-            
-            // Obtener indicador y centro
-            const indicador = iaapsData.indicadores.find(i => i.codigo === indicadorCodigo);
-            const centro = iaapsData.centros.find(c => c.codigo === centroCodigo);
-            
-            if (!indicador || !centro) {
-                mostrarCargando(false);
-                mostrarNotificacion('Error al exportar datos', 'error');
-                return;
-            }
-            
-            // Nombre del archivo
-            const nombreArchivo = `IAAPS_Tendencia_${indicador.codigo}_${centro.nombre}_${new Date().toISOString().split('T')[0]}.pdf`;
-            
-            // Título
-            const titulo = `Tendencia Histórica: ${indicador.codigo} - ${centro.nombre}`;
-            
-            // Añadir título
-            doc.setFontSize(18);
-            doc.text(titulo, 14, 22);
-            
-            // Añadir fecha
-            doc.setFontSize(11);
-            doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 30);
-            
-            // Capturar gráfico
-            const canvas = document.getElementById('tendenciaHistoricaChart');
-            const imgData = canvas.toDataURL('image/png');
-            
-            // Añadir gráfico
-            doc.addImage(imgData, 'PNG', 14, 35, 180, 100);
-            
-            // Añadir tabla
-            const filas = Array.from(document.querySelectorAll('#tendenciaTableBody tr'));
-            const columnas = [
-                { header: 'Periodo', dataKey: 'periodo' },
-                { header: 'Resultado', dataKey: 'resultado' },
-                { header: 'Meta', dataKey: 'meta' },
-                { header: 'Cumplimiento', dataKey: 'cumplimiento' },
-                { header: 'Estado', dataKey: 'estado' }
-            ];
-            
-            const datos = filas.map(fila => {
-                const celdas = Array.from(fila.querySelectorAll('td'));
-                return {
-                    periodo: celdas[0].textContent,
-                    resultado: celdas[1].textContent,
-                    meta: celdas[2].textContent,
-                    cumplimiento: celdas[3].textContent.trim(),
-                    estado: celdas[4].textContent
-                };
-            });
-            
-            doc.autoTable({
-                columns: columnas,
-                body: datos,
-                startY: 140,
-                styles: { fontSize: 8 },
-                didDrawCell: function(data) {
-                    // Colorear celdas de estado
-                    if (data.column.dataKey === 'estado') {
-                        if (data.cell.text.length > 0) {
-                            const estado = data.cell.text[0];
-                            
-                            if (estado === 'Cumplido') {
-                                doc.setFillColor(39, 174, 96); // Verde
-                            } else if (estado === 'Parcial') {
-                                doc.setFillColor(243, 156, 18); // Amarillo
-                            } else {
-                                doc.setFillColor(231, 76, 60); // Rojo
-                            }
-                            
-                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
-                            doc.setTextColor(255, 255, 255); // Texto blanco
-                            doc.text(data.cell.text, data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2, {
-                                align: 'center',
-                                baseline: 'middle'
-                            });
-                        }
-                    }
-                }
-            });
-            
-            // Añadir pie de página
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.text(`Página ${i} de ${pageCount} - IAAPS Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
-                    align: 'center'
-                });
-            }
-            
-            // Guardar PDF
-            doc.save(nombreArchivo);
-            
-            mostrarCargando(false);
-            mostrarNotificacion('PDF exportado correctamente', 'success');
-        } catch (error) {
-            console.error('Error al exportar a PDF:', error);
-            mostrarCargando(false);
-            mostrarNotificacion('Error al exportar datos', 'error');
-        }
-    }, 1000);
-}
 
 // ==================== EXTENSIÓN DE FUNCIONALIDADES PRINCIPALES ====================
 
@@ -6139,8 +5496,6 @@ function actualizarTablaIndicadores() {
               ${rc.cumplimiento.toFixed(2)}%
             </span>
           </td>
-          <td class="text-center">
-            ${tendenciaHtml}
           </td>
         `;
         tableBody.appendChild(row);
@@ -6539,7 +5894,6 @@ function aplicarTemaAGraficos() {
     if (centroCumplimientoChartInstance) centroCumplimientoChartInstance.update();
     if (centroIndicadoresChartInstance) centroIndicadoresChartInstance.update();
     if (indicadorCentrosChartInstance) indicadorCentrosChartInstance.update();
-    if (indicadorTendenciaChartInstance) indicadorTendenciaChartInstance.update();
     if (comparativoChartInstance) comparativoChartInstance.update();
 }
 
@@ -6620,6 +5974,104 @@ function highlightByMeta() {
       }
     });
 }
+
+// ——— Función para agregar nota referencial en metas específicas ———
+function agregarNotaReferencial() {
+  const metas = ['13', '14', '15', '17'];
+  // Recorre cada fila de la tabla de detalle de indicadores del centro
+  document.querySelectorAll('#centroIndicadoresTableBody tr').forEach(fila => {
+    const tdIndicador = fila.querySelector('td:first-child');
+    if (!tdIndicador) return;
+    // Extrae el código (antes del guión o espacio)
+    const codigo = tdIndicador.textContent.trim().split(/[\s.-]/)[0];
+    if (metas.includes(codigo)) {
+      // Si aún no existe la nota, la agrega
+      if (!tdIndicador.querySelector('.nota-referencial')) {
+        const span = document.createElement('span');
+        span.className = 'nota-referencial';
+        span.textContent = ' (solo referencial P dic 2024)';
+        span.style.color = 'black';
+        span.style.fontWeight = 'bold';
+        tdIndicador.appendChild(span);
+      }
+    }
+  });
+}
+
+// Llamar a la función justo después de que se haya cargado/actualizado el detalle:
+document.addEventListener('DOMContentLoaded', () => {
+  // Si tu tabla ya se llena tras cargar datos, también puedes hacerlo así:
+  setTimeout(agregarNotaReferencial, 1000);
+});
+
+// Lista de indicadores a evaluar con estado "En Proceso"
+const indicadoresProceso = ['3','5','6.1.A','6.1.B','6.2','7','8','9.2','9.3','11','16'];
+
+/**
+ * Determina el estado según reglas:
+ * - Si es uno de indicadoresProceso y 25% ≤ cumplimiento < meta: En Proceso (amarillo)
+ * - Si cumplimiento ≥ meta: Cumplido (verde)
+ * - Si cumplimiento < meta: Crítico (rojo)
+ */
+function determinarEstadoMeta(codigo, cumplimiento, meta) {
+  if (indicadoresProceso.includes(codigo) && cumplimiento >= 25 && cumplimiento < meta) {
+    return { class: 'bg-warning', icon: 'fa-hourglass-half', text: 'En Proceso' };
+  } else if (cumplimiento >= meta) {
+    return { class: 'bg-success', icon: 'fa-check-circle', text: 'Cumplido' };
+  } else {
+    return { class: 'bg-danger', icon: 'fa-times-circle', text: 'Crítico' };
+  }
+}
+
+// Función actualizada para actualizar la tabla de indicadores del centro
+function actualizarTablaIndicadoresCentro() {
+  const tableBody = document.getElementById('centroIndicadoresTableBody');
+  tableBody.innerHTML = '';
+
+  // Ordenar indicadores por código
+  const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
+    const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
+    const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
+    return codigoA - codigoB;
+  });
+
+  indicadoresOrdenados.forEach(indicador => {
+    const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+    if (!resultado) return;
+
+    // Determinar estado según criterios
+    const estado = determinarEstadoMeta(indicador.codigo, resultado.cumplimiento, indicador.meta);
+
+    // Formatear resultado y meta
+    const resultadoFormateado = indicador.tipo === 'porcentaje'
+      ? resultado.resultado.toFixed(2) + '%'
+      : resultado.resultado.toFixed(2);
+    const metaFormateada = indicador.tipo === 'porcentaje'
+      ? indicador.meta.toFixed(2) + '%'
+      : indicador.meta.toFixed(2);
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>
+        <strong>${indicador.codigo}</strong> - ${indicador.nombre}
+      </td>
+      <td class="text-center">${resultado.numerador}</td>
+      <td class="text-center">${resultado.denominador}</td>
+      <td class="text-center">${resultadoFormateado}</td>
+      <td class="text-center">${metaFormateada}</td>
+      <td class="text-center">
+        <span class="badge ${estado.class}">
+          <i class="fas ${estado.icon} me-1"></i>${estado.text}
+        </span>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+
+
+
 
 
 
