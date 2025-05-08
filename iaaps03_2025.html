@@ -2706,24 +2706,24 @@ iaapsData = {
   importancia: 0,
   resultados: [
     // Todos los valores siguen en cero (suma de ceros)
-    { centro: 'comunal',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'curico',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'miguel',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'betty',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'colon',        numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'sarmiento',    numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'niches',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
+    { centro: 'comunal',      numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'curico',       numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'miguel',       numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'betty',        numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'colon',        numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'sarmiento',    numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'niches',       numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100},
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'porvenir',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'dona_carmen',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'potrero',       numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'chequenlemu',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'upeo',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'cordillerilla', numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 },
-    { centro: 'obra',          numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:   0.00 }
+    { centro: 'prosperidad',   numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'tutuquen',      numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'porvenir',      numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'dona_carmen',   numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'potrero',       numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'chequenlemu',   numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'upeo',          numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'cordillerilla', numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 },
+    { centro: 'obra',          numerador:    1, denominador:    1, resultado:   100, cumplimiento:   100 }
   ]
 },
 
@@ -2983,9 +2983,9 @@ iaapsData = {
                     totalIndicadores++;
                     cumplimientoTotal += resultadoComunal.cumplimiento || 0;
                     
-                    if (resultadoComunal.cumplimiento >= 25) {
+                    if (resultadoComunal.cumplimiento >= 100) {
                         indicadoresCumplidos++;
-                    } else if (resultadoComunal.cumplimiento >= 80) {
+                    } else if (resultadoComunal.cumplimiento >= 25) {
                         indicadoresParciales++;
                     } else {
                         indicadoresCriticos++;
@@ -3057,8 +3057,8 @@ function actualizarGraficoCentros() {
                 data: centrosCumplimiento,
                 backgroundColor: function(context) {
                     const value = context.dataset.data[context.dataIndex];
-                    if (value >= 25) return '#27ae60';
-                    else if (value >= 80) return '#f39c12';
+                    if (value >= 100) return '#27ae60';
+                    else if (value >= 25) return '#f39c12';
                     else return '#e74c3c';
                 },
                 borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -3113,9 +3113,9 @@ function actualizarGraficoCentros() {
                         cumplimientoTotal += cumplimiento;
                         indicadoresContados++;
                         
-                        if (cumplimiento >= 25) {
+                        if (cumplimiento >= 100) {
                             indicadoresCumplidos++;
-                        } else if (cumplimiento >= 80) {
+                        } else if (cumplimiento >= 25) {
                             indicadoresParciales++;
                         } else {
                             indicadoresCriticos++;
@@ -3127,8 +3127,8 @@ function actualizarGraficoCentros() {
                     parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
                 
                 let statusClass = '';
-                if (cumplimientoPromedio >= 25) statusClass = 'bg-success';
-                else if (cumplimientoPromedio >= 80) statusClass = 'bg-warning';
+                if (cumplimientoPromedio >= 100) statusClass = 'bg-success';
+                else if (cumplimientoPromedio >= 25) statusClass = 'bg-warning';
                 else statusClass = 'bg-danger';
                 
                 const row = document.createElement('tr');
@@ -3219,8 +3219,8 @@ function actualizarGraficoTop(indicadores, canvasId, isTop) {
 
     // Colores según rangos
     const backgroundColors = data.map(v =>
-        v >= 25 ? '#27ae60'
-      : v >= 80 ? '#f39c12'
+        v >= 100 ? '#27ae60'
+      : v >= 25 ? '#f39c12'
       :            '#e74c3c'
     );
 
@@ -3309,8 +3309,8 @@ function actualizarGraficoTop(indicadores, canvasId, isTop) {
                 
                 // Determinar clase de color
                 let colorClass = '';
-                if (cumplimientoPromedio >= 25) colorClass = 'bg-success';
-                else if (cumplimientoPromedio >= 80) colorClass = 'bg-warning';
+                if (cumplimientoPromedio >= 100) colorClass = 'bg-success';
+                else if (cumplimientoPromedio >= 25) colorClass = 'bg-warning';
                 else colorClass = 'bg-danger';
                 
                 // Actualizar tarjeta
@@ -3658,11 +3658,11 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                 let statusIcon = '';
                 let statusText = '';
                 
-                if (resultado.cumplimiento >= 25) {
+                if (resultado.cumplimiento >= 100) {
                     statusClass = 'bg-success';
                     statusIcon = 'fa-check-circle';
                     statusText = 'Cumplido';
-                } else if (resultado.cumplimiento >= 80) {
+                } else if (resultado.cumplimiento >= 25) {
                     statusClass = 'bg-warning';
                     statusIcon = 'fa-exclamation-triangle';
                     statusText = 'Parcial';
@@ -3738,7 +3738,7 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                         cumplimientoTotal += resultado.cumplimiento || 0;
                         indicadoresContados++;
                         
-                        if (resultado.cumplimiento >= 25) {
+                        if (resultado.cumplimiento >= 100) {
                             indicadoresCumplidos++;
                         } else if (resultado.cumplimiento >= 20) {
                             indicadoresParciales++;
@@ -3752,8 +3752,8 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                     parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
                 
                 let statusClass = '';
-                if (cumplimientoPromedio >= 25) statusClass = 'bg-success';
-                else if (cumplimientoPromedio >= 80) statusClass = 'bg-warning';
+                if (cumplimientoPromedio >= 100) statusClass = 'bg-success';
+                else if (cumplimientoPromedio >= 25) statusClass = 'bg-warning';
                 else statusClass = 'bg-danger';
                 
                 const row = document.createElement('tr');
@@ -3848,7 +3848,7 @@ function actualizarGraficosDetalleIndicador(indicador) {
         data,
         backgroundColor: ctx => {
           const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 25 ? '#27ae60' : v >= 20 ? '#f39c12' : '#e74c3c';
+          return v >= 100 ? '#27ae60' : v >= 20 ? '#f39c12' : '#e74c3c';
         },
         borderColor: 'rgba(0,0,0,0.1)',
         borderWidth: 1
@@ -3958,7 +3958,7 @@ function actualizarTablaDetalleIndicador(indicador) {
  */
 function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
   let cls, icon, txt;
-  if (resultado.cumplimiento >= 25) {
+  if (resultado.cumplimiento >= 100) {
     cls = 'bg-success'; icon = 'fa-check-circle'; txt = 'Cumplido';
   } else if (resultado.cumplimiento >= 20) {
     cls = 'bg-warning'; icon = 'fa-exclamation-triangle'; txt = 'Parcial';
@@ -3997,11 +3997,11 @@ function agregarFilaIndicador(tbody, indicador, resultado, nombre) {
             let statusIcon = '';
             let statusText = '';
             
-            if (resultado.cumplimiento >= 25) {
+            if (resultado.cumplimiento >=100) {
                 statusClass = 'bg-success';
                 statusIcon = 'fa-check-circle';
                 statusText = 'Cumplido';
-            } else if (resultado.cumplimiento >= 80) {
+            } else if (resultado.cumplimiento >= 25) {
                 statusClass = 'bg-warning';
                 statusIcon = 'fa-exclamation-triangle';
                 statusText = 'Parcial';
@@ -4590,8 +4590,8 @@ function exportarExcel(tipo) {
                     if (!resultado) return;
                     
                     let estado = '';
-                    if (resultado.cumplimiento >= 25) estado = 'Cumplido';
-                    else if (resultado.cumplimiento >= 80) estado = 'Parcial';
+                    if (resultado.cumplimiento >= 100) estado = 'Cumplido';
+                    else if (resultado.cumplimiento >= 25) estado = 'Parcial';
                     else estado = 'Crítico';
                     
                     data.push([
@@ -4624,8 +4624,8 @@ function exportarExcel(tipo) {
                     if (!resultado) return;
                     
                     let estado = '';
-                    if (resultado.cumplimiento >= 25) estado = 'Cumplido';
-                    else if (resultado.cumplimiento >= 80) estado = 'Parcial';
+                    if (resultado.cumplimiento >= 100) estado = 'Cumplido';
+                    else if (resultado.cumplimiento >= 25) estado = 'Parcial';
                     else estado = 'Crítico';
                     
                     data.push([
@@ -4688,9 +4688,9 @@ function exportarExcel(tipo) {
                     // Aplicar colores según estado para columna de cumplimiento
                     if (tipo === 'centro' && j === 5 || tipo === 'indicador' && j === 5) {
                         const cumplimiento = parseFloat(data[i][j]);
-                        if (cumplimiento >= 25) {
+                        if (cumplimiento >= 100) {
                             ws[cell_ref].s = { fill: { fgColor: { rgb: "27AE60" } }, font: { color: { rgb: "FFFFFF" } } };
-                        } else if (cumplimiento >= 80) {
+                        } else if (cumplimiento >= 25) {
                             ws[cell_ref].s = { fill: { fgColor: { rgb: "F39C12" } }, font: { color: { rgb: "FFFFFF" } } };
                         } else {
                             ws[cell_ref].s = { fill: { fgColor: { rgb: "E74C3C" } }, font: { color: { rgb: "FFFFFF" } } };
@@ -4861,9 +4861,9 @@ function exportarPDF(tipo) {
                         if (data.cell.text.length > 0) {
                             const cumplimiento = parseFloat(data.cell.text[0]);
                             
-                            if (cumplimiento >= 25) {
+                            if (cumplimiento >= 100) {
                                 doc.setFillColor(39, 174, 96); // Verde
-                            } else if (cumplimiento >= 80) {
+                            } else if (cumplimiento >= 100) {
                                 doc.setFillColor(243, 156, 18); // Amarillo
                             } else {
                                 doc.setFillColor(231, 76, 60); // Rojo
@@ -5195,7 +5195,7 @@ function actualizarGraficosDetalleIndicador(indicador) {
         data: centrosCumplimiento,
         backgroundColor: ctx => {
           const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 25 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
+          return v >= 100 ? '#27ae60' : v >= 25 ? '#f39c12' : '#e74c3c';
         },
         borderColor: 'rgba(0,0,0,0.1)',
         borderWidth: 1
@@ -5367,32 +5367,88 @@ new Chart(ctx, {
  * @param {string} tipo Tipo de retorno ('class', 'icon', 'text', o 'all')
  * @returns {object|string} Clase, icono, texto o todos según el tipo solicitado
  */
-function determinarEstadoIndicador(cumplimiento, umbral, tipo = 'all') {
-    // Valores por defecto
-    const resultado = {
-        statusClass: '',
-        statusIcon: '',
-        statusText: ''
-    };
+/**
+ * Determina el estado de un indicador según su cumplimiento y meta
+ * Versión modificada para metas especiales en marzo
+ * Para indicadores 3, 5, 6.1.A, 6.1.B, 6.2, 7, 8, 9.2, 9.3, 11, 16:
+ * - CUMPLIDO (verde): cumplimiento >= 100% de la meta
+ * - EN PROCESO (amarillo): cumplimiento >= 25% de la meta pero < 100% de la meta
+ * - CRÍTICO (rojo): cumplimiento < 25% de la meta
+ * 
+ * @param {number} cumplimiento - Porcentaje de cumplimiento actual
+ * @param {number} meta - Porcentaje de la meta establecida
+ * @param {string} codigoIndicador - Código del indicador para aplicar reglas específicas
+ * @return {Object} Objeto con clases CSS, ícono y texto descriptivo del estado
+ */
+/**
+ * Determina el estado de un indicador según su cumplimiento
+ * Versión modificada para indicadores especiales (3, 5, 6.1.A, 6.1.B, 6.2, 7, 8, 9.2, 9.3, 11, 16)
+ * 
+ * Para estos indicadores:
+ * - CUMPLIDO (verde): cumplimiento >= 100% (cumplimiento es igual o superior a la meta)
+ * - EN PROCESO (amarillo): cumplimiento >= 25% pero < 100% (por debajo de la meta)
+ * - CRÍTICO (rojo): cumplimiento < 25%
+ * 
+ * @param {number} cumplimiento - Porcentaje de cumplimiento (valor absoluto)
+ * @param {number} meta - Valor de la meta establecida
+ * @param {string} codigoIndicador - Código del indicador para aplicar reglas específicas
+ * @return {Object} Objeto con clases CSS, ícono y texto descriptivo del estado
+ */
+function determinarEstadoIndicador(cumplimiento, meta, codigoIndicador = '') {
+    // Lista de indicadores con reglas especiales
+    const indicadoresEspecialesMetas = ['3', '5', '6.1.A', '6.1.B', '6.2', '7', '8', '9.2', '9.3', '11', '16'];
     
-    // Determinar estado según umbral
-    if (cumplimiento >= umbral) {
-        resultado.statusClass = 'status-success';
-        resultado.statusIcon = 'fa-check-circle';
-        resultado.statusText = 'Cumplido';
+    // Verificar si el indicador está en la lista de reglas especiales
+    const tieneReglasEspeciales = indicadoresEspecialesMetas.includes(codigoIndicador);
+    
+    // Aplicar lógica según corresponda
+    if (tieneReglasEspeciales) {
+        // Para los indicadores especiales:
+        if (cumplimiento >= 100) {
+            // Si cumplimiento es igual o superior a la meta (100%)
+            return {
+                statusClass: 'status-success',
+                statusIcon: 'fa-check-circle',
+                statusText: 'CUMPLIDO'
+            };
+        } else if (cumplimiento >= 25) {
+            // Si cumplimiento es igual o superior a 25% pero menos que 100%
+            return {
+                statusClass: 'status-warning',
+                statusIcon: 'fa-exclamation-triangle',
+                statusText: 'EN PROCESO'
+            };
+        } else {
+            // Si cumplimiento es inferior a 25%
+            return {
+                statusClass: 'status-danger',
+                statusIcon: 'fa-times-circle',
+                statusText: 'CRÍTICO'
+            };
+        }
     } else {
-        resultado.statusClass = 'status-danger';
-        resultado.statusIcon = 'fa-times-circle';
-        resultado.statusText = 'Crítico';
+        // Lógica estándar para el resto de indicadores (mantener comportamiento original)
+        if (cumplimiento >= meta) {
+            return {
+                statusClass: 'status-success',
+                statusIcon: 'fa-check-circle',
+                statusText: 'CUMPLIDO'
+            };
+        } else if (cumplimiento >= (meta * 0.8)) {
+            return {
+                statusClass: 'status-warning',
+                statusIcon: 'fa-exclamation-triangle',
+                statusText: 'EN PROCESO'
+            };
+        } else {
+            return {
+                statusClass: 'status-danger',
+                statusIcon: 'fa-times-circle',
+                statusText: 'CRÍTICO'
+            };
+        }
     }
-    
-    // Retornar según tipo solicitado
-    if (tipo === 'class') return resultado.statusClass;
-    if (tipo === 'icon') return resultado.statusIcon;
-    if (tipo === 'text') return resultado.statusText;
-    return resultado;
 }
-
 /**
  * Formatea un valor según su tipo
  * @param {number} valor Valor a formatear
@@ -5473,7 +5529,8 @@ function actualizarTablaIndicadores() {
         const umbral = specialMetas.includes(indicador.codigo) ? indicador.meta : 25;
         
         // Obtener estado del indicador
-        const estado = determinarEstadoIndicador(rc.cumplimiento, umbral);
+        const estado = determinarEstadoIndicador(rc.cumplimiento, umbral, indicador.codigo);
+
         
         // Formatear resultado y meta
         const resultadoFormateado = formatearValor(rc.resultado, indicador.tipo);
@@ -5543,7 +5600,8 @@ function actualizarTablaIndicadoresCentro() {
         const umbral = specialMetas.includes(indicador.codigo) ? indicador.meta : 25;
         
         // Obtener estado
-        const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral);
+const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral, indicador.codigo);
+
         
         // Formatear valores
         const resultadoFormateado = formatearValor(resultado.resultado, indicador.tipo);
@@ -5830,7 +5888,8 @@ function actualizarTablaDetalleIndicador(indicador) {
  */
 function agregarFilaIndicador(tbody, indicador, resultado, nombreCentro, umbral) {
     // Obtener estado
-    const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral);
+const estado = determinarEstadoIndicador(resultado.cumplimiento, umbral, indicador.codigo);
+
     
     // Formatear valores
     const resultadoFormateado = formatearValor(resultado.resultado, indicador.tipo);
