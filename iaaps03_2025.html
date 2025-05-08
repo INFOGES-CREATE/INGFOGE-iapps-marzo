@@ -10,7 +10,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
      <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Para exportación a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- Para exportación a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -2736,14 +2741,13 @@ iaapsData = {
   importancia: 5,
   resultados: [
     // Centros principales (sin establecimientos asociados en este indicador)
-    { centro: 'comunal', numerador: 94867, denominador: 67226, resultado: 71.00, cumplimiento: 84 },
-    { centro: 'curico',  numerador: 22004, denominador: 16408, resultado: 75.00, cumplimiento: 88 },
-    { centro: 'miguel',  numerador: 16945, denominador: 10713, resultado: 63.00, cumplimiento: 74 },
-    { centro: 'betty',   numerador: 19910, denominador: 13622, resultado: 68.00, cumplimiento: 80 },
-    { centro: 'colon',   numerador: 13899, denominador: 10372, resultado: 75.00, cumplimiento: 88 },
-    { centro: 'sarmiento', numerador:12852, denominador: 9896, resultado: 77.00, cumplimiento: 90 },
-    { centro: 'niches',  numerador:  9258, denominador:  6215, resultado: 67.00, cumplimiento: 79 },
-
+  { centro: 'comunal',    numerador: 41714, denominador: 94867, resultado: 43.97, cumplimiento: 52.35 },
+  { centro: 'curico',     numerador: 10177, denominador: 22004, resultado: 46.25, cumplimiento: 55.06 },
+  { centro: 'miguel',     numerador:  6876, denominador: 16945, resultado: 40.58, cumplimiento: 48.31 },
+  { centro: 'betty',      numerador:  8691, denominador: 19910, resultado: 43.65, cumplimiento: 51.97 },
+  { centro: 'colon',      numerador:  5616, denominador: 13899, resultado: 40.41, cumplimiento: 48.10 },
+  { centro: 'sarmiento',  numerador:  6183, denominador: 12852, resultado: 48.11, cumplimiento: 57.27 },
+  { centro: 'niches',     numerador:  4171, denominador:  9258, resultado: 45.05, cumplimiento: 53.63 },
     // Establecimientos (sin cambios)
     { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
     { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
@@ -6304,17 +6308,683 @@ function diagnosticarDashboard() {
     return "OK: Diagnóstico completado sin problemas evidentes";
 }
 
+/**
+ * FUNCIONES BÁSICAS DE EXPORTACIÓN PARA DASHBOARD IAAPS
+ * Solución simplificada para corregir errores en exportación PDF y Excel
+ */
 
+// ==================== FUNCIÓN PARA EXPORTAR A EXCEL ====================
 
+/**
+ * Exporta datos a Excel según el tipo seleccionado
+ * @param {string} tipo - 'centro', 'indicador' o 'comparativo'
+ */
+function exportarExcel(tipo) {
+  // Mostrar indicador de carga
+  mostrarCargando(true);
+  
+  setTimeout(() => {
+    try {
+      // Verificar si XLSX está disponible
+      if (typeof XLSX === 'undefined') {
+        console.error("Error: La librería SheetJS (XLSX) no está disponible");
+        mostrarNotificacion('Error: Librería Excel no disponible', 'error');
+        mostrarCargando(false);
+        return;
+      }
+      
+      let data = [];
+      let nombreArchivo = '';
+      
+      if (tipo === 'centro') {
+        // Exportar datos del centro seleccionado
+        const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+        if (!centro) {
+          mostrarNotificacion('Error: Centro no encontrado', 'error');
+          mostrarCargando(false);
+          return;
+        }
+        
+        nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.xlsx`;
+        
+        // Encabezados
+        data.push(['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']);
+        
+        // Datos
+        iaapsData.indicadores.forEach(indicador => {
+          const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+          if (!resultado) return;
+          
+          let estado = '';
+          if (resultado.cumplimiento >= 100) estado = 'Cumplido';
+          else if (resultado.cumplimiento >= 25) estado = 'Parcial';
+          else estado = 'Crítico';
+          
+          data.push([
+            `${indicador.codigo} - ${indicador.nombre}`,
+            resultado.numerador,
+            resultado.denominador,
+            indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+            indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+            resultado.cumplimiento.toFixed(2) + '%',
+            estado
+          ]);
+        });
+      } else if (tipo === 'indicador') {
+        // Exportar datos del indicador seleccionado
+        const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+        if (!indicador) {
+          mostrarNotificacion('Error: Indicador no encontrado', 'error');
+          mostrarCargando(false);
+          return;
+        }
+        
+        nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.xlsx`;
+        
+        // Encabezados
+        data.push(['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']);
+        
+        // Datos
+        iaapsData.centros.forEach(centro => {
+          const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+          if (!resultado) return;
+          
+          let estado = '';
+          if (resultado.cumplimiento >= 100) estado = 'Cumplido';
+          else if (resultado.cumplimiento >= 25) estado = 'Parcial';
+          else estado = 'Crítico';
+          
+          data.push([
+            centro.nombre,
+            resultado.numerador,
+            resultado.denominador,
+            indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+            indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+            resultado.cumplimiento.toFixed(2) + '%',
+            estado
+          ]);
+        });
+      } else if (tipo === 'comparativo') {
+        // Exportar tabla comparativa
+        nombreArchivo = `IAAPS_Comparativo_Marzo_2025.xlsx`;
+        
+        // Encabezados
+        const headers = ['Indicador', 'Meta'];
+        iaapsData.centros.forEach(centro => {
+          headers.push(centro.nombre);
+        });
+        data.push(headers);
+        
+        // Datos
+        iaapsData.indicadores.forEach(indicador => {
+          const row = [
+            `${indicador.codigo} - ${indicador.nombre}`,
+            indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2)
+          ];
+          
+          iaapsData.centros.forEach(centro => {
+            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+            if (resultado) {
+              row.push(resultado.cumplimiento.toFixed(2) + '%');
+            } else {
+              row.push('-');
+            }
+          });
+          
+          data.push(row);
+        });
+      }
+      
+      // Crear libro de Excel usando método simple de XLSX
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "IAAPS");
+      
+      // Exportar archivo
+      XLSX.writeFile(wb, nombreArchivo);
+      
+      mostrarCargando(false);
+      mostrarNotificacion('Excel exportado correctamente', 'success');
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+      mostrarCargando(false);
+      mostrarNotificacion('Error al exportar Excel: ' + error.message, 'error');
+    }
+  }, 500);
+}
 
+// ==================== FUNCIÓN PARA EXPORTAR A PDF ====================
 
+/**
+ * Exporta datos a PDF según el tipo seleccionado
+ * Solución para el error "doc.autoTable is not a function"
+ * @param {string} tipo - 'centro', 'indicador' o 'comparativo'
+ */
+function exportarPDF(tipo) {
+  // Mostrar indicador de carga
+  mostrarCargando(true);
+  
+  setTimeout(() => {
+    try {
+      // Verificar si jsPDF está disponible correctamente
+      if (typeof window.jspdf === 'undefined') {
+        console.error("Error: La librería jsPDF no está disponible");
+        mostrarNotificacion('Error: Librería PDF no disponible', 'error');
+        mostrarCargando(false);
+        return;
+      }
+      
+      // Crear instancia jsPDF (sintaxis corregida)
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Verificar si el plugin autoTable está disponible
+      if (typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
+        console.error("Error: Plugin autoTable no disponible");
+        // Usar método básico sin autoTable
+        exportarPDFBasico(doc, tipo);
+        return;
+      }
+      
+      let nombreArchivo = '';
+      let titulo = '';
+      let datos = [];
+      let columnas = [];
+      
+      if (tipo === 'centro') {
+        // Exportar datos del centro seleccionado
+        const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+        if (!centro) {
+          mostrarCargando(false);
+          mostrarNotificacion('Error: Centro no encontrado', 'error');
+          return;
+        }
+        
+        nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
+        titulo = `Reporte IAAPS - ${centro.nombre} - Marzo 2025`;
+        
+        // Definir columnas para autoTable
+        columnas = [
+          { header: 'Indicador', dataKey: 'indicador' },
+          { header: 'Numerador', dataKey: 'numerador' },
+          { header: 'Denominador', dataKey: 'denominador' },
+          { header: 'Resultado', dataKey: 'resultado' },
+          { header: 'Meta', dataKey: 'meta' },
+          { header: 'Cumplimiento', dataKey: 'cumplimiento' }
+        ];
+        
+        // Datos
+        iaapsData.indicadores.forEach(indicador => {
+          const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+          if (!resultado) return;
+          
+          datos.push({
+            indicador: `${indicador.codigo} - ${indicador.nombre.substring(0, 40)}...`,
+            numerador: resultado.numerador,
+            denominador: resultado.denominador,
+            resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+            meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+            cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+          });
+        });
+      } else if (tipo === 'indicador') {
+        // Exportar datos del indicador seleccionado
+        const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+        if (!indicador) {
+          mostrarCargando(false);
+          mostrarNotificacion('Error: Indicador no encontrado', 'error');
+          return;
+        }
+        
+        nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
+        titulo = `Reporte IAAPS - Indicador ${indicador.codigo} - Marzo 2025`;
+        
+        // Definir columnas para autoTable
+        columnas = [
+          { header: 'Centro', dataKey: 'centro' },
+          { header: 'Numerador', dataKey: 'numerador' },
+          { header: 'Denominador', dataKey: 'denominador' },
+          { header: 'Resultado', dataKey: 'resultado' },
+          { header: 'Meta', dataKey: 'meta' },
+          { header: 'Cumplimiento', dataKey: 'cumplimiento' }
+        ];
+        
+        // Datos
+        iaapsData.centros.forEach(centro => {
+          const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+          if (!resultado) return;
+          
+          datos.push({
+            centro: centro.nombre,
+            numerador: resultado.numerador,
+            denominador: resultado.denominador,
+            resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+            meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+            cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+          });
+        });
+      } else if (tipo === 'comparativo') {
+        // Exportar tabla comparativa
+        nombreArchivo = `IAAPS_Comparativo_Marzo_2025.pdf`;
+        titulo = `Reporte IAAPS - Comparativo - Marzo 2025`;
+        
+        // Definir columnas para autoTable
+        columnas = [
+          { header: 'Indicador', dataKey: 'indicador' },
+          { header: 'Meta', dataKey: 'meta' }
+        ];
+        
+        // Agregar columnas para cada centro (limitado a algunos para que quepa en PDF)
+        const centrosLimitados = iaapsData.centros.slice(0, 4); // Solo 4 centros para que quepa en el PDF
+        centrosLimitados.forEach(centro => {
+          columnas.push({ header: centro.nombre.substring(0, 8), dataKey: centro.codigo });
+        });
+        
+        // Datos
+        iaapsData.indicadores.forEach(indicador => {
+          const fila = {
+            indicador: `${indicador.codigo} - ${indicador.nombre.substring(0, 20)}...`,
+            meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2)
+          };
+          
+          // Agregar datos para cada centro
+          centrosLimitados.forEach(centro => {
+            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+            if (resultado) {
+              fila[centro.codigo] = resultado.cumplimiento.toFixed(2) + '%';
+            } else {
+              fila[centro.codigo] = '-';
+            }
+          });
+          
+          datos.push(fila);
+        });
+      }
+      
+      // Añadir título
+      doc.setFontSize(18);
+      doc.text(titulo, 14, 22);
+      
+      // Añadir fecha
+      doc.setFontSize(11);
+      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 30);
+      
+      // Comprobar nuevamente el método autoTable antes de usarlo
+      if (typeof doc.autoTable === 'function') {
+        // Utilizar autoTable si está disponible
+        doc.autoTable({
+          columns: columnas,
+          body: datos,
+          startY: 35,
+          styles: { fontSize: 9 },
+          columnStyles: {
+            indicador: { cellWidth: 60 }
+          }
+        });
+      } else {
+        // Método alternativo si autoTable no está disponible
+        exportarPDFBasico(doc, tipo);
+        return;
+      }
+      
+      // Añadir pie de página
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.text(`Página ${i} de ${pageCount} - INFOGES Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+          align: 'center'
+        });
+      }
+      
+      // Guardar PDF
+      doc.save(nombreArchivo);
+      
+      mostrarCargando(false);
+      mostrarNotificacion('PDF exportado correctamente', 'success');
+    } catch (error) {
+      console.error('Error al exportar a PDF:', error);
+      mostrarCargando(false);
+      mostrarNotificacion('Error al exportar PDF: ' + error.message, 'error');
+    }
+  }, 500);
+}
 
+/**
+ * Método alternativo básico para exportar a PDF si autoTable no está disponible
+ * @param {jsPDF} doc - Instancia de jsPDF
+ * @param {string} tipo - Tipo de exportación
+ */
+function exportarPDFBasico(doc, tipo) {
+  try {
+    let nombreArchivo = '';
+    let titulo = '';
+    let datos = [];
+    
+    if (tipo === 'centro') {
+      const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+      if (!centro) {
+        mostrarCargando(false);
+        mostrarNotificacion('Error: Centro no encontrado', 'error');
+        return;
+      }
+      
+      nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
+      titulo = `Reporte IAAPS - ${centro.nombre} - Marzo 2025`;
+      
+      // Generar datos del centro
+      iaapsData.indicadores.forEach((indicador, index) => {
+        const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+        if (!resultado) return;
+        
+        datos.push({
+          indicador: `${indicador.codigo} - ${indicador.nombre}`,
+          resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+          meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+          cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+        });
+      });
+    } else if (tipo === 'indicador') {
+      const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+      if (!indicador) {
+        mostrarCargando(false);
+        mostrarNotificacion('Error: Indicador no encontrado', 'error');
+        return;
+      }
+      
+      nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
+      titulo = `Reporte IAAPS - Indicador ${indicador.codigo} - Marzo 2025`;
+      
+      // Generar datos del indicador
+      iaapsData.centros.forEach((centro, index) => {
+        const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+        if (!resultado) return;
+        
+        datos.push({
+          centro: centro.nombre,
+          resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
+          meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
+          cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+        });
+      });
+    } else {
+      nombreArchivo = `IAAPS_Comparativo_Marzo_2025.pdf`;
+      titulo = `Reporte IAAPS - Comparativo - Marzo 2025`;
+      
+      // Solo mostrar mensaje de que se necesita autoTable
+      doc.setFontSize(18);
+      doc.text(titulo, 14, 22);
+      doc.setFontSize(12);
+      doc.text("Para generar el reporte comparativo se necesita el plugin autoTable.", 14, 40);
+      doc.text("Por favor, asegúrese de que la librería jspdf-autotable esté correctamente cargada.", 14, 50);
+      doc.save(nombreArchivo);
+      mostrarCargando(false);
+      mostrarNotificacion('PDF básico exportado. Se recomienda instalar el plugin autoTable.', 'warning');
+      return;
+    }
+    
+    // Añadir título
+    doc.setFontSize(18);
+    doc.text(titulo, 14, 22);
+    
+    // Añadir fecha
+    doc.setFontSize(11);
+    doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Crear tabla básica manualmente
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    
+    let startY = 40;
+    const lineHeight = 10;
+    
+    // Cabeceras
+    if (tipo === 'centro') {
+      doc.text("Indicador", 14, startY);
+      doc.text("Resultado", 110, startY);
+      doc.text("Meta", 140, startY);
+      doc.text("Cumplimiento", 170, startY);
+    } else {
+      doc.text("Centro", 14, startY);
+      doc.text("Resultado", 110, startY);
+      doc.text("Meta", 140, startY);
+      doc.text("Cumplimiento", 170, startY);
+    }
+    
+    startY += 5;
+    doc.line(10, startY, 200, startY); // Línea horizontal
+    
+    startY += 5;
+    
+    // Límite de filas para que quepa en la página
+    const maxRows = 25;
+    const datosLimitados = datos.slice(0, maxRows);
+    
+    // Datos
+    datosLimitados.forEach((dato, index) => {
+      const y = startY + (index * lineHeight);
+      
+      if (tipo === 'centro') {
+        doc.text(dato.indicador.substring(0, 40), 14, y);
+      } else {
+        doc.text(dato.centro.substring(0, 40), 14, y);
+      }
+      
+      doc.text(dato.resultado, 110, y);
+      doc.text(dato.meta, 140, y);
+      doc.text(dato.cumplimiento, 170, y);
+      
+      // Línea separadora
+      if (index < datosLimitados.length - 1) {
+        doc.setDrawColor(200, 200, 200);
+        doc.line(10, y + 2, 200, y + 2);
+      }
+    });
+    
+    // Si hay más datos de los que se muestran
+    if (datos.length > maxRows) {
+      const y = startY + (maxRows * lineHeight) + 5;
+      doc.text(`... y ${datos.length - maxRows} filas más`, 14, y);
+    }
+    
+    // Añadir pie de página
+    doc.setFontSize(8);
+    doc.text("INFOGES Curicó - Dashboard de Control", doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+      align: 'center'
+    });
+    
+    // Guardar PDF
+    doc.save(nombreArchivo);
+    
+    mostrarCargando(false);
+    mostrarNotificacion('PDF básico exportado correctamente', 'success');
+  } catch (error) {
+    console.error('Error en exportación básica a PDF:', error);
+    mostrarCargando(false);
+    mostrarNotificacion('Error al exportar PDF básico: ' + error.message, 'error');
+  }
+}
 
+// ==================== CONFIGURACIÓN DE EVENTOS ====================
 
+/**
+ * Configura los event listeners para los botones de exportación
+ * Esta función debe llamarse al cargar la página
+ */
+function configurarEventosExportacion() {
+  console.log("Configurando eventos de exportación...");
+  
+  // Botones para exportar detalles de centro
+  const btnExcelCentro = document.getElementById('exportCentroExcelBtn');
+  const btnPdfCentro = document.getElementById('exportCentroPdfBtn');
+  
+  if (btnExcelCentro) {
+    btnExcelCentro.addEventListener('click', function() {
+      console.log("Exportando centro a Excel...");
+      exportarExcel('centro');
+    });
+  }
+  
+  if (btnPdfCentro) {
+    btnPdfCentro.addEventListener('click', function() {
+      console.log("Exportando centro a PDF...");
+      exportarPDF('centro');
+    });
+  }
+  
+  // Botones para exportar detalles de indicador
+  const btnExcelIndicador = document.getElementById('exportIndicadorExcelBtn');
+  const btnPdfIndicador = document.getElementById('exportIndicadorPdfBtn');
+  
+  if (btnExcelIndicador) {
+    btnExcelIndicador.addEventListener('click', function() {
+      console.log("Exportando indicador a Excel...");
+      exportarExcel('indicador');
+    });
+  }
+  
+  if (btnPdfIndicador) {
+    btnPdfIndicador.addEventListener('click', function() {
+      console.log("Exportando indicador a PDF...");
+      exportarPDF('indicador');
+    });
+  }
+  
+  // Botones para exportar detalles comparativos
+  const btnExcelComparativo = document.getElementById('exportComparativoExcelBtn');
+  const btnPdfComparativo = document.getElementById('exportComparativoPdfBtn');
+  
+  if (btnExcelComparativo) {
+    btnExcelComparativo.addEventListener('click', function() {
+      console.log("Exportando comparativo a Excel...");
+      exportarExcel('comparativo');
+    });
+  }
+  
+  if (btnPdfComparativo) {
+    btnPdfComparativo.addEventListener('click', function() {
+      console.log("Exportando comparativo a PDF...");
+      exportarPDF('comparativo');
+    });
+  }
+  
+  // Botón general de exportación de detalle
+  const btnExportDetail = document.getElementById('exportDetailBtn');
+  if (btnExportDetail) {
+    btnExportDetail.addEventListener('click', function() {
+      console.log("Exportando detalle...");
+      
+      // Determinar qué vista está activa y exportar según corresponda
+      if (document.getElementById('centro-content') && 
+          document.getElementById('centro-content').classList.contains('active')) {
+        exportarPDF('centro');
+      } 
+      else if (document.getElementById('indicador-content') && 
+              document.getElementById('indicador-content').classList.contains('active')) {
+        exportarPDF('indicador');
+      }
+      else if (document.getElementById('comparativo-content') && 
+              document.getElementById('comparativo-content').classList.contains('active')) {
+        exportarPDF('comparativo');
+      }
+      else {
+        // Si no se puede determinar, usar la vista de centro por defecto
+        exportarPDF('centro');
+      }
+    });
+  }
+  
+  console.log("Configuración de eventos de exportación completada.");
+}
 
+// ==================== CARGAR DINÁMICAMENTE LIBRERÍAS FALTANTES ====================
 
+/**
+ * Carga dinámicamente las librerías necesarias para la exportación
+ * si no están disponibles
+ */
+function cargarLibreriasExportacion() {
+  console.log("Verificando librerías de exportación...");
+  
+  // Verificar SheetJS (XLSX)
+  if (typeof XLSX === 'undefined') {
+    console.warn("Librería XLSX no encontrada. Cargando dinámicamente...");
+    
+    const xlsxScript = document.createElement('script');
+    xlsxScript.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    xlsxScript.onload = function() {
+      console.log("Librería XLSX cargada correctamente");
+    };
+    document.head.appendChild(xlsxScript);
+  } else {
+    console.log("Librería XLSX ya está disponible");
+  }
+  
+  // Verificar jsPDF
+  if (typeof window.jspdf === 'undefined') {
+    console.warn("Librería jsPDF no encontrada. Cargando dinámicamente...");
+    
+    const jspdfScript = document.createElement('script');
+    jspdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    jspdfScript.onload = function() {
+      console.log("Librería jsPDF cargada correctamente");
+      
+      // Cargar el plugin AutoTable después de jsPDF
+      if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
+        console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
+        
+        const autoTableScript = document.createElement('script');
+        autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
+        autoTableScript.onload = function() {
+          console.log("Plugin AutoTable cargado correctamente");
+        };
+        document.head.appendChild(autoTableScript);
+      }
+    };
+    document.head.appendChild(jspdfScript);
+  } else {
+    console.log("Librería jsPDF ya está disponible");
+    
+    // Verificar AutoTable si jsPDF ya está disponible
+    if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
+      console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
+      
+      const autoTableScript = document.createElement('script');
+      autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
+      autoTableScript.onload = function() {
+        console.log("Plugin AutoTable cargado correctamente");
+      };
+      document.head.appendChild(autoTableScript);
+    } else {
+      console.log("Plugin AutoTable ya está disponible");
+    }
+  }
+}
 
+// ==================== INICIALIZACIÓN SIMPLIFICADA ====================
 
+// Inicializar las funciones de exportación cuando se carga el documento
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("Inicializando funcionalidades de exportación simplificadas...");
+  
+  // Cargar librerías necesarias
+  cargarLibreriasExportacion();
+  
+  // Configurar eventos después de un retraso para asegurar que todo está cargado
+  setTimeout(function() {
+    configurarEventosExportacion();
+  }, 1000);
+  
+  console.log("Inicialización de funcionalidades de exportación completada.");
+});
+
+// Ejecutar la inicialización inmediatamente si el documento ya está cargado
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(function() {
+    cargarLibreriasExportacion();
+    configurarEventosExportacion();
+  }, 1000);
+}
 </script>
 
 </html>
