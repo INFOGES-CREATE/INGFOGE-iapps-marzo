@@ -6128,6 +6128,119 @@ function actualizarTablaIndicadoresCentro() {
   });
 }
 
+/**
+ * Calcula el cumplimiento global de todos los indicadores IAAPS
+ * considerando su ponderación (importancia relativa)
+ * @param {string} centroCodigo - Código del centro para el cual calcular (default: 'comunal')
+ * @returns {number} - Porcentaje de cumplimiento global
+ */
+function calcularCumplimientoGlobal(centroCodigo = 'comunal') {
+    // Verificar que existan datos
+    if (!iaapsData || !iaapsData.indicadores) {
+        console.error("Datos IAAPS no disponibles");
+        return 0;
+    }
+    
+    let sumaPonderada = 0;
+    let sumaPonderacion = 0;
+    
+    // Recorrer cada indicador
+    iaapsData.indicadores.forEach(indicador => {
+        // Buscar resultado para el centro especificado
+        const resultado = indicador.resultados.find(r => r.centro === centroCodigo);
+        if (!resultado || resultado.denominador <= 0) return;
+        
+        // Obtener la ponderación del indicador (importancia relativa)
+        let ponderacion = 0;
+        
+        // El indicador 10 (GES) es crítico y no se incluye en la suma ponderada
+        if (indicador.codigo === '10') return;
+        
+        // Convertir la importancia de string a número (quitar el símbolo %)
+        const importanciaStr = importanciaIndicadores[indicador.codigo];
+        if (importanciaStr) {
+            ponderacion = parseFloat(importanciaStr.replace('%', ''));
+        }
+        
+        // Si no se pudo obtener la ponderación, continuar con el siguiente
+        if (isNaN(ponderacion) || ponderacion <= 0) return;
+        
+        // Limitar el cumplimiento a un máximo de 100%
+        const cumplimientoAjustado = Math.min(resultado.cumplimiento, 100);
+        
+        // Acumular suma ponderada y suma de ponderaciones
+        sumaPonderada += (cumplimientoAjustado * ponderacion);
+        sumaPonderacion += ponderacion;
+    });
+    
+    // Calcular porcentaje global (evitar división por cero)
+    const porcentajeGlobal = sumaPonderacion > 0 ? 
+        (sumaPonderada / sumaPonderacion) : 0;
+    
+    // Redondear a 2 decimales y retornar
+    return parseFloat(porcentajeGlobal.toFixed(2));
+}
+
+/**
+ * Calcula el cumplimiento global ponderado de todos los indicadores IAAPS
+ * para un centro específico o a nivel comunal.
+ * 
+ * @param {string} codigoCentro - Código del centro ('comunal' u otro código de centro)
+ * @param {Array} indicadores - Array de indicadores con sus resultados
+ * @returns {number} - Porcentaje de cumplimiento global ponderado (0-100)
+ */
+function calcularCumplimientoGlobal(codigoCentro, indicadores) {
+    // 1) Validación de parámetros
+    if (!codigoCentro || !indicadores || !Array.isArray(indicadores)) {
+        console.error("Parámetros incorrectos para calcular cumplimiento global");
+        return 0;
+    }
+
+    // 2) Variables para acumular valores
+    let sumaPonderada = 0;          // Suma de (cumplimiento × ponderación)
+    let sumaPonderaciones = 0;      // Suma total de ponderaciones
+    let indicadoresContados = 0;    // Contador de indicadores válidos
+
+    // 3) Recorrer cada indicador
+    indicadores.forEach(indicador => {
+        // Buscar resultado del centro específico
+        const resultado = indicador.resultados.find(r => r.centro === codigoCentro);
+        
+        // Continuar solo si hay resultados y tiene denominador
+        if (resultado && resultado.denominador > 0) {
+            // Obtener la importancia del indicador (como número, quitando el %)
+            let importancia = 0;
+            
+            // El indicador 10 es crítico y se evalúa por separado
+            if (indicador.codigo === '10') {
+                return; // Saltamos este indicador
+            }
+            
+            // Extraer el valor numérico de la importancia (quitar el % y convertir a número)
+            const importanciaStr = importanciaIndicadores[indicador.codigo] || '0%';
+            importancia = parseFloat(importanciaStr.replace('%', '')) || 0;
+            
+            // Verificar que la importancia sea válida
+            if (importancia > 0) {
+                // Calcular la contribución ponderada de este indicador
+                // (limitando el cumplimiento a máximo 100%)
+                const cumplimientoEfectivo = Math.min(resultado.cumplimiento, 100);
+                sumaPonderada += cumplimientoEfectivo * importancia;
+                sumaPonderaciones += importancia;
+                indicadoresContados++;
+            }
+        }
+    });
+
+    // 4) Calcular el cumplimiento global ponderado
+    if (sumaPonderaciones === 0 || indicadoresContados === 0) {
+        console.warn("No se encontraron indicadores válidos para calcular el cumplimiento global");
+        return 0;
+    }
+
+    // 5) Retornar el cumplimiento ponderado, redondeado a dos decimales
+    return parseFloat((sumaPonderada / sumaPonderaciones).toFixed(2));
+}
 
 
 
