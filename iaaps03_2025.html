@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
+     <!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- jsPDF AutoTable (si luego vas a usar autoTable en otro método) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<!-- Tu script que define exportarPDFBasico -->
+<script src="ruta/a/tu/script.js"></script>
+
      <!-- Chart.js + DataLabels plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -1504,11 +1511,7 @@ body {
                     <h3 class="detail-title" id="detailTitle">Detalle de Indicadores IAAPS</h3>
                     <p class="detail-subtitle" id="detailSubtitle">Seleccione un centro o indicador para ver detalles específicos.</p>
                 </div>
-                <div>
-                    <button class="btn btn-primary" id="exportDetailBtn">
-                        <i class="fas fa-file-export me-1"></i> Exportar Reporte
-                    </button>
-                </div>
+                
             </div>
             
             <!-- Tab Navigation -->
