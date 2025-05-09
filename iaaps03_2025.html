@@ -3419,9 +3419,9 @@ function actualizarGraficosDetalleCentro() {
         const res = indicador.resultados.find(r => r.centro === currentCentro);
         if (res && res.denominador > 0) {
             indicadoresAnalizados++;
-            if (res.cumplimiento >= 95) {
+            if (res.cumplimiento >= 100) {
                 datosCumplimiento[0]++; // Cumplidos
-            } else if (res.cumplimiento >= 80) {
+            } else if (res.cumplimiento >= 25) {
                 datosCumplimiento[1]++; // Parciales
             } else {
                 datosCumplimiento[2]++; // Críticos
@@ -3550,7 +3550,7 @@ function actualizarGraficosDetalleCentro() {
                         data: promedios,
                         backgroundColor: function(ctx) {
                             const v = ctx.raw;
-                            return v >= 95 ? '#27ae60' : v >= 80 ? '#f39c12' : '#e74c3c';
+                            return v >= 100 ? '#27ae60' : v >= 25 ? '#f39c12' : '#e74c3c';
                         },
                         borderColor: 'rgba(0, 0, 0, 0.1)',
                         borderWidth: 1
@@ -4348,9 +4348,9 @@ function actualizarTablaComparativa() {
                     // Calcular color según porcentaje de cumplimiento
                     let color = '';
                     
-                    if (resultado.cumplimiento >= 95) {
+                    if (resultado.cumplimiento >= 100) {
                         color = '#27ae60'; // Verde - Cumplido
-                    } else if (resultado.cumplimiento >= 80) {
+                    } else if (resultado.cumplimiento >= 25) {
                         color = '#f39c12'; // Amarillo - Parcial
                     } else {
                         color = '#e74c3c'; // Rojo - Crítico
