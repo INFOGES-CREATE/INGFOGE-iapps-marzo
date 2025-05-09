@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
+     <!-- Chart.js + DataLabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
      <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <!-- Para exportación a Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1174,8 +1178,8 @@ body {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="exportDataLink">
-                            <i class="fas fa-file-export me-1"></i> Exportar
+                        <a class="nav-link" href="bibliotecas_iaaps.html" id="exportDataLink">
+                            <i class="fas fa-file-alt me-1"></i> Docs IAAPS
                         </a>
                     </li>
                     <li class="nav-item">
@@ -4120,10 +4124,11 @@ function actualizarVistaComparativa() {
  * Actualiza el gráfico comparativo de radar
  * Versión mejorada con mejor manejo de errores y visualización
  */
+
+
 function actualizarGraficoComparativo() {
     console.log("Actualizando gráfico comparativo...");
     
-    // Verificar que el elemento exista en el DOM
     const canvasElement = document.getElementById('comparativoChart');
     if (!canvasElement) {
         console.error("No se encontró el elemento 'comparativoChart' en el DOM");
@@ -4131,20 +4136,19 @@ function actualizarGraficoComparativo() {
     }
     
     try {
-        // Preparar datos para el gráfico
-        const centros = iaapsData.centros.filter(c => c.codigo !== 'comunal');
+        // 1) Incluir todos los centros (incluyendo 'comunal')
+        const centros = iaapsData.centros;  // ahora con los 6 centros más el comunal
         
-        // Obtener categorías de indicadores
+        // 2) Definir categorías
         const categorias = {
             'Cobertura': [],
             'Tasa': [],
             'Porcentaje': [],
             'Otro': []
         };
-        
-        // Clasificar los indicadores en categorías
         iaapsData.indicadores.forEach(indicador => {
-            if (indicador.nombre.toLowerCase().includes('cobertura')) {
+            const nombre = indicador.nombre.toLowerCase();
+            if (nombre.includes('cobertura')) {
                 categorias['Cobertura'].push(indicador.codigo);
             } else if (indicador.tipo === 'tasa') {
                 categorias['Tasa'].push(indicador.codigo);
@@ -4155,86 +4159,73 @@ function actualizarGraficoComparativo() {
             }
         });
         
-        // Crear datasets para el gráfico
-        const datasets = [];
+        // 3) Preparar datasets
         const colores = [
-            { border: 'rgb(52, 152, 219)', background: 'rgba(52, 152, 219, 0.2)' }, // Azul
-            { border: 'rgb(39, 174, 96)', background: 'rgba(39, 174, 96, 0.2)' },   // Verde
-            { border: 'rgb(231, 76, 60)', background: 'rgba(231, 76, 60, 0.2)' },   // Rojo
-            { border: 'rgb(243, 156, 18)', background: 'rgba(243, 156, 18, 0.2)' }  // Amarillo
+            { border: 'rgb(52, 152, 219)', background: 'rgba(52, 152, 219, 0.2)' },
+            { border: 'rgb(39, 174, 96)',  background: 'rgba(39, 174, 96, 0.2)'  },
+            { border: 'rgb(231, 76, 60)',  background: 'rgba(231, 76, 60, 0.2)'  },
+            { border: 'rgb(243, 156, 18)', background: 'rgba(243, 156, 18, 0.2)' }
         ];
-        
+        const datasets = [];
         let colorIndex = 0;
         
-        // Para cada categoría, calcular cumplimiento promedio por centro
         for (const categoria in categorias) {
-            if (categorias[categoria].length === 0) continue;
-            
             const codigos = categorias[categoria];
-            const datosCentros = [];
+            if (!codigos.length) continue;
             
-            // Para cada centro, calcular el promedio de cumplimiento de esta categoría
-            centros.forEach(centro => {
-                let total = 0;
-                let count = 0;
-                
+            // Calcular cumplimiento promedio por centro
+            const datosCentros = centros.map(centro => {
+                let total = 0, count = 0;
                 codigos.forEach(codigo => {
-                    const indicador = iaapsData.indicadores.find(i => i.codigo === codigo);
-                    if (indicador) {
-                        const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-                        if (resultado && resultado.denominador > 0) {
-                            total += resultado.cumplimiento || 0;
+                    const ind = iaapsData.indicadores.find(i => i.codigo === codigo);
+                    if (ind) {
+                        const res = ind.resultados.find(r => r.centro === centro.codigo);
+                        if (res && res.denominador > 0) {
+                            total += res.cumplimiento || 0;
                             count++;
                         }
                     }
                 });
-                
-                const promedio = count > 0 ? parseFloat((total / count).toFixed(2)) : 0;
-                datosCentros.push(promedio);
+                return count ? +(total / count).toFixed(2) : 0;
             });
             
-            // Solo añadir el dataset si tiene datos
             if (datosCentros.some(v => v > 0)) {
+                const { border, background } = colores[colorIndex];
                 datasets.push({
                     label: categoria,
                     data: datosCentros,
-                    backgroundColor: colores[colorIndex].background,
-                    borderColor: colores[colorIndex].border,
-                    borderWidth: 2,
-                    pointBackgroundColor: colores[colorIndex].border,
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: colores[colorIndex].border
+                    backgroundColor: background,
+                    borderColor: border,
+                    borderWidth: 1
                 });
-                
                 colorIndex = (colorIndex + 1) % colores.length;
             }
         }
         
-        // Destruir gráfico anterior si existe
+        // 4) Destruir instancia previa
         if (comparativoChartInstance) {
             comparativoChartInstance.destroy();
         }
         
-        // Verificar si hay datos para mostrar
-        if (datasets.length === 0 || centros.length === 0) {
-            console.warn("No hay datos suficientes para crear el gráfico comparativo");
-            
-            // Mostrar mensaje en el canvas
+        // 5) Validar que existan datos
+        if (!datasets.length || !centros.length) {
             const ctx = canvasElement.getContext('2d');
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             ctx.font = '16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#e0e0e0' : '#666';
-            ctx.fillText('No hay datos suficientes para esta visualización', 
-                        canvasElement.width / 2, canvasElement.height / 2);
+            ctx.fillStyle = '#666';
+            ctx.fillText(
+                'No hay datos suficientes para esta visualización',
+                canvasElement.width / 2,
+                canvasElement.height / 2
+            );
             return;
         }
         
-        // Crear gráfico
+        // 6) Crear gráfico de barras
         const ctx = canvasElement.getContext('2d');
         comparativoChartInstance = new Chart(ctx, {
-            type: 'radar',
+            type: 'bar',
             data: {
                 labels: centros.map(c => c.nombre),
                 datasets: datasets
@@ -4243,75 +4234,67 @@ function actualizarGraficoComparativo() {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    r: {
+                    x: {
+                        title: { display: true, text: 'Centros' },
+                        ticks: { font: { size: 12 } }
+                    },
+                    y: {
                         min: 0,
                         max: 100,
-                        beginAtZero: true,
+                        title: { display: true, text: 'Cumplimiento (%)' },
                         ticks: {
                             stepSize: 20,
-                            font: {
-                                size: 10
-                            }
-                        },
-                        pointLabels: {
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            }
+                            font: { size: 12 }
                         }
                     }
                 },
                 plugins: {
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: value => `${value}%`,
+                        font: { size: 10 }
+                    },
                     legend: {
                         position: 'top',
                         labels: {
-                            font: {
-                                size: 12
-                            },
+                            font: { size: 12 },
                             padding: 20
                         }
                     },
                     title: {
                         display: true,
                         text: 'Comparativo de Cumplimiento por Categoría',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
+                        font: { size: 16, weight: 'bold' },
                         padding: 20
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label} - ${context.raw.toFixed(2)}%`;
-                            }
-                        }
                     }
                 }
-            }
+            },
+            plugins: [ChartDataLabels]
         });
         
         console.log("Gráfico comparativo actualizado correctamente");
     } catch (error) {
         console.error("Error al actualizar gráfico comparativo:", error);
-        
-        // Mostrar mensaje de error en el canvas
-        try {
-            const ctx = canvasElement.getContext('2d');
-            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#e74c3c';
-            ctx.fillText('Error al generar la visualización', 
-                        canvasElement.width / 2, canvasElement.height / 2);
-            ctx.font = '14px Arial';
-            ctx.fillText('Consulte la consola para más detalles', 
-                        canvasElement.width / 2, canvasElement.height / 2 + 30);
-        } catch (e) {
-            console.error("Error adicional al mostrar mensaje de error:", e);
-        }
+        const ctx = canvasElement.getContext('2d');
+        ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillText(
+            'Error al generar la visualización',
+            canvasElement.width / 2,
+            canvasElement.height / 2
+        );
+        ctx.font = '14px Arial';
+        ctx.fillText(
+            'Consulte la consola para más detalles',
+            canvasElement.width / 2,
+            canvasElement.height / 2 + 30
+        );
     }
 }
+
 
 /**
  * Actualiza la tabla comparativa con datos de todos los centros e indicadores
@@ -5195,18 +5178,16 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {Object} indicador  El objeto indicador de iaapsData.indicadores
  */
 function actualizarGraficosDetalleIndicador(indicador) {
-  // --- GRÁFICO 1: Barras de Cumplimiento por Centro ---
+  // --- GRÁFICO 1: Barras de Cumplimiento por Centro (incluye 'comunal') ---
   const centrosLabels = [];
   const centrosCumplimiento = [];
-  iaapsData.centros
-    .filter(c => c.codigo !== 'comunal')
-    .forEach(centro => {
-      const res = indicador.resultados.find(r => r.centro === centro.codigo);
-      if (res && res.denominador > 0) {
-        centrosLabels.push(centro.nombre);
-        centrosCumplimiento.push(res.cumplimiento || 0);
-      }
-    });
+  iaapsData.centros.forEach(centro => {
+    const res = indicador.resultados.find(r => r.centro === centro.codigo);
+    if (res && res.denominador > 0) {
+      centrosLabels.push(centro.nombre);
+      centrosCumplimiento.push(res.cumplimiento || 0);
+    }
+  });
 
   // Destruir la instancia previa si existe
   if (indicadorCentrosChartInstance) {
@@ -5214,7 +5195,9 @@ function actualizarGraficosDetalleIndicador(indicador) {
   }
 
   // Crear nuevo gráfico de barras
-  const ctxCentros = document.getElementById('indicadorCentrosChart').getContext('2d');
+  const ctxCentros = document
+    .getElementById('indicadorCentrosChart')
+    .getContext('2d');
   indicadorCentrosChartInstance = new Chart(ctxCentros, {
     type: 'bar',
     data: {
@@ -5224,7 +5207,9 @@ function actualizarGraficosDetalleIndicador(indicador) {
         data: centrosCumplimiento,
         backgroundColor: ctx => {
           const v = ctx.dataset.data[ctx.dataIndex];
-          return v >= 100 ? '#27ae60' : v >= 25 ? '#f39c12' : '#e74c3c';
+          return v >= 100 ? '#27ae60'
+               : v >= 25  ? '#f39c12'
+                          : '#e74c3c';
         },
         borderColor: 'rgba(0,0,0,0.1)',
         borderWidth: 1
@@ -5270,7 +5255,9 @@ function actualizarGraficosDetalleIndicador(indicador) {
   }
 
   // Crear gráfico de línea
-  const ctxTend = document.getElementById('indicadorTendenciaChart').getContext('2d');
+  const ctxTend = document
+    .getElementById('indicadorTendenciaChart')
+    .getContext('2d');
   indicadorTendenciaChartInstance = new Chart(ctxTend, {
     type: 'line',
     data: {
@@ -5313,6 +5300,7 @@ function actualizarGraficosDetalleIndicador(indicador) {
     }
   });
 }
+
 /**
  * Evalúa el cumplimiento de una o varias metas (indicadores) para todos los centros.
  *

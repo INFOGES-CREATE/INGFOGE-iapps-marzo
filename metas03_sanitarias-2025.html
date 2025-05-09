@@ -10,12 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
      <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <!-- Para exportación a Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Para exportación a PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -1174,8 +1169,8 @@ body {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="exportDataLink">
-                            <i class="fas fa-file-export me-1"></i> Exportar
+                        <a class="nav-link" href="bibliotecas_iaaps.html" id="exportDataLink">
+                            <i class="fas fa-file-export me-1"></i> Documentos IAAPS
                         </a>
                     </li>
                     <li class="nav-item">
@@ -2748,6 +2743,7 @@ iaapsData = {
   { centro: 'colon',      numerador:  5616, denominador: 13899, resultado: 40.41, cumplimiento: 48.10 },
   { centro: 'sarmiento',  numerador:  6183, denominador: 12852, resultado: 48.11, cumplimiento: 57.27 },
   { centro: 'niches',     numerador:  4171, denominador:  9258, resultado: 45.05, cumplimiento: 53.63 },
+
     // Establecimientos (sin cambios)
     { centro: 'prosperidad',   numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
     { centro: 'tutuquen',      numerador:    0, denominador:    0, resultado:   0.00, cumplimiento:  0 },
@@ -3665,7 +3661,7 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
 
         
         
-             // Función para actualizar la tabla de indicadores del centro
+        // Función para actualizar la tabla de indicadores del centro
         function actualizarTablaIndicadoresCentro() {
             const tableBody = document.getElementById('centroIndicadoresTableBody');
             tableBody.innerHTML = '';
@@ -3685,11 +3681,11 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                 let statusIcon = '';
                 let statusText = '';
                 
-                if (resultado.cumplimiento >= 100) {
+                if (resultado.cumplimiento >= 25) {
                     statusClass = 'bg-success';
                     statusIcon = 'fa-check-circle';
                     statusText = 'Cumplido';
-                } else if (resultado.cumplimiento >= 25) {
+                } else if (resultado.cumplimiento >= 80) {
                     statusClass = 'bg-warning';
                     statusIcon = 'fa-exclamation-triangle';
                     statusText = 'Parcial';
@@ -3765,7 +3761,7 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                         cumplimientoTotal += resultado.cumplimiento || 0;
                         indicadoresContados++;
                         
-                        if (resultado.cumplimiento >= 100) {
+                        if (resultado.cumplimiento >= 25) {
                             indicadoresCumplidos++;
                         } else if (resultado.cumplimiento >= 20) {
                             indicadoresParciales++;
@@ -3779,8 +3775,8 @@ document.getElementById('darkModeToggle').addEventListener('change', configurarC
                     parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
                 
                 let statusClass = '';
-                if (cumplimientoPromedio >= 100) statusClass = 'bg-success';
-                else if (cumplimientoPromedio >= 25) statusClass = 'bg-warning';
+                if (cumplimientoPromedio >= 25) statusClass = 'bg-success';
+                else if (cumplimientoPromedio >= 80) statusClass = 'bg-warning';
                 else statusClass = 'bg-danger';
                 
                 const row = document.createElement('tr');
@@ -3840,6 +3836,7 @@ function actualizarDetalleIndicador() {
     // 3) Actualizar tabla
     actualizarTablaDetalleIndicador(indicador);
 }
+
 
 /**
  * Dibuja (o redibuja) los dos gráficos dentro de la pestaña de detalle
@@ -6109,51 +6106,8 @@ function determinarEstadoMeta(codigo, cumplimiento, meta) {
   }
 }
 
-// Función actualizada para actualizar la tabla de indicadores del centro
-function actualizarTablaIndicadoresCentro() {
-  const tableBody = document.getElementById('centroIndicadoresTableBody');
-  tableBody.innerHTML = '';
 
-  // Ordenar indicadores por código
-  const indicadoresOrdenados = [...iaapsData.indicadores].sort((a, b) => {
-    const codigoA = parseFloat(a.codigo.replace(/[^0-9.]/g, ''));
-    const codigoB = parseFloat(b.codigo.replace(/[^0-9.]/g, ''));
-    return codigoA - codigoB;
-  });
 
-  indicadoresOrdenados.forEach(indicador => {
-    const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-    if (!resultado) return;
-
-    // Determinar estado según criterios
-    const estado = determinarEstadoMeta(indicador.codigo, resultado.cumplimiento, indicador.meta);
-
-    // Formatear resultado y meta
-    const resultadoFormateado = indicador.tipo === 'porcentaje'
-      ? resultado.resultado.toFixed(2) + '%'
-      : resultado.resultado.toFixed(2);
-    const metaFormateada = indicador.tipo === 'porcentaje'
-      ? indicador.meta.toFixed(2) + '%'
-      : indicador.meta.toFixed(2);
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>
-        <strong>${indicador.codigo}</strong> - ${indicador.nombre}
-      </td>
-      <td class="text-center">${resultado.numerador}</td>
-      <td class="text-center">${resultado.denominador}</td>
-      <td class="text-center">${resultadoFormateado}</td>
-      <td class="text-center">${metaFormateada}</td>
-      <td class="text-center">
-        <span class="badge ${estado.class}">
-          <i class="fas ${estado.icon} me-1"></i>${estado.text}
-        </span>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
 
 /**
  * Calcula el cumplimiento global de todos los indicadores IAAPS
@@ -6308,47 +6262,95 @@ function diagnosticarDashboard() {
     return "OK: Diagnóstico completado sin problemas evidentes";
 }
 
+
+
+
+
+
+
+
 /**
- * FUNCIONES BÁSICAS DE EXPORTACIÓN PARA DASHBOARD IAAPS
- * Solución simplificada para corregir errores en exportación PDF y Excel
+ * FUNCIONES PREMIUM DE EXPORTACIÓN PARA DASHBOARD IAAPS
+ * Versión elegante y profesional con branding corporativo
+ * 
+ * @author INFOGES Curicó
+ * @version 2.0.0
+ * @copyright 2025 Servicio de Salud Maule
  */
 
-// ==================== FUNCIÓN PARA EXPORTAR A EXCEL ====================
+// Definición de paleta de colores corporativa
+const BRAND_COLORS = {
+  primary: '#2E9B61',       // Verde principal
+  secondary: '#20724A',     // Verde oscuro
+  accent: '#6FDDA6',        // Verde claro
+  light: '#eafaf1',         // Verde ultra claro
+  text: '#263238',          // Texto oscuro
+  textLight: '#FFFFFF',     // Texto claro
+  success: '#3AC97C',       // Verde éxito
+  warning: '#FFBD3D',       // Amarillo advertencia
+  danger: '#FF5A5A',        // Rojo error
+  gray: '#78909C'           // Gris neutro
+};
+
+// Ruta a los recursos de marca
+const BRAND_ASSETS = {
+  logo: 'images/logo2.png',         // Logo principal
+  headerBackground: '#eafaf1',      // Color de fondo de encabezado
+  footerText: 'INFOGES Curicó - Dashboard de Control IAAPS',
+  watermark: 'CONFIDENCIAL'         // Marca de agua para documentos
+};
+
+// ==================== FUNCIÓN PARA EXPORTAR A EXCEL - VERSIÓN PREMIUM ====================
 
 /**
- * Exporta datos a Excel según el tipo seleccionado
+ * Exporta datos a Excel según el tipo seleccionado con formato profesional
  * @param {string} tipo - 'centro', 'indicador' o 'comparativo'
  */
-function exportarExcel(tipo) {
-  // Mostrar indicador de carga
-  mostrarCargando(true);
+function exportarExcelPremium(tipo) {
+  // Mostrar indicador de carga personalizado
+  mostrarCargandoPremium('Generando documento Excel de alta calidad...');
   
   setTimeout(() => {
     try {
-      // Verificar si XLSX está disponible
+      // Verificar disponibilidad de librerías
       if (typeof XLSX === 'undefined') {
         console.error("Error: La librería SheetJS (XLSX) no está disponible");
-        mostrarNotificacion('Error: Librería Excel no disponible', 'error');
-        mostrarCargando(false);
+        mostrarNotificacionPremium('La librería Excel no está disponible', 'error');
+        ocultarCargandoPremium();
         return;
       }
       
       let data = [];
       let nombreArchivo = '';
+      let tituloReporte = '';
+      let subtituloReporte = '';
+      
+      // Obtener fecha actual formateada
+      const fechaActual = new Date().toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
       
       if (tipo === 'centro') {
         // Exportar datos del centro seleccionado
         const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
         if (!centro) {
-          mostrarNotificacion('Error: Centro no encontrado', 'error');
-          mostrarCargando(false);
+          mostrarNotificacionPremium('Centro no encontrado en la base de datos', 'error');
+          ocultarCargandoPremium();
           return;
         }
         
         nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.xlsx`;
+        tituloReporte = `Índices de Actividad Atención Primaria`;
+        subtituloReporte = `${centro.nombre.toUpperCase()} - Marzo 2025`;
         
-        // Encabezados
-        data.push(['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']);
+        // Datos informativos y encabezados
+        data.push([tituloReporte]);
+        data.push([subtituloReporte]);
+        data.push([`Fecha de generación: ${fechaActual}`]);
+        data.push([]);  // Línea en blanco
+        data.push(['Código', 'Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']);
         
         // Datos
         iaapsData.indicadores.forEach(indicador => {
@@ -6356,12 +6358,13 @@ function exportarExcel(tipo) {
           if (!resultado) return;
           
           let estado = '';
-          if (resultado.cumplimiento >= 100) estado = 'Cumplido';
-          else if (resultado.cumplimiento >= 25) estado = 'Parcial';
-          else estado = 'Crítico';
+          if (resultado.cumplimiento >= 100) estado = 'CUMPLIDO';
+          else if (resultado.cumplimiento >= 25) estado = 'EN PROCESO';
+          else estado = 'CRÍTICO';
           
           data.push([
-            `${indicador.codigo} - ${indicador.nombre}`,
+            indicador.codigo,
+            indicador.nombre,
             resultado.numerador,
             resultado.denominador,
             indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
@@ -6370,18 +6373,59 @@ function exportarExcel(tipo) {
             estado
           ]);
         });
+        
+        // Agregar resumen al final
+        data.push([]);  // Línea en blanco
+        
+        // Agregar estadísticas de cumplimiento
+        let indicadoresCumplidos = 0;
+        let indicadoresParciales = 0;
+        let indicadoresCriticos = 0;
+        
+        iaapsData.indicadores.forEach(indicador => {
+          const resultado = indicador.resultados.find(r => r.centro === currentCentro);
+          if (!resultado) return;
+          
+          if (resultado.cumplimiento >= 100) indicadoresCumplidos++;
+          else if (resultado.cumplimiento >= 25) indicadoresParciales++;
+          else indicadoresCriticos++;
+        });
+        
+        data.push(['Resumen de Cumplimiento']);
+        data.push(['Indicadores Cumplidos', indicadoresCumplidos]);
+        data.push(['Indicadores en Proceso', indicadoresParciales]);
+        data.push(['Indicadores Críticos', indicadoresCriticos]);
+        
       } else if (tipo === 'indicador') {
         // Exportar datos del indicador seleccionado
         const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
         if (!indicador) {
-          mostrarNotificacion('Error: Indicador no encontrado', 'error');
-          mostrarCargando(false);
+          mostrarNotificacionPremium('Indicador no encontrado en la base de datos', 'error');
+          ocultarCargandoPremium();
           return;
         }
         
         nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.xlsx`;
+        tituloReporte = `Índices de Actividad Atención Primaria`;
+        subtituloReporte = `Indicador ${indicador.codigo}: ${indicador.nombre} - Marzo 2025`;
         
-        // Encabezados
+        // Datos informativos y encabezados
+        data.push([tituloReporte]);
+        data.push([subtituloReporte]);
+        data.push([`Fecha de generación: ${fechaActual}`]);
+        data.push([]);  // Línea en blanco
+        
+        // Agregar detalles del indicador
+        data.push(['Detalles del Indicador']);
+        data.push(['Código', indicador.codigo]);
+        data.push(['Nombre', indicador.nombre]);
+        data.push(['Meta', indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2)]);
+        data.push(['Importancia', importanciaIndicadores[indicador.codigo]]);
+        data.push(['Numerador', formulasIndicadores[indicador.codigo].numerador]);
+        data.push(['Denominador', formulasIndicadores[indicador.codigo].denominador]);
+        data.push([]);  // Línea en blanco
+        
+        // Encabezados de la tabla principal
         data.push(['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento', 'Estado']);
         
         // Datos
@@ -6390,9 +6434,9 @@ function exportarExcel(tipo) {
           if (!resultado) return;
           
           let estado = '';
-          if (resultado.cumplimiento >= 100) estado = 'Cumplido';
-          else if (resultado.cumplimiento >= 25) estado = 'Parcial';
-          else estado = 'Crítico';
+          if (resultado.cumplimiento >= 100) estado = 'CUMPLIDO';
+          else if (resultado.cumplimiento >= 25) estado = 'EN PROCESO';
+          else estado = 'CRÍTICO';
           
           data.push([
             centro.nombre,
@@ -6404,12 +6448,21 @@ function exportarExcel(tipo) {
             estado
           ]);
         });
+        
       } else if (tipo === 'comparativo') {
         // Exportar tabla comparativa
         nombreArchivo = `IAAPS_Comparativo_Marzo_2025.xlsx`;
+        tituloReporte = `Índices de Actividad Atención Primaria`;
+        subtituloReporte = `Análisis Comparativo por Centro - Marzo 2025`;
         
-        // Encabezados
-        const headers = ['Indicador', 'Meta'];
+        // Datos informativos y encabezados
+        data.push([tituloReporte]);
+        data.push([subtituloReporte]);
+        data.push([`Fecha de generación: ${fechaActual}`]);
+        data.push([]);  // Línea en blanco
+        
+        // Encabezados dinámicos
+        const headers = ['Código', 'Indicador', 'Meta'];
         iaapsData.centros.forEach(centro => {
           headers.push(centro.nombre);
         });
@@ -6418,7 +6471,8 @@ function exportarExcel(tipo) {
         // Datos
         iaapsData.indicadores.forEach(indicador => {
           const row = [
-            `${indicador.codigo} - ${indicador.nombre}`,
+            indicador.codigo,
+            indicador.nombre,
             indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2)
           ];
           
@@ -6433,78 +6487,264 @@ function exportarExcel(tipo) {
           
           data.push(row);
         });
+        
+        // Agregar análisis de cumplimiento al final
+        data.push([]);  // Línea en blanco
+        data.push(['Análisis de Cumplimiento por Centro']);
+        
+        // Encabezados de la tabla de análisis
+        data.push(['Centro', 'Cumplimiento Promedio', 'Indicadores Cumplidos', 'En Proceso', 'Críticos']);
+        
+        // Datos de análisis por centro
+        iaapsData.centros.forEach(centro => {
+          let cumplimientoTotal = 0;
+          let indicadoresContados = 0;
+          let indicadoresCumplidos = 0;
+          let indicadoresParciales = 0;
+          let indicadoresCriticos = 0;
+          
+          iaapsData.indicadores.forEach(indicador => {
+            const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+            if (resultado && resultado.denominador > 0) {
+              cumplimientoTotal += resultado.cumplimiento || 0;
+              indicadoresContados++;
+              
+              if (resultado.cumplimiento >= 100) indicadoresCumplidos++;
+              else if (resultado.cumplimiento >= 25) indicadoresParciales++;
+              else indicadoresCriticos++;
+            }
+          });
+          
+          const cumplimientoPromedio = indicadoresContados > 0 ? 
+            parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
+          
+          data.push([
+            centro.nombre,
+            cumplimientoPromedio.toFixed(2) + '%',
+            indicadoresCumplidos,
+            indicadoresParciales,
+            indicadoresCriticos
+          ]);
+        });
       }
       
-      // Crear libro de Excel usando método simple de XLSX
-      const ws = XLSX.utils.aoa_to_sheet(data);
+      // Crear libro de Excel avanzado con formato
       const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      
+      // Configurar ancho de columnas óptimo
+      const wscols = [];
+      if (data[0]) {
+        for (let i = 0; i < data[0].length; i++) {
+          let maxLength = 0;
+          for (let j = 0; j < data.length; j++) {
+            if (data[j][i] && String(data[j][i]).length > maxLength) {
+              maxLength = String(data[j][i]).length;
+            }
+          }
+          wscols.push({ wch: Math.min(maxLength + 2, 50) });  // Limitar ancho máximo a 50 caracteres
+        }
+      }
+      ws['!cols'] = wscols;
+      
+      // Aplicar estilos avanzados (hasta donde permite XLSX)
+      if (tipo === 'centro' || tipo === 'indicador') {
+        // Estilos para título y subtítulo
+        applyExcelStyle(ws, 'A1', { font: { bold: true, size: 16 }, fill: { fgColor: { rgb: "EAF9F1" } } });
+        applyExcelStyle(ws, 'A2', { font: { bold: true, size: 14 }, fill: { fgColor: { rgb: "EAF9F1" } } });
+        
+        // Fusionar celdas para títulos
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },  // Título
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },  // Subtítulo
+          { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } }   // Fecha
+        ];
+        
+        // Estilos para encabezados de tabla
+        const headerRow = tipo === 'centro' ? 4 : 13;
+        for (let col = 0; col < 8; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: headerRow, c: col });
+          applyExcelStyle(ws, cellRef, { 
+            font: { bold: true, color: { rgb: "FFFFFF" } }, 
+            fill: { fgColor: { rgb: "2E9B61" } },
+            alignment: { horizontal: "center" }
+          });
+        }
+        
+        // Estilo para las filas de datos
+        for (let row = headerRow + 1; row < data.length; row++) {
+          // Verificar si es una fila de datos
+          if (data[row].length >= 7) {
+            // Aplicar color alternado a las filas
+            const bgColor = row % 2 === 0 ? "FFFFFF" : "F5F5F5";
+            
+            for (let col = 0; col < data[row].length; col++) {
+              const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+              applyExcelStyle(ws, cellRef, { 
+                fill: { fgColor: { rgb: bgColor } }
+              });
+            }
+            
+            // Estilo especial para la columna de cumplimiento
+            if (data[row][6]) {
+              const cumplimiento = parseFloat(data[row][6]);
+              let colorHex = "3AC97C";  // Verde por defecto
+              if (cumplimiento < 25) {
+                colorHex = "FF5A5A";    // Rojo para crítico
+              } else if (cumplimiento < 100) {
+                colorHex = "FFBD3D";    // Amarillo para parcial
+              }
+              
+              const cumplimientoCell = XLSX.utils.encode_cell({ r: row, c: 6 });
+              applyExcelStyle(ws, cumplimientoCell, { 
+                font: { bold: true, color: { rgb: colorHex } }
+              });
+            }
+          }
+        }
+      } else if (tipo === 'comparativo') {
+        // Estilos para título y subtítulo
+        applyExcelStyle(ws, 'A1', { font: { bold: true, size: 16 }, fill: { fgColor: { rgb: "EAF9F1" } } });
+        applyExcelStyle(ws, 'A2', { font: { bold: true, size: 14 }, fill: { fgColor: { rgb: "EAF9F1" } } });
+        
+        // Fusionar celdas para títulos (número de columnas dinámico)
+        const mergeColumns = headers ? headers.length - 1 : 9;
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: mergeColumns } },  // Título
+          { s: { r: 1, c: 0 }, e: { r: 1, c: mergeColumns } },  // Subtítulo
+          { s: { r: 2, c: 0 }, e: { r: 2, c: mergeColumns } }   // Fecha
+        ];
+        
+        // Estilos para encabezados
+        const headerRow = 4;
+        for (let col = 0; col < headers.length; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: headerRow, c: col });
+          applyExcelStyle(ws, cellRef, { 
+            font: { bold: true, color: { rgb: "FFFFFF" } }, 
+            fill: { fgColor: { rgb: "2E9B61" } },
+            alignment: { horizontal: "center" }
+          });
+        }
+      }
+      
       XLSX.utils.book_append_sheet(wb, ws, "IAAPS");
       
-      // Exportar archivo
+      // Exportar el archivo
       XLSX.writeFile(wb, nombreArchivo);
       
-      mostrarCargando(false);
-      mostrarNotificacion('Excel exportado correctamente', 'success');
+      ocultarCargandoPremium();
+      mostrarNotificacionPremium('Documento Excel exportado correctamente', 'success');
     } catch (error) {
       console.error('Error al exportar a Excel:', error);
-      mostrarCargando(false);
-      mostrarNotificacion('Error al exportar Excel: ' + error.message, 'error');
+      ocultarCargandoPremium();
+      mostrarNotificacionPremium('Error en la exportación: ' + error.message, 'error');
     }
-  }, 500);
+  }, 800);
 }
 
-// ==================== FUNCIÓN PARA EXPORTAR A PDF ====================
+/**
+ * Aplica estilos a una celda específica (compatible con SheetJS)
+ * @param {Object} worksheet - Hoja de trabajo
+ * @param {string} cellRef - Referencia de celda (ej. 'A1')
+ * @param {Object} style - Objeto de estilo
+ */
+function applyExcelStyle(worksheet, cellRef, style) {
+  if (!worksheet[cellRef]) return;
+  
+  if (!worksheet[cellRef].s) {
+    worksheet[cellRef].s = {};
+  }
+  
+  // Aplicar estilos disponibles
+  if (style.font) {
+    worksheet[cellRef].s.font = style.font;
+  }
+  
+  if (style.fill) {
+    worksheet[cellRef].s.fill = style.fill;
+  }
+  
+  if (style.alignment) {
+    worksheet[cellRef].s.alignment = style.alignment;
+  }
+  
+  if (style.border) {
+    worksheet[cellRef].s.border = style.border;
+  }
+}
+
+// ==================== FUNCIÓN PARA EXPORTAR A PDF - VERSIÓN PREMIUM ====================
 
 /**
- * Exporta datos a PDF según el tipo seleccionado
- * Solución para el error "doc.autoTable is not a function"
+ * Exporta datos a PDF según el tipo seleccionado con diseño profesional premium
  * @param {string} tipo - 'centro', 'indicador' o 'comparativo'
  */
-function exportarPDF(tipo) {
-  // Mostrar indicador de carga
-  mostrarCargando(true);
+function exportarPDFPremium(tipo) {
+  // Mostrar indicador de carga personalizado
+  mostrarCargandoPremium('Generando documento PDF de alta calidad...');
   
   setTimeout(() => {
     try {
-      // Verificar si jsPDF está disponible correctamente
+      // Verificar disponibilidad de librerías
       if (typeof window.jspdf === 'undefined') {
         console.error("Error: La librería jsPDF no está disponible");
-        mostrarNotificacion('Error: Librería PDF no disponible', 'error');
-        mostrarCargando(false);
+        mostrarNotificacionPremium('Librería PDF no disponible', 'error');
+        ocultarCargandoPremium();
         return;
       }
       
-      // Crear instancia jsPDF (sintaxis corregida)
+      // Crear instancia jsPDF
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
       
       // Verificar si el plugin autoTable está disponible
-      if (typeof window.jspdf.jsPDF.prototype.autoTable !== 'function') {
-        console.error("Error: Plugin autoTable no disponible");
-        // Usar método básico sin autoTable
-        exportarPDFBasico(doc, tipo);
+      const autoTableDisponible = typeof doc.autoTable === 'function';
+      if (!autoTableDisponible) {
+        console.warn("Plugin autoTable no disponible. Cargando alternativa...");
+        // Intentar cargar dinámicamente
+        cargarPluginAutoTable(() => {
+          // Reintentamos la exportación una vez cargado
+          exportarPDFPremium(tipo);
+        });
         return;
       }
       
       let nombreArchivo = '';
       let titulo = '';
+      let subtitulo = '';
       let datos = [];
       let columnas = [];
+      
+      // Obtener fecha actual formateada
+      const fechaActual = new Date().toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+      
+      // Añadir cabecera con logo
+      agregarCabeceraPDF(doc, fechaActual);
       
       if (tipo === 'centro') {
         // Exportar datos del centro seleccionado
         const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
         if (!centro) {
-          mostrarCargando(false);
-          mostrarNotificacion('Error: Centro no encontrado', 'error');
+          ocultarCargandoPremium();
+          mostrarNotificacionPremium('Centro no encontrado en la base de datos', 'error');
           return;
         }
         
         nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
-        titulo = `Reporte IAAPS - ${centro.nombre} - Marzo 2025`;
+        titulo = `REPORTE IAAPS - ${centro.nombre.toUpperCase()}`;
+        subtitulo = `CORTE MARZO 2025`;
         
         // Definir columnas para autoTable
         columnas = [
+          { header: 'Código', dataKey: 'codigo' },
           { header: 'Indicador', dataKey: 'indicador' },
           { header: 'Numerador', dataKey: 'numerador' },
           { header: 'Denominador', dataKey: 'denominador' },
@@ -6519,7 +6759,8 @@ function exportarPDF(tipo) {
           if (!resultado) return;
           
           datos.push({
-            indicador: `${indicador.codigo} - ${indicador.nombre.substring(0, 40)}...`,
+            codigo: indicador.codigo,
+            indicador: indicador.nombre,
             numerador: resultado.numerador,
             denominador: resultado.denominador,
             resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
@@ -6527,17 +6768,25 @@ function exportarPDF(tipo) {
             cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
           });
         });
+        
+        // Añadir resumen de cumplimiento
+        agregarResumenCumplimientoPDF(doc, currentCentro);
+        
       } else if (tipo === 'indicador') {
         // Exportar datos del indicador seleccionado
         const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
         if (!indicador) {
-          mostrarCargando(false);
-          mostrarNotificacion('Error: Indicador no encontrado', 'error');
+          ocultarCargandoPremium();
+          mostrarNotificacionPremium('Indicador no encontrado en la base de datos', 'error');
           return;
         }
         
         nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
-        titulo = `Reporte IAAPS - Indicador ${indicador.codigo} - Marzo 2025`;
+        titulo = `REPORTE IAAPS - INDICADOR ${indicador.codigo}`;
+        subtitulo = `CORTE MARZO 2025`;
+        
+        // Agregar cuadro con detalles del indicador
+        agregarDetallesIndicadorPDF(doc, indicador);
         
         // Definir columnas para autoTable
         columnas = [
@@ -6563,27 +6812,34 @@ function exportarPDF(tipo) {
             cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
           });
         });
+        
       } else if (tipo === 'comparativo') {
         // Exportar tabla comparativa
         nombreArchivo = `IAAPS_Comparativo_Marzo_2025.pdf`;
-        titulo = `Reporte IAAPS - Comparativo - Marzo 2025`;
+        titulo = `REPORTE IAAPS - ANÁLISIS COMPARATIVO`;
+        subtitulo = `CORTE MARZO 2025`;
         
-        // Definir columnas para autoTable
+        // Definir columnas para autoTable (una por centro)
         columnas = [
+          { header: 'Código', dataKey: 'codigo' },
           { header: 'Indicador', dataKey: 'indicador' },
           { header: 'Meta', dataKey: 'meta' }
         ];
         
-        // Agregar columnas para cada centro (limitado a algunos para que quepa en PDF)
-        const centrosLimitados = iaapsData.centros.slice(0, 4); // Solo 4 centros para que quepa en el PDF
+        // Agregar solo los primeros 4 centros para no desbordar el ancho
+        const centrosLimitados = iaapsData.centros.slice(0, 5);
         centrosLimitados.forEach(centro => {
-          columnas.push({ header: centro.nombre.substring(0, 8), dataKey: centro.codigo });
+          columnas.push({ 
+            header: centro.nombre.length > 10 ? centro.nombre.substring(0, 10) + '...' : centro.nombre, 
+            dataKey: centro.codigo 
+          });
         });
         
         // Datos
         iaapsData.indicadores.forEach(indicador => {
           const fila = {
-            indicador: `${indicador.codigo} - ${indicador.nombre.substring(0, 20)}...`,
+            codigo: indicador.codigo,
+            indicador: indicador.nombre.length > 35 ? indicador.nombre.substring(0, 35) + '...' : indicador.nombre,
             meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2)
           };
           
@@ -6599,220 +6855,839 @@ function exportarPDF(tipo) {
           
           datos.push(fila);
         });
+        
+        // Agregar resumen de cumplimiento por centro
+        doc.addPage();
+        agregarComparativoCentrosPDF(doc);
       }
       
-      // Añadir título
+      // Añadir títulos
       doc.setFontSize(18);
-      doc.text(titulo, 14, 22);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(BRAND_COLORS.primary);
+      doc.text(titulo, doc.internal.pageSize.width / 2, 45, { align: 'center' });
       
-      // Añadir fecha
-      doc.setFontSize(11);
-      doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 30);
+      doc.setFontSize(14);
+      doc.setTextColor(BRAND_COLORS.secondary);
+      doc.text(subtitulo, doc.internal.pageSize.width / 2, 52, { align: 'center' });
       
-      // Comprobar nuevamente el método autoTable antes de usarlo
-      if (typeof doc.autoTable === 'function') {
-        // Utilizar autoTable si está disponible
-        doc.autoTable({
-          columns: columnas,
-          body: datos,
-          startY: 35,
-          styles: { fontSize: 9 },
-          columnStyles: {
-            indicador: { cellWidth: 60 }
+      // Añadir línea decorativa
+      doc.setDrawColor(BRAND_COLORS.primary);
+      doc.setLineWidth(0.5);
+      doc.line(40, 55, doc.internal.pageSize.width - 40, 55);
+      
+      // Añadir tabla
+      doc.autoTable({
+        columns: columnas,
+        body: datos,
+        startY: tipo === 'indicador' ? 110 : 60,
+        margin: { top: 60, right: 15, bottom: 25, left: 15 },
+        headStyles: {
+          fillColor: [46, 155, 97],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        bodyStyles: {
+          fontSize: 9
+        },
+        alternateRowStyles: {
+          fillColor: [250, 250, 250]
+        },
+        columnStyles: {
+          codigo: { cellWidth: 15 },
+          indicador: { cellWidth: 50 },
+          numerador: { cellWidth: 20, halign: 'center' },
+          denominador: { cellWidth: 20, halign: 'center' },
+          cumplimiento: { 
+            cellWidth: 25, 
+            halign: 'center',
+            fontStyle: 'bold'
           }
-        });
-      } else {
-        // Método alternativo si autoTable no está disponible
-        exportarPDFBasico(doc, tipo);
-        return;
-      }
+        },
+        didDrawCell: function(data) {
+          // Colorear celdas de cumplimiento
+          if (data.section === 'body') {
+            if (data.column.dataKey === 'cumplimiento' && data.cell.text.length > 0) {
+              const cumplimiento = parseFloat(data.cell.text[0]);
+              
+              if (cumplimiento >= 100) {
+                doc.setFillColor(58, 201, 112); // Verde
+              } else if (cumplimiento >= 25) {
+                doc.setFillColor(255, 189, 61); // Amarillo
+              } else {
+                doc.setFillColor(255, 90, 90); // Rojo
+              }
+              
+              // Colorear fondo celda
+              doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+              
+              // Escribir texto en blanco
+              doc.setTextColor(255, 255, 255);
+              doc.setFont('helvetica', 'bold');
+              doc.text(data.cell.text, data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2, {
+                align: 'center',
+                baseline: 'middle'
+              });
+            }
+          }
+        }
+      });
       
-      // Añadir pie de página
+      // Añadir pie de página a todas las páginas
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(8);
-        doc.text(`Página ${i} de ${pageCount} - INFOGES Curicó - Dashboard de Control`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
-          align: 'center'
-        });
+        
+        // Añadir pie de página
+        agregarPiePaginaPDF(doc, i, pageCount);
+        
+        // Añadir marca de agua sutil
+        agregarMarcaAguaPDF(doc);
       }
       
       // Guardar PDF
       doc.save(nombreArchivo);
       
-      mostrarCargando(false);
-      mostrarNotificacion('PDF exportado correctamente', 'success');
+      ocultarCargandoPremium();
+      mostrarNotificacionPremium('Documento PDF exportado correctamente', 'success');
     } catch (error) {
       console.error('Error al exportar a PDF:', error);
-      mostrarCargando(false);
-      mostrarNotificacion('Error al exportar PDF: ' + error.message, 'error');
+      ocultarCargandoPremium();
+      mostrarNotificacionPremium('Error en la exportación: ' + error.message, 'error');
     }
-  }, 500);
+  }, 800);
 }
 
 /**
- * Método alternativo básico para exportar a PDF si autoTable no está disponible
- * @param {jsPDF} doc - Instancia de jsPDF
- * @param {string} tipo - Tipo de exportación
+ * Agrega cabecera profesional con logo al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ * @param {string} fecha - Fecha formateada
  */
-function exportarPDFBasico(doc, tipo) {
+function agregarCabeceraPDF(doc, fecha) {
+  // Fondo para cabecera
+  doc.setFillColor(234, 250, 241); // Verde ultra claro
+  doc.rect(0, 0, doc.internal.pageSize.width, 30, 'F');
+  
+  // Línea decorativa
+  doc.setDrawColor(BRAND_COLORS.primary);
+  doc.setLineWidth(3);
+  doc.line(0, 30, doc.internal.pageSize.width, 30);
+  
+  // Intentar cargar logo (simulado, en producción usar una imagen real)
   try {
-    let nombreArchivo = '';
-    let titulo = '';
-    let datos = [];
+    // En un entorno real usaríamos una imagen:
+    // doc.addImage(BRAND_ASSETS.logo, 'PNG', 15, 5, 40, 20);
     
-    if (tipo === 'centro') {
-      const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
-      if (!centro) {
-        mostrarCargando(false);
-        mostrarNotificacion('Error: Centro no encontrado', 'error');
-        return;
-      }
-      
-      nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
-      titulo = `Reporte IAAPS - ${centro.nombre} - Marzo 2025`;
-      
-      // Generar datos del centro
-      iaapsData.indicadores.forEach((indicador, index) => {
-        const resultado = indicador.resultados.find(r => r.centro === currentCentro);
-        if (!resultado) return;
-        
-        datos.push({
-          indicador: `${indicador.codigo} - ${indicador.nombre}`,
-          resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
-          meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
-          cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
-        });
-      });
-    } else if (tipo === 'indicador') {
-      const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
-      if (!indicador) {
-        mostrarCargando(false);
-        mostrarNotificacion('Error: Indicador no encontrado', 'error');
-        return;
-      }
-      
-      nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
-      titulo = `Reporte IAAPS - Indicador ${indicador.codigo} - Marzo 2025`;
-      
-      // Generar datos del indicador
-      iaapsData.centros.forEach((centro, index) => {
-        const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
-        if (!resultado) return;
-        
-        datos.push({
-          centro: centro.nombre,
-          resultado: indicador.tipo === 'porcentaje' ? resultado.resultado.toFixed(2) + '%' : resultado.resultado.toFixed(2),
-          meta: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2),
-          cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
-        });
-      });
-    } else {
-      nombreArchivo = `IAAPS_Comparativo_Marzo_2025.pdf`;
-      titulo = `Reporte IAAPS - Comparativo - Marzo 2025`;
-      
-      // Solo mostrar mensaje de que se necesita autoTable
-      doc.setFontSize(18);
-      doc.text(titulo, 14, 22);
-      doc.setFontSize(12);
-      doc.text("Para generar el reporte comparativo se necesita el plugin autoTable.", 14, 40);
-      doc.text("Por favor, asegúrese de que la librería jspdf-autotable esté correctamente cargada.", 14, 50);
-      doc.save(nombreArchivo);
-      mostrarCargando(false);
-      mostrarNotificacion('PDF básico exportado. Se recomienda instalar el plugin autoTable.', 'warning');
-      return;
-    }
-    
-    // Añadir título
-    doc.setFontSize(18);
-    doc.text(titulo, 14, 22);
-    
-    // Añadir fecha
-    doc.setFontSize(11);
-    doc.text(`Fecha de generación: ${new Date().toLocaleDateString()}`, 14, 30);
-    
-    // Crear tabla básica manualmente
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    
-    let startY = 40;
-    const lineHeight = 10;
-    
-    // Cabeceras
-    if (tipo === 'centro') {
-      doc.text("Indicador", 14, startY);
-      doc.text("Resultado", 110, startY);
-      doc.text("Meta", 140, startY);
-      doc.text("Cumplimiento", 170, startY);
-    } else {
-      doc.text("Centro", 14, startY);
-      doc.text("Resultado", 110, startY);
-      doc.text("Meta", 140, startY);
-      doc.text("Cumplimiento", 170, startY);
-    }
-    
-    startY += 5;
-    doc.line(10, startY, 200, startY); // Línea horizontal
-    
-    startY += 5;
-    
-    // Límite de filas para que quepa en la página
-    const maxRows = 25;
-    const datosLimitados = datos.slice(0, maxRows);
-    
-    // Datos
-    datosLimitados.forEach((dato, index) => {
-      const y = startY + (index * lineHeight);
-      
-      if (tipo === 'centro') {
-        doc.text(dato.indicador.substring(0, 40), 14, y);
-      } else {
-        doc.text(dato.centro.substring(0, 40), 14, y);
-      }
-      
-      doc.text(dato.resultado, 110, y);
-      doc.text(dato.meta, 140, y);
-      doc.text(dato.cumplimiento, 170, y);
-      
-      // Línea separadora
-      if (index < datosLimitados.length - 1) {
-        doc.setDrawColor(200, 200, 200);
-        doc.line(10, y + 2, 200, y + 2);
-      }
-    });
-    
-    // Si hay más datos de los que se muestran
-    if (datos.length > maxRows) {
-      const y = startY + (maxRows * lineHeight) + 5;
-      doc.text(`... y ${datos.length - maxRows} filas más`, 14, y);
-    }
-    
-    // Añadir pie de página
+    // Simulación de logo con texto
+    doc.setFillColor(BRAND_COLORS.primary);
+    doc.roundedRect(15, 5, 40, 20, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('INFOGES', 35, 15, { align: 'center' });
     doc.setFontSize(8);
-    doc.text("INFOGES Curicó - Dashboard de Control", doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
-      align: 'center'
+    doc.text('CURICÓ', 35, 20, { align: 'center' });
+  } catch (e) {
+    console.warn("No se pudo cargar el logo:", e);
+  }
+  
+  // Información de documento
+  doc.setTextColor(BRAND_COLORS.text);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('SERVICIO DE SALUD MAULE', doc.internal.pageSize.width - 15, 10, { align: 'right' });
+  doc.text('DEPARTAMENTO DE ATENCIÓN PRIMARIA', doc.internal.pageSize.width - 15, 15, { align: 'right' });
+  doc.text(`Fecha: ${fecha}`, doc.internal.pageSize.width - 15, 20, { align: 'right' });
+  doc.text('DOCUMENTO OFICIAL', doc.internal.pageSize.width - 15, 25, { align: 'right' });
+}
+
+/**
+ * Agrega pie de página profesional al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ * @param {number} pageNumber - Número de página actual
+ * @param {number} pageCount - Número total de páginas
+ */
+function agregarPiePaginaPDF(doc, pageNumber, pageCount) {
+  const pageSize = doc.internal.pageSize;
+  const pageWidth = pageSize.width;
+  const pageHeight = pageSize.height;
+  
+  // Fondo para pie de página
+  doc.setFillColor(234, 250, 241); // Verde ultra claro
+  doc.rect(0, pageHeight - 20, pageWidth, 20, 'F');
+  
+  // Línea decorativa
+  doc.setDrawColor(BRAND_COLORS.primary);
+  doc.setLineWidth(1);
+  doc.line(0, pageHeight - 20, pageWidth, pageHeight - 20);
+  
+  // Información de pie de página
+  doc.setTextColor(BRAND_COLORS.text);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  
+  // Logo texto
+  doc.setFont('helvetica', 'bold');
+  doc.text('INFOGES CURICÓ', 15, pageHeight - 13);
+  
+  // Texto central
+  doc.setFont('helvetica', 'normal');
+  doc.text('Dashboard de Control IAAPS', pageWidth / 2, pageHeight - 13, { align: 'center' });
+  
+  // Numeración
+  doc.text(`Página ${pageNumber} de ${pageCount}`, pageWidth - 15, pageHeight - 13, { align: 'right' });
+  
+  // Información confidencial
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(7);
+  doc.text('Documento generado automáticamente. Uso interno institucional.', pageWidth / 2, pageHeight - 7, { align: 'center' });
+}
+
+/**
+ * Agrega marca de agua sutil al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ */
+function agregarMarcaAguaPDF(doc) {
+  // Guardar estado actual
+  const textColor = doc.getTextColor();
+  const fontSize = doc.getFontSize();
+  const fontStyle = doc.getFont();
+  
+  // Configurar marca de agua
+  doc.setTextColor(230, 230, 230);
+  doc.setFontSize(50);
+  doc.setFont('helvetica', 'bold');
+  
+  // Dibujar texto rotado en el centro
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  
+  doc.text(BRAND_ASSETS.watermark, pageWidth / 2, pageHeight / 2, {
+    align: 'center',
+    angle: 45
+  });
+  
+  // Restaurar estado
+  doc.setTextColor(textColor);
+  doc.setFontSize(fontSize);
+  doc.setFont(fontStyle.fontName, fontStyle.fontStyle);
+}
+
+/**
+ * Agrega cuadro de resumen de cumplimiento al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ * @param {string} codigoCentro - Código del centro
+ */
+function agregarResumenCumplimientoPDF(doc, codigoCentro) {
+  let indicadoresCumplidos = 0;
+  let indicadoresParciales = 0;
+  let indicadoresCriticos = 0;
+  let cumplimientoTotal = 0;
+  let indicadoresContados = 0;
+  
+  // Calcular estadísticas
+  iaapsData.indicadores.forEach(indicador => {
+    const resultado = indicador.resultados.find(r => r.centro === codigoCentro);
+    if (!resultado || resultado.denominador <= 0) return;
+    
+    cumplimientoTotal += resultado.cumplimiento || 0;
+    indicadoresContados++;
+    
+    if (resultado.cumplimiento >= 100) indicadoresCumplidos++;
+    else if (resultado.cumplimiento >= 25) indicadoresParciales++;
+    else indicadoresCriticos++;
+  });
+  
+  const cumplimientoPromedio = indicadoresContados > 0 ? 
+    parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
+  
+  // Posición después de la tabla existente
+  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 150;
+  
+  // Título del resumen
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_COLORS.primary);
+  doc.text("RESUMEN DE CUMPLIMIENTO", doc.internal.pageSize.width / 2, finalY, { align: 'center' });
+  
+  // Definir coordenadas para los cuadros de resumen
+  const startX = 20;
+  const startY = finalY + 10;
+  const boxWidth = (doc.internal.pageSize.width - 40) / 3 - 5;
+  const boxHeight = 30;
+  
+  // Cuadro 1: Cumplidos
+  dibujarCuadroResumen(doc, 
+    startX, startY, boxWidth, boxHeight,
+    'CUMPLIDOS', indicadoresCumplidos,
+    BRAND_COLORS.success, '#EAFAF1'
+  );
+  
+  // Cuadro 2: Parciales
+  dibujarCuadroResumen(doc, 
+    startX + boxWidth + 5, startY, boxWidth, boxHeight,
+    'EN PROCESO', indicadoresParciales,
+    BRAND_COLORS.warning, '#FFF8E1'
+  );
+  
+  // Cuadro 3: Críticos
+  dibujarCuadroResumen(doc, 
+    startX + (boxWidth + 5) * 2, startY, boxWidth, boxHeight,
+    'CRÍTICOS', indicadoresCriticos,
+    BRAND_COLORS.danger, '#FFEBEE'
+  );
+  
+  // Cuadro de cumplimiento global
+  const globalBoxWidth = doc.internal.pageSize.width - 40;
+  const globalBoxY = startY + boxHeight + 10;
+  
+  // Fondo del cuadro global
+  doc.setFillColor('#F5F5F5');
+  doc.roundedRect(startX, globalBoxY, globalBoxWidth, boxHeight, 3, 3, 'F');
+  
+  // Borde superior
+  doc.setDrawColor(BRAND_COLORS.primary);
+  doc.setLineWidth(1.5);
+  doc.line(startX, globalBoxY, startX + globalBoxWidth, globalBoxY);
+  
+  // Texto del cuadro global
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_COLORS.text);
+  doc.text("CUMPLIMIENTO GLOBAL", startX + 10, globalBoxY + 12);
+  
+  // Valor del cumplimiento global
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  
+  // Color según valor
+  if (cumplimientoPromedio >= 100) {
+    doc.setTextColor(BRAND_COLORS.success);
+  } else if (cumplimientoPromedio >= 25) {
+    doc.setTextColor(BRAND_COLORS.warning);
+  } else {
+    doc.setTextColor(BRAND_COLORS.danger);
+  }
+  
+  doc.text(`${cumplimientoPromedio.toFixed(2)}%`, startX + globalBoxWidth - 10, globalBoxY + 12 + 5, { align: 'right' });
+}
+
+/**
+ * Dibuja un cuadro de resumen con título y valor
+ * @param {jsPDF} doc - Instancia jsPDF
+ * @param {number} x - Posición X
+ * @param {number} y - Posición Y
+ * @param {number} width - Ancho del cuadro
+ * @param {number} height - Alto del cuadro
+ * @param {string} titulo - Título del cuadro
+ * @param {number} valor - Valor a mostrar
+ * @param {string} colorBorde - Color del borde superior
+ * @param {string} colorFondo - Color de fondo
+ */
+function dibujarCuadroResumen(doc, x, y, width, height, titulo, valor, colorBorde, colorFondo) {
+  // Convertir colores HEX a componentes RGB
+  const colorBordeRGB = hexToRgb(colorBorde);
+  const colorFondoRGB = hexToRgb(colorFondo);
+  
+  // Fondo del cuadro
+  doc.setFillColor(colorFondoRGB.r, colorFondoRGB.g, colorFondoRGB.b);
+  doc.roundedRect(x, y, width, height, 3, 3, 'F');
+  
+  // Borde superior
+  doc.setDrawColor(colorBordeRGB.r, colorBordeRGB.g, colorBordeRGB.b);
+  doc.setLineWidth(1.5);
+  doc.line(x, y, x + width, y);
+  
+  // Texto del título
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_COLORS.text);
+  doc.text(titulo, x + 10, y + 12);
+  
+  // Valor
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(colorBordeRGB.r, colorBordeRGB.g, colorBordeRGB.b);
+  doc.text(valor.toString(), x + width - 10, y + 12 + 5, { align: 'right' });
+}
+
+/**
+ * Agrega cuadro con detalles del indicador al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ * @param {Object} indicador - Objeto indicador
+ */
+function agregarDetallesIndicadorPDF(doc, indicador) {
+  // Recuadro principal
+  doc.setFillColor('#F8F9FA');
+  doc.roundedRect(15, 60, doc.internal.pageSize.width - 30, 45, 3, 3, 'F');
+  
+  // Bordes verticales de colores
+  doc.setDrawColor(BRAND_COLORS.primary);
+  doc.setLineWidth(4);
+  doc.line(15, 60, 15, 105);
+  
+  // Títulos de campos
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(BRAND_COLORS.primary);
+  
+  const campos = [
+    { titulo: 'Código:', valor: indicador.codigo, x: 20, y: 70 },
+    { titulo: 'Nombre:', valor: indicador.nombre, x: 20, y: 80 },
+    { titulo: 'Meta:', valor: indicador.tipo === 'porcentaje' ? indicador.meta.toFixed(2) + '%' : indicador.meta.toFixed(2), x: 20, y: 90 },
+    { titulo: 'Importancia:', valor: importanciaIndicadores[indicador.codigo], x: 120, y: 70 },
+    { titulo: 'Numerador:', valor: formulasIndicadores[indicador.codigo].numerador, x: 120, y: 80 },
+    { titulo: 'Denominador:', valor: formulasIndicadores[indicador.codigo].denominador, x: 120, y: 90 }
+  ];
+  
+  // Dibujar campos
+  campos.forEach(campo => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(BRAND_COLORS.primary);
+    doc.text(campo.titulo, campo.x, campo.y);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(BRAND_COLORS.text);
+    
+    // Manejar texto largo
+    const maxWidth = campo.x === 20 ? 90 : 75;
+    
+    if (campo.titulo === 'Nombre:' || campo.titulo === 'Numerador:' || campo.titulo === 'Denominador:') {
+      const textLines = doc.splitTextToSize(campo.valor, maxWidth);
+      doc.text(textLines, campo.x + 30, campo.y);
+    } else {
+      doc.text(campo.valor, campo.x + 30, campo.y);
+    }
+  });
+}
+
+/**
+ * Agrega análisis comparativo de centros al documento PDF
+ * @param {jsPDF} doc - Instancia jsPDF
+ */
+function agregarComparativoCentrosPDF(doc) {
+  // Título
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_COLORS.primary);
+  doc.text("ANÁLISIS COMPARATIVO POR CENTRO", doc.internal.pageSize.width / 2, 40, { align: 'center' });
+  
+  // Tabla comparativa
+  const datos = [];
+  
+  // Encabezados
+  const columnas = [
+    { header: 'Centro', dataKey: 'centro' },
+    { header: 'Cumplimiento', dataKey: 'cumplimiento' },
+    { header: 'Cumplidos', dataKey: 'cumplidos' },
+    { header: 'En Proceso', dataKey: 'proceso' },
+    { header: 'Críticos', dataKey: 'criticos' }
+  ];
+  
+  // Datos por centro
+  iaapsData.centros.forEach(centro => {
+    let cumplimientoTotal = 0;
+    let indicadoresContados = 0;
+    let indicadoresCumplidos = 0;
+    let indicadoresParciales = 0;
+    let indicadoresCriticos = 0;
+    
+    iaapsData.indicadores.forEach(indicador => {
+      const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
+      if (resultado && resultado.denominador > 0) {
+        cumplimientoTotal += resultado.cumplimiento || 0;
+        indicadoresContados++;
+        
+        if (resultado.cumplimiento >= 100) indicadoresCumplidos++;
+        else if (resultado.cumplimiento >= 25) indicadoresParciales++;
+        else indicadoresCriticos++;
+      }
     });
     
-    // Guardar PDF
-    doc.save(nombreArchivo);
+    const cumplimientoPromedio = indicadoresContados > 0 ? 
+      parseFloat((cumplimientoTotal / indicadoresContados).toFixed(2)) : 0;
     
-    mostrarCargando(false);
-    mostrarNotificacion('PDF básico exportado correctamente', 'success');
-  } catch (error) {
-    console.error('Error en exportación básica a PDF:', error);
-    mostrarCargando(false);
-    mostrarNotificacion('Error al exportar PDF básico: ' + error.message, 'error');
+    datos.push({
+      centro: centro.nombre,
+      cumplimiento: cumplimientoPromedio.toFixed(2) + '%',
+      cumplidos: indicadoresCumplidos.toString(),
+      proceso: indicadoresParciales.toString(),
+      criticos: indicadoresCriticos.toString()
+    });
+  });
+  
+  // Generar tabla
+  doc.autoTable({
+    columns: columnas,
+    body: datos,
+    startY: 50,
+    headStyles: {
+      fillColor: [46, 155, 97],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      halign: 'center'
+    },
+    bodyStyles: {
+      fontSize: 10
+    },
+    columnStyles: {
+      cumplimiento: { 
+        halign: 'center',
+        fontStyle: 'bold'
+      },
+      cumplidos: { 
+        halign: 'center',
+        fontStyle: 'bold',
+        textColor: [58, 201, 112]
+      },
+      proceso: { 
+        halign: 'center',
+        fontStyle: 'bold',
+        textColor: [255, 189, 61]
+      },
+      criticos: { 
+        halign: 'center',
+        fontStyle: 'bold',
+        textColor: [255, 90, 90]
+      }
+    },
+    didDrawCell: function(data) {
+      // Colorear celdas de cumplimiento
+      if (data.section === 'body' && data.column.dataKey === 'cumplimiento' && data.cell.text.length > 0) {
+        const cumplimiento = parseFloat(data.cell.text[0]);
+        
+        // Definir color según cumplimiento
+        let fillColor = [58, 201, 112]; // Verde por defecto
+        if (cumplimiento < 25) {
+          fillColor = [255, 90, 90]; // Rojo
+        } else if (cumplimiento < 100) {
+          fillColor = [255, 189, 61]; // Amarillo
+        }
+        
+        // Colorear fondo
+        doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+        
+        // Texto en blanco
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text(data.cell.text, data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2, {
+          align: 'center',
+          baseline: 'middle'
+        });
+      }
+    }
+  });
+  
+  // Agregar gráfico (representación simulada)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(BRAND_COLORS.primary);
+  doc.text("GRÁFICO DE CUMPLIMIENTO POR CENTRO", doc.internal.pageSize.width / 2, doc.lastAutoTable.finalY + 20, { align: 'center' });
+  
+  // Simulación del gráfico con rectángulos de colores
+  const startY = doc.lastAutoTable.finalY + 30;
+  const barHeight = 20;
+  const maxWidth = doc.internal.pageSize.width - 60;
+  
+  // Dibujar cada barra
+  datos.forEach((dato, index) => {
+    const y = startY + (index * (barHeight + 5));
+    const cumplimiento = parseFloat(dato.cumplimiento);
+    const barWidth = (cumplimiento / 100) * maxWidth;
+    
+    // Color según cumplimiento
+    if (cumplimiento >= 100) {
+      doc.setFillColor(58, 201, 112); // Verde
+    } else if (cumplimiento >= 25) {
+      doc.setFillColor(255, 189, 61); // Amarillo
+    } else {
+      doc.setFillColor(255, 90, 90); // Rojo
+    }
+    
+    // Dibujar barra
+    doc.roundedRect(30, y, barWidth, barHeight, 2, 2, 'F');
+    
+    // Etiqueta del centro
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(BRAND_COLORS.text);
+    
+    // Limitar longitud de nombre si es muy largo
+    let nombreCentro = dato.centro;
+    if (nombreCentro.length > 20) {
+      nombreCentro = nombreCentro.substring(0, 18) + '...';
+    }
+    
+    doc.text(nombreCentro, 25, y + barHeight / 2, { align: 'right', baseline: 'middle' });
+    
+    // Valor de cumplimiento
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text(dato.cumplimiento, 30 + barWidth - 5, y + barHeight / 2, { align: 'right', baseline: 'middle' });
+  });
+}
+
+/**
+ * Carga dinámicamente el plugin autoTable si no está disponible
+ * @param {Function} callback - Función a ejecutar cuando se complete la carga
+ */
+function cargarPluginAutoTable(callback) {
+  const script = document.createElement('script');
+  script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
+  script.onload = function() {
+    console.log("Plugin AutoTable cargado correctamente");
+    if (typeof callback === 'function') callback();
+  };
+  script.onerror = function() {
+    console.error("Error al cargar el plugin AutoTable");
+    mostrarNotificacionPremium('No se pudo cargar el plugin AutoTable', 'error');
+    ocultarCargandoPremium();
+  };
+  document.head.appendChild(script);
+}
+
+// ==================== FUNCIONES AUXILIARES ====================
+
+/**
+ * Muestra un indicador de carga premium
+ * @param {string} mensaje - Mensaje a mostrar (opcional)
+ */
+function mostrarCargandoPremium(mensaje = 'Procesando...') {
+  // Verificar si ya existe un overlay de carga
+  let loadingOverlay = document.getElementById('premiumLoadingOverlay');
+  
+  if (!loadingOverlay) {
+    // Crear overlay si no existe
+    loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'premiumLoadingOverlay';
+    loadingOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    `;
+    
+    // Crear spinner con CSS moderno
+    const spinner = document.createElement('div');
+    spinner.style.cssText = `
+      width: 50px;
+      height: 50px;
+      border: 3px solid ${BRAND_COLORS.light};
+      border-top: 3px solid ${BRAND_COLORS.primary};
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    `;
+    
+    // Crear estilo para la animación
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Crear contenedor de mensaje
+    const mensajeEl = document.createElement('div');
+    mensajeEl.id = 'premiumLoadingMessage';
+    mensajeEl.style.cssText = `
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      font-size: 16px;
+      color: ${BRAND_COLORS.primary};
+      font-weight: 500;
+      text-align: center;
+      margin-top: 15px;
+      max-width: 80%;
+    `;
+    mensajeEl.textContent = mensaje;
+    
+    // Agregar logo (opcional)
+    const logoContainer = document.createElement('div');
+    logoContainer.style.cssText = `
+      margin-bottom: 20px;
+      background-color: ${BRAND_COLORS.primary};
+      color: white;
+      padding: 8px 15px;
+      border-radius: 4px;
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      font-weight: bold;
+    `;
+    logoContainer.textContent = 'INFOGES';
+    
+    // Ensamblar todo
+    loadingOverlay.appendChild(logoContainer);
+    loadingOverlay.appendChild(spinner);
+    loadingOverlay.appendChild(mensajeEl);
+    document.body.appendChild(loadingOverlay);
+  } else {
+    // Actualizar mensaje si ya existe el overlay
+    const mensajeEl = document.getElementById('premiumLoadingMessage');
+    if (mensajeEl) {
+      mensajeEl.textContent = mensaje;
+    }
+    
+    // Mostrar si estaba oculto
+    loadingOverlay.style.display = 'flex';
   }
 }
 
-// ==================== CONFIGURACIÓN DE EVENTOS ====================
+/**
+ * Oculta el indicador de carga premium
+ */
+function ocultarCargandoPremium() {
+  const loadingOverlay = document.getElementById('premiumLoadingOverlay');
+  if (loadingOverlay) {
+    loadingOverlay.style.display = 'none';
+  }
+}
 
 /**
- * Configura los event listeners para los botones de exportación
+ * Muestra una notificación tipo toast premium
+ * @param {string} mensaje - Mensaje a mostrar
+ * @param {string} tipo - Tipo de notificación: 'success', 'error', 'warning', 'info'
+ */
+function mostrarNotificacionPremium(mensaje, tipo) {
+  // Verificar si ya existe un contenedor de notificaciones
+  let toastContainer = document.getElementById('premiumToastContainer');
+  
+  if (!toastContainer) {
+    // Crear contenedor si no existe
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'premiumToastContainer';
+    toastContainer.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    `;
+    document.body.appendChild(toastContainer);
+  }
+  
+  // Determinar color según tipo
+  let backgroundColor, iconClass;
+  switch (tipo) {
+    case 'success':
+      backgroundColor = BRAND_COLORS.success;
+      iconClass = 'fa-check-circle';
+      break;
+    case 'error':
+      backgroundColor = BRAND_COLORS.danger;
+      iconClass = 'fa-exclamation-circle';
+      break;
+    case 'warning':
+      backgroundColor = BRAND_COLORS.warning;
+      iconClass = 'fa-exclamation-triangle';
+      break;
+    case 'info':
+    default:
+      backgroundColor = BRAND_COLORS.secondary;
+      iconClass = 'fa-info-circle';
+      break;
+  }
+  
+  // Crear toast
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background-color: ${backgroundColor};
+    color: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    min-width: 300px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.3s, transform 0.3s;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  `;
+  
+  // Contenido del toast
+  toast.innerHTML = `
+    <i class="fas ${iconClass}" style="margin-right: 10px; font-size: 18px;"></i>
+    <div style="flex-grow: 1;">${mensaje}</div>
+    <i class="fas fa-times" style="margin-left: 15px; cursor: pointer; opacity: 0.7;"></i>
+  `;
+  
+  // Agregar al contenedor
+  toastContainer.appendChild(toast);
+  
+  // Animar entrada
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(0)';
+  }, 50);
+  
+  // Configurar cierre manual
+  const closeButton = toast.querySelector('.fa-times');
+  closeButton.addEventListener('click', () => {
+    cerrarToastPremium(toast);
+  });
+  
+  // Cierre automático después de 5 segundos
+  setTimeout(() => {
+    cerrarToastPremium(toast);
+  }, 5000);
+}
+
+/**
+ * Cierra una notificación toast con animación
+ * @param {HTMLElement} toast - Elemento toast a cerrar
+ */
+function cerrarToastPremium(toast) {
+  // Animar salida
+  toast.style.opacity = '0';
+  toast.style.transform = 'translateX(50px)';
+  
+  // Eliminar después de la animación
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 300);
+}
+
+/**
+ * Convierte color hexadecimal a componentes RGB
+ * @param {string} hex - Color en formato hexadecimal
+ * @returns {Object} - Objeto con propiedades r, g, b
+ */
+function hexToRgb(hex) {
+  // Eliminar # si está presente
+  hex = hex.replace(/^#/, '');
+  
+  // Parsear a componentes RGB
+  const bigint = parseInt(hex, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  
+  return { r, g, b };
+}
+
+// ==================== CONFIGURACIÓN DE EVENTOS DE EXPORTACIÓN PREMIUM ====================
+
+/**
+ * Configura los event listeners para los botones de exportación premium
  * Esta función debe llamarse al cargar la página
  */
-function configurarEventosExportacion() {
-  console.log("Configurando eventos de exportación...");
+function configurarEventosExportacionPremium() {
+  console.log("Configurando eventos de exportación premium...");
   
   // Botones para exportar detalles de centro
   const btnExcelCentro = document.getElementById('exportCentroExcelBtn');
@@ -6820,15 +7695,15 @@ function configurarEventosExportacion() {
   
   if (btnExcelCentro) {
     btnExcelCentro.addEventListener('click', function() {
-      console.log("Exportando centro a Excel...");
-      exportarExcel('centro');
+      console.log("Exportando centro a Excel (Premium)...");
+      exportarExcelPremium('centro');
     });
   }
   
   if (btnPdfCentro) {
     btnPdfCentro.addEventListener('click', function() {
-      console.log("Exportando centro a PDF...");
-      exportarPDF('centro');
+      console.log("Exportando centro a PDF (Premium)...");
+      exportarPDFPremium('centro');
     });
   }
   
@@ -6838,15 +7713,15 @@ function configurarEventosExportacion() {
   
   if (btnExcelIndicador) {
     btnExcelIndicador.addEventListener('click', function() {
-      console.log("Exportando indicador a Excel...");
-      exportarExcel('indicador');
+      console.log("Exportando indicador a Excel (Premium)...");
+      exportarExcelPremium('indicador');
     });
   }
   
   if (btnPdfIndicador) {
     btnPdfIndicador.addEventListener('click', function() {
-      console.log("Exportando indicador a PDF...");
-      exportarPDF('indicador');
+      console.log("Exportando indicador a PDF (Premium)...");
+      exportarPDFPremium('indicador');
     });
   }
   
@@ -6856,15 +7731,15 @@ function configurarEventosExportacion() {
   
   if (btnExcelComparativo) {
     btnExcelComparativo.addEventListener('click', function() {
-      console.log("Exportando comparativo a Excel...");
-      exportarExcel('comparativo');
+      console.log("Exportando comparativo a Excel (Premium)...");
+      exportarExcelPremium('comparativo');
     });
   }
   
   if (btnPdfComparativo) {
     btnPdfComparativo.addEventListener('click', function() {
-      console.log("Exportando comparativo a PDF...");
-      exportarPDF('comparativo');
+      console.log("Exportando comparativo a PDF (Premium)...");
+      exportarPDFPremium('comparativo');
     });
   }
   
@@ -6872,119 +7747,150 @@ function configurarEventosExportacion() {
   const btnExportDetail = document.getElementById('exportDetailBtn');
   if (btnExportDetail) {
     btnExportDetail.addEventListener('click', function() {
-      console.log("Exportando detalle...");
+      console.log("Exportando detalle (Premium)...");
       
       // Determinar qué vista está activa y exportar según corresponda
       if (document.getElementById('centro-content') && 
           document.getElementById('centro-content').classList.contains('active')) {
-        exportarPDF('centro');
+        exportarPDFPremium('centro');
       } 
       else if (document.getElementById('indicador-content') && 
               document.getElementById('indicador-content').classList.contains('active')) {
-        exportarPDF('indicador');
+        exportarPDFPremium('indicador');
       }
       else if (document.getElementById('comparativo-content') && 
               document.getElementById('comparativo-content').classList.contains('active')) {
-        exportarPDF('comparativo');
+        exportarPDFPremium('comparativo');
       }
       else {
         // Si no se puede determinar, usar la vista de centro por defecto
-        exportarPDF('centro');
+        exportarPDFPremium('centro');
       }
     });
   }
   
-  console.log("Configuración de eventos de exportación completada.");
+  console.log("Configuración de eventos de exportación premium completada.");
 }
 
-// ==================== CARGAR DINÁMICAMENTE LIBRERÍAS FALTANTES ====================
+// ==================== INICIALIZACIÓN PREMIUM ====================
 
-/**
- * Carga dinámicamente las librerías necesarias para la exportación
- * si no están disponibles
- */
-function cargarLibreriasExportacion() {
-  console.log("Verificando librerías de exportación...");
-  
-  // Verificar SheetJS (XLSX)
-  if (typeof XLSX === 'undefined') {
-    console.warn("Librería XLSX no encontrada. Cargando dinámicamente...");
-    
-    const xlsxScript = document.createElement('script');
-    xlsxScript.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-    xlsxScript.onload = function() {
-      console.log("Librería XLSX cargada correctamente");
-    };
-    document.head.appendChild(xlsxScript);
-  } else {
-    console.log("Librería XLSX ya está disponible");
-  }
-  
-  // Verificar jsPDF
-  if (typeof window.jspdf === 'undefined') {
-    console.warn("Librería jsPDF no encontrada. Cargando dinámicamente...");
-    
-    const jspdfScript = document.createElement('script');
-    jspdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
-    jspdfScript.onload = function() {
-      console.log("Librería jsPDF cargada correctamente");
-      
-      // Cargar el plugin AutoTable después de jsPDF
-      if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
-        console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
-        
-        const autoTableScript = document.createElement('script');
-        autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
-        autoTableScript.onload = function() {
-          console.log("Plugin AutoTable cargado correctamente");
-        };
-        document.head.appendChild(autoTableScript);
-      }
-    };
-    document.head.appendChild(jspdfScript);
-  } else {
-    console.log("Librería jsPDF ya está disponible");
-    
-    // Verificar AutoTable si jsPDF ya está disponible
-    if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
-      console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
-      
-      const autoTableScript = document.createElement('script');
-      autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
-      autoTableScript.onload = function() {
-        console.log("Plugin AutoTable cargado correctamente");
-      };
-      document.head.appendChild(autoTableScript);
-    } else {
-      console.log("Plugin AutoTable ya está disponible");
-    }
-  }
-}
-
-// ==================== INICIALIZACIÓN SIMPLIFICADA ====================
-
-// Inicializar las funciones de exportación cuando se carga el documento
+// Inicializar las funciones de exportación premium cuando se carga el documento
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("Inicializando funcionalidades de exportación simplificadas...");
-  
-  // Cargar librerías necesarias
-  cargarLibreriasExportacion();
+  console.log("Inicializando funcionalidades de exportación premium...");
   
   // Configurar eventos después de un retraso para asegurar que todo está cargado
   setTimeout(function() {
-    configurarEventosExportacion();
+    configurarEventosExportacionPremium();
+    
+    // Verificar disponibilidad de librerías y cargar si es necesario
+    if (typeof XLSX === 'undefined') {
+      cargarLibreriaXLSX();
+    }
+    
+    if (typeof window.jspdf === 'undefined') {
+      cargarLibreriaJSPDF();
+    }
   }, 1000);
   
-  console.log("Inicialización de funcionalidades de exportación completada.");
+  console.log("Inicialización de funcionalidades de exportación premium completada.");
 });
+
+/**
+ * Carga la librería SheetJS (XLSX) si no está disponible
+ */
+function cargarLibreriaXLSX() {
+  console.log("Cargando librería SheetJS (XLSX)...");
+  const script = document.createElement('script');
+  script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+  script.onload = function() {
+    console.log("Librería XLSX cargada correctamente");
+  };
+  document.head.appendChild(script);
+}
+
+/**
+ * Carga la librería jsPDF si no está disponible
+ */
+function cargarLibreriaJSPDF() {
+  console.log("Cargando librería jsPDF...");
+  const script = document.createElement('script');
+  script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+  script.onload = function() {
+    console.log("Librería jsPDF cargada correctamente");
+    cargarPluginAutoTable();
+  };
+  document.head.appendChild(script);
+}
 
 // Ejecutar la inicialización inmediatamente si el documento ya está cargado
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
   setTimeout(function() {
-    cargarLibreriasExportacion();
-    configurarEventosExportacion();
+    configurarEventosExportacionPremium();
   }, 1000);
 }
+
+// === Configuración de eventos para exportar a PDF ===
+function configurarExportacionPDF() {
+  // Centro
+  const btnPdfCentro = document.getElementById('exportCentroPdfBtn');
+  if (btnPdfCentro) {
+    btnPdfCentro.addEventListener('click', () => {
+      console.log('Click en PDF Centro');
+      exportarPDFPremium('centro');
+    });
+  } else {
+    console.warn('Botón #exportCentroPdfBtn no encontrado');
+  }
+
+  // Indicador
+  const btnPdfIndicador = document.getElementById('exportIndicadorPdfBtn');
+  if (btnPdfIndicador) {
+    btnPdfIndicador.addEventListener('click', () => {
+      console.log('Click en PDF Indicador');
+      exportarPDFPremium('indicador');
+    });
+  } else {
+    console.warn('Botón #exportIndicadorPdfBtn no encontrado');
+  }
+
+  // Comparativo
+  const btnPdfComparativo = document.getElementById('exportComparativoPdfBtn');
+  if (btnPdfComparativo) {
+    btnPdfComparativo.addEventListener('click', () => {
+      console.log('Click en PDF Comparativo');
+      exportarPDFPremium('comparativo');
+    });
+  } else {
+    console.warn('Botón #exportComparativoPdfBtn no encontrado');
+  }
+
+  // Botón general de detalle (decide qué exportar según la vista activa)
+  const btnExportDetail = document.getElementById('exportDetailBtn');
+  if (btnExportDetail) {
+    btnExportDetail.addEventListener('click', () => {
+      console.log('Click en PDF Detalle');
+      if (document.getElementById('centro-content')?.classList.contains('active')) {
+        exportarPDFPremium('centro');
+      } else if (document.getElementById('indicador-content')?.classList.contains('active')) {
+        exportarPDFPremium('indicador');
+      } else if (document.getElementById('comparativo-content')?.classList.contains('active')) {
+        exportarPDFPremium('comparativo');
+      } else {
+        // fallback
+        exportarPDFPremium('centro');
+      }
+    });
+  } else {
+    console.warn('Botón #exportDetailBtn no encontrado');
+  }
+}
+
+// Llama a esta función una vez que tu HTML esté cargado:
+document.addEventListener('DOMContentLoaded', () => {
+  configurarExportacionPDF();
+});
+
+
 </script>
 
 </html>
