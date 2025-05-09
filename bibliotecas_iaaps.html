@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Digital IAAPS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: rgb(46, 155, 97);
+            --primary-dark: #2EA067;
+            --primary-light: #6FDDA6;
+            --primary-ultra-light: #eafaf1;
+            --secondary-color: #389CC0;
+            --accent-color: #9B59B6;
+            --text-dark: #263238;
+            --text-light: #FFFFFF;
+            --gray-light: #f5f5f5;
+            --gray-medium: #e0e0e0;
+            --gray-dark: #757575;
+            --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 6px 12px rgba(0, 0, 0, 0.15);
+            --shadow-strong: 0 10px 20px rgba(0, 0, 0, 0.2);
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            --gradient-accent: linear-gradient(135deg, #8E44AD 0%, #9B59B6 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Open Sans', sans-serif;
+        }
+        
+        body {
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* Header */
+        header {
+            background: var(--gradient-primary);
+            padding: 1.5rem 0;
+            color: var(--text-light);
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            z-index: 100;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 2.2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background-color: white;
+            padding: 4rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-dark);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Library Section */
+        .library-section {
+            padding: 4rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2rem;
+            color: var(--primary-dark);
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+        
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .document-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .document-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .document-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-primary);
+        }
+        
+        .document-image {
+            height: 180px;
+            background-color: var(--primary-ultra-light);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .document-image i {
+            font-size: 5rem;
+            color: var(--primary-color);
+            opacity: 0.7;
+        }
+        
+        .document-thumbnail {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+        }
+        
+        .document-content {
+            padding: 1.5rem;
+        }
+        
+        .document-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--primary-dark);
+        }
+        
+        .document-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+        
+        .document-info i {
+            margin-right: 5px;
+        }
+        
+        .document-info span {
+            margin-right: 15px;
+        }
+        
+        .document-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-top: 1px solid var(--gray-medium);
+            padding-top: 1rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 5px 15px rgba(46, 155, 97, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-dark);
+            border: 1px solid var(--primary-color);
+            flex: 1;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(46, 155, 97, 0.1);
+        }
+        
+        .btn-accent {
+            background: var(--gradient-accent);
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-accent:hover {
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.4);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+            background-color: var(--primary-ultra-light);
+        }
+        
+        .btn-icon i {
+            margin: 0;
+        }
+        
+        .btn-icon:hover {
+            background-color: var(--primary-light);
+            color: white;
+        }
+        
+        /* Audio Player Mini */
+        .audio-player-mini {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .audio-player-mini.active {
+            transform: translateY(0);
+        }
+        
+        .audio-title {
+            flex: 1;
+            margin-right: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .audio-controls-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .audio-btn-mini {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-btn-mini.play-pause {
+            background: var(--gradient-primary);
+            box-shadow: 0 4px 10px rgba(46, 155, 97, 0.4);
+        }
+        
+        .audio-btn-mini.stop {
+            background: #e74c3c;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        }
+        
+        .audio-btn-mini.close {
+            background: var(--gray-dark);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .audio-btn-mini:hover {
+            transform: scale(1.1);
+        }
+        
+        .audio-progress-mini {
+            flex: 1;
+            height: 5px;
+            background-color: var(--gray-medium);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0 15px;
+            cursor: pointer;
+        }
+        
+        .audio-progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0;
+            transition: width 0.2s linear;
+        }
+        
+        .audio-time {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        /* Viewer Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5vh auto;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-strong);
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            transform: scale(1.2);
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pdf-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .pdf-container embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        .toast {
+            background-color: white;
+            color: var(--text-dark);
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease forwards;
+            max-width: 350px;
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .toast.error {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .toast.success .toast-icon {
+            color: var(--primary-color);
+        }
+        
+        .toast.error .toast-icon {
+            color: #e74c3c;
+        }
+        
+        .toast.info .toast-icon {
+            color: var(--secondary-color);
+        }
+        
+        .toast-message {
+            flex: 1;
+        }
+        
+        .toast-close {
+            margin-left: 10px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toast-close:hover {
+            opacity: 1;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Loader */
+        .loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary-ultra-light);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--text-dark);
+            color: var(--text-light);
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .footer-column {
+            flex: 1;
+            padding: 0 1rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .footer-column p {
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .social-icons {
+            display: flex;
+            margin-top: 1rem;
+        }
+        
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+        
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+        
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .logo {
+                font-size: 1.8rem;
+            }
+            
+            .documents-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+            
+            .footer-column {
+                margin-bottom: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 1rem;
+            }
+            
+            nav ul li {
+                margin: 0 0.7rem;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .document-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .document-actions .btn {
+                width: 100%;
+            }
+            
+            .modal-content {
+                width: 95%;
+                height: 95vh;
+                margin: 2.5vh auto;
+            }
+            
+            .audio-player-mini {
+                flex-wrap: wrap;
+                padding: 0.8rem;
+            }
+            
+            .audio-title {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .audio-time {
+                min-width: 60px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero {
+                padding: 2rem 0;
+            }
+            
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .document-card {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            .audio-progress-mini {
+                margin: 0 10px;
+            }
+            
+            .audio-btn-mini {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-book-open"></i>
+                    Biblioteca Digital IAAPS
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="iaaps03_2025.html"><i class="fas fa-arrow-left"></i> Volver al Dashboard</a></li>
+                        <li><a href="#"><i class="fas fa-book"></i> Colección</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Acerca de</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1 class="fade-in">Biblioteca de Documentos IAAPS</h1>
+            <p class="fade-in delay-100">Acceda a nuestra colección de documentos oficiales para consulta, descarga y reproducción de audio</p>
+        </div>
+    </section>
+    
+    <section class="library-section">
+        <div class="container">
+            <h2 class="section-title fade-in">Documentos Disponibles</h2>
+            
+            <div class="documents-grid">
+                <!-- Documento 1 -->
+                <div class="document-card fade-in delay-100">
+                    <div class="document-image">
+                        <div class="document-thumbnail"></div>
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-content">
+                        <h3 class="document-title">Fe de erratas - v2.0.1 - 25.02.2025 - Final</h3>
+                        <div class="document-info">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>08-05-2025</span>
+                            <i class="fas fa-file-alt"></i>
+                            <span>413 KB</span>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-primary" onclick="openDocumentViewer('Fe de erratas - v2.0.1 - 25.02.2025 - Final', 'libros/Fe de erratas - v2.0.1 - 25.02.2025 - Final.pdf')">
+                                <i class="fas fa-eye"></i> Vista Previa
+                            </button>
+                            <button class="btn btn-accent" onclick="startSpeaking('Fe de erratas - v2.0.1 - 25.02.2025 - Final')">
+                                <i class="fas fa-headphones"></i> Escuchar
+                            </button>
+                            <a href="libros/Fe de erratas - v2.0.1 - 25.02.2025 - Final.pdf" download class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Descargar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documento 2 -->
+                <div class="document-card fade-in delay-200">
+                    <div class="document-image">
+                        <div class="document-thumbnail"></div>
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-content">
+                        <h3 class="document-title">Informe visación IAAPS 2025 Curicó</h3>
+                        <div class="document-info">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>08-05-2025</span>
+                            <i class="fas fa-file-alt"></i>
+                            <span>108 KB</span>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-primary" onclick="openDocumentViewer('Informe visación IAAPS 2025 Curicó', 'libros/Informe visación IAAPS 2025 Curicó.pdf')">
+                                <i class="fas fa-eye"></i> Vista Previa
+                            </button>
+                            <button class="btn btn-accent" onclick="startSpeaking('Informe visación IAAPS 2025 Curicó')">
+                                <i class="fas fa-headphones"></i> Escuchar
+                            </button>
+                            <a href="libros/Informe visación IAAPS 2025 Curicó.pdf" download class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Descargar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documento 3 -->
+                <div class="document-card fade-in delay-300">
+                    <div class="document-image">
+                        <div class="document-thumbnail"></div>
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="document-content">
+                        <h3 class="document-title">OT IAAPS 2025 v1. 30.01.2025 (1)</h3>
+                        <div class="document-info">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>08-05-2025</span>
+                            <i class="fas fa-file-alt"></i>
+                            <span>2.914 KB</span>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-primary" onclick="openDocumentViewer('OT IAAPS 2025 v1. 30.01.2025 (1)', 'libros/OT IAAPS 2025 v1. 30.01.2025 (1).pdf')">
+                                <i class="fas fa-eye"></i> Vista Previa
+                            </button>
+                            <button class="btn btn-accent" onclick="startSpeaking('OT IAAPS 2025 v1. 30.01.2025 (1)')">
+                                <i class="fas fa-headphones"></i> Escuchar
+                            </button>
+                            <a href="libros/OT IAAPS 2025 v1. 30.01.2025 (1).pdf" download class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Descargar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Document Viewer Modal -->
+    <div id="documentViewerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Vista Previa de Documento</h2>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="pdf-container">
+                    <div class="loader">
+                        <div class="spinner"></div>
+                    </div>
+                    <embed id="pdfViewer" src="" type="application/pdf">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio Player Mini -->
+    <div id="audioPlayerMini" class="audio-player-mini">
+        <div class="audio-title" id="audioTitle">Reproduciendo: Documento</div>
+        <div class="audio-progress-mini" id="audioProgressContainer">
+            <div class="audio-progress-fill" id="audioProgressFill"></div>
+        </div>
+        <div class="audio-time" id="audioTime">00:00 / 00:00</div>
+        <div class="audio-controls-mini">
+            <div class="audio-btn-mini play-pause" id="audioPlayPauseBtn" onclick="togglePlayPause()">
+                <i class="fas fa-pause"></i>
+            </div>
+            <div class="audio-btn-mini stop" onclick="stopSpeaking()">
+                <i class="fas fa-stop"></i>
+            </div>
+            <div class="audio-btn-mini close" onclick="closeAudioPlayer()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Sobre IAAPS</h3>
+                    <p>Los Índices de Actividad de la Atención Primaria de Salud (IAAPS) son instrumentos de evaluación para el monitoreo y gestión del desempeño en atención primaria.</p>
+                    <p>Proporcionan un marco sistemático para evaluar la implementación de políticas de salud.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Enlaces Rápidos</h3>
+                    <p><a href="iaaps03_2025.html" style="color: white; text-decoration: none;">Dashboard IAAPS</a></p>
+                    <p><a href="#" style="color: white; text-decoration: none;">Preguntas Frecuentes</a></p>
+                    <p><a href="#" style="color: white; text-decoration: none;">Glosario de Términos</a></p>
+                    <p><a href="#" style="color: white; text-decoration: none;">Contacto</a></p>
+                </div>
+                <div class="footer-column">
+                    <h3>Contáctenos</h3>
+                    <p><i class="fas fa-envelope"></i> infoiaaps@salud.gob.cl</p>
+                    <p><i class="fas fa-phone"></i> +56 2 2574 0100</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Ministerio de Salud, Santiago, Chile</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Ministerio de Salud de Chile - Biblioteca Digital IAAPS. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Variables globales
+        let currentPdfUrl = '';
+        let documentContents = {};
+        let speechSynthesis = window.speechSynthesis;
+        let utterance = null;
+        let speakingInterval = null;
+        let currentSpeakingDoc = null;
+        let totalTextLength = 0;
+        let currentPosition = 0;
+        let isPaused = false;
+        let speechStartTime = 0;
+        let speechElapsedTime = 0;
+        
+        // Contenido simulado para transcripciones (texto de los documentos)
+        documentContents = {
+            'Fe de erratas - v2.0.1 - 25.02.2025 - Final': `FE DE ERRATAS - VERSIÓN 2.0.1
+ÍNDICES DE ACTIVIDAD DE LA ATENCIÓN PRIMARIA DE SALUD (IAAPS) 2025
+
+DOCUMENTO DE CORRECCIONES OFICIALES
+Fecha de emisión: 25 de febrero de 2025
+
+El presente documento contiene las rectificaciones a errores detectados en la documentación oficial de los Índices de Actividad de la Atención Primaria de Salud (IAAPS) para el año 2025. Estas correcciones son de aplicación inmediata y reemplazan a las secciones correspondientes en los documentos originales.
+
+I. CORRECCIONES DE INDICADORES
+
+1. INDICADOR 3: Tasa de consultas médicas de morbilidad por habitante año
+   Error detectado: Fórmula de cálculo incorrecta
+   Corrección: La fórmula correcta debe considerar el número total de consultas dividido por población inscrita validada
+
+2. INDICADOR 6.1.A: Cobertura EMP mujeres (20-64 años)
+   Error detectado: Denominador incorrecto
+   Corrección: Se debe restar del denominador el total de embarazadas en el rango etario
+
+3. INDICADOR 9.2: Tasa controles salud mental
+   Error detectado: Meta incorrecta
+   Corrección: La meta correcta es 6.00 y no 5.00 como figuraba en el documento original
+
+II. CORRECCIONES DE METAS
+
+Para los siguientes indicadores se corrigen las metas establecidas:
+- Indicador 11: Meta corregida de 80% a 85%
+- Indicador 14: Meta corregida de 67% a 71% 
+- Indicador 17: Meta corregida de 60% a 61.13%
+
+III. ACLARACIONES
+
+Se aclara que para los indicadores 3, 5, 6.1.A, 6.1.B, 6.2, 7, 8, 9.2, 9.3, 11 y 16, el estado se determinará según:
+- CUMPLIDO (verde): cumplimiento ≥ 100% de la meta
+- EN PROCESO (amarillo): cumplimiento ≥ 25% pero < 100% de la meta
+- CRÍTICO (rojo): cumplimiento < 25% de la meta
+
+Estas correcciones deberán ser aplicadas con efecto inmediato en todos los tableros, informes y sistemas de seguimiento IAAPS del año 2025.`,
+
+            'Informe visación IAAPS 2025 Curicó': `INFORME VISACIÓN IAAPS 2025 CURICÓ
+SERVICIO DE SALUD MAULE
+MARZO 2025
+
+INFORME DE VISACIÓN
+ÍNDICES DE ACTIVIDAD DE LA ATENCIÓN PRIMARIA DE SALUD
+COMUNA DE CURICÓ
+
+RESUMEN EJECUTIVO
+
+El presente informe documenta los resultados de la visación realizada a los establecimientos de Atención Primaria de Salud (APS) de la comuna de Curicó, correspondiente al primer trimestre de 2025. Se evaluaron los 17 indicadores establecidos en el marco de los Índices de Actividad de la Atención Primaria de Salud (IAAPS).
+
+ESTABLECIMIENTOS EVALUADOS:
+- CESFAM Curicó Centro
+- CESFAM Miguel Ángel Arenas
+- CESFAM Betty Muñoz
+- CESFAM Colón
+- CESFAM Sarmiento
+- CESFAM Los Niches
+- Establecimientos dependientes (SAPU, SAR, SUR, PSR)
+
+RESULTADOS DESTACADOS:
+
+1. Cumplimiento Comunal: 69.02%
+2. Indicadores Cumplidos: 8 de 17 (47.1%)
+3. Indicadores en Proceso: 7 de 17 (41.2%)
+4. Indicadores Críticos: 2 de 17 (11.8%)
+
+FORTALEZAS:
+- 100% de cumplimiento en indicadores de continuidad de atención (1, 2.1, 2.2, 10)
+- Destacado rendimiento en cobertura de salud mental (9.1) con un 119.14% de cumplimiento
+- Buen desempeño en indicador 12 (control precoz de embarazo) con 100.45% de cumplimiento
+
+ÁREAS CRÍTICAS:
+- Baja tasa de consultas médicas (Indicador 3) con solo 26.25% de cumplimiento
+- Deficiente proporción de niños sin caries (Indicador 16) con 24.42% de cumplimiento
+- Bajo porcentaje de personas egresadas por alta clínica en salud mental (9.3)
+
+RECOMENDACIONES:
+1. Implementar estrategias para aumentar cobertura de atención dental preventiva en menores de 3 años
+2. Desarrollar plan de mejora para aumentar egresos por alta en programa de salud mental
+3. Fortalecer la oferta de consultas médicas en todos los centros de salud`,
+
+            'OT IAAPS 2025 v1. 30.01.2025 (1)': `ORIENTACIÓN TÉCNICA
+ÍNDICES DE ACTIVIDAD DE LA ATENCIÓN PRIMARIA DE SALUD
+IAAPS 2025
+VERSIÓN 1.0 - 30 DE ENERO 2025
+
+MINISTERIO DE SALUD
+SUBSECRETARÍA DE REDES ASISTENCIALES
+DIVISIÓN DE ATENCIÓN PRIMARIA
+
+INTRODUCCIÓN
+
+El presente documento establece las Orientaciones Técnicas para la implementación, monitoreo y evaluación de los Índices de Actividad de la Atención Primaria de Salud (IAAPS) correspondientes al año 2025. Los IAAPS constituyen un instrumento de evaluación de la gestión y el desempeño de la atención primaria, vinculados al aporte estatal a la administración municipal establecido en la Ley N° 19.378.
+
+Para el año 2025, se han definido 17 indicadores que abarcan diversas dimensiones del quehacer de la Atención Primaria de Salud, los cuales responden a los objetivos sanitarios de la década 2021-2030 y al Modelo de Atención Integral de Salud Familiar y Comunitaria.
+
+I. MARCO CONCEPTUAL
+
+Los IAAPS son un conjunto de indicadores que evalúan el funcionamiento integral de la atención primaria desde la perspectiva de las Redes Integradas de Servicios de Salud (RISS). Estos indicadores miden aspectos relacionados con:
+
+1. Acceso y cobertura efectiva a la atención de salud
+2. Continuidad de la atención
+3. Efectividad de las intervenciones sanitarias
+4. Eficiencia en la utilización de recursos
+5. Calidad de la atención otorgada
+
+II. ESTRUCTURA DE LOS INDICADORES
+
+Cada indicador IAAPS 2025 presenta la siguiente estructura:
+- Nombre del indicador
+- Definición
+- Fórmula de cálculo (numerador/denominador)
+- Meta anual
+- Importancia relativa (ponderación)
+- Fuente de datos
+- Periodicidad de evaluación
+- Responsables del cumplimiento
+
+III. DESCRIPCIÓN DE INDICADORES
+
+INDICADOR 1: Porcentaje de centros de salud autoevaluados mediante MAIS
+Meta: 100%
+Importancia relativa: 4%
+
+INDICADOR 2.1: Continuidad de Atención
+Meta: 100%
+Importancia relativa: 4%
+
+INDICADOR 2.2: Disponibilidad de fármacos trazadores
+Meta: 100%
+Importancia relativa: 4%
+
+[Continúa la descripción de los demás indicadores...]
+
+IV. MONITOREO Y EVALUACIÓN
+
+El monitoreo de los IAAPS 2025 se realizará trimestralmente mediante sistema de información en línea, generando reportes que permitirán:
+
+1. Identificar oportunamente desviaciones en el cumplimiento
+2. Implementar medidas correctivas
+3. Retroalimentar a los equipos de salud
+4. Realizar auditorías selectivas para validar la información reportada
+
+V. CÁLCULO DEL CUMPLIMIENTO GLOBAL
+
+El cumplimiento global se calculará considerando la importancia relativa (ponderación) de cada indicador según la siguiente fórmula:
+
+Cumplimiento Global = Suma(Cumplimiento Indicador i × Ponderación i)
+
+Donde:
+- Cumplimiento Indicador i = (Resultado Indicador i / Meta Indicador i) × 100%
+- El cumplimiento máximo de cada indicador será 100%`
+        };
+        
+        // Función para abrir el visor de documentos
+        function openDocumentViewer(title, pdfUrl) {
+            // Actualizar título y URL del PDF
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('pdfViewer').src = pdfUrl;
+            currentPdfUrl = pdfUrl;
+            
+            // Mostrar modal
+            document.getElementById('documentViewerModal').style.display = 'block';
+        }
+        
+        // Función para cerrar el modal
+        function closeModal() {
+            document.getElementById('documentViewerModal').style.display = 'none';
+            document.getElementById('pdfViewer').src = '';
+        }
+        
+        // Funciones para el Text-to-Speech
+        function startSpeaking(documentTitle) {
+            // Detener cualquier reproducción previa
+            stopSpeaking();
+            
+            // Verificar si el navegador soporta Text-to-Speech
+            if (!speechSynthesis) {
+                showToast('Tu navegador no soporta la función de lectura de texto', 'error');
+                return;
+            }
+            
+            // Obtener el contenido del documento
+            const text = documentContents[documentTitle];
+            if (!text) {
+                showToast('No se encuentra contenido para este documento', 'error');
+                return;
+            }
+            
+            // Configurar el reproductor
+            currentSpeakingDoc = documentTitle;
+            document.getElementById('audioTitle').textContent = 'Reproduciendo: ' + documentTitle;
+            document.getElementById('audioPlayerMini').classList.add('active');
+            document.getElementById('audioPlayPauseBtn').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            // Reiniciar variables de seguimiento
+            currentPosition = 0;
+            totalTextLength = text.length;
+            speechStartTime = Date.now();
+            speechElapsedTime = 0;
+            isPaused = false;
+            
+            // Crear nuevo utterance para la lectura
+            utterance = new SpeechSynthesisUtterance(text);
+            
+            // Seleccionar voz en español si está disponible
+            const voices = speechSynthesis.getVoices();
+            const spanishVoice = voices.find(voice => voice.lang.includes('es'));
+            if (spanishVoice) {
+                utterance.voice = spanishVoice;
+            }
+            
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            
+            // Eventos del utterance
+            utterance.onstart = () => {
+                showToast('Iniciando reproducción de audio', 'info');
+                
+                // Iniciar actualización del progreso
+                speakingInterval = setInterval(updateSpeakingProgress, 100);
+            };
+            
+            utterance.onend = () => {
+                stopSpeaking();
+                showToast('Reproducción finalizada', 'success');
+            };
+            
+            utterance.onerror = (event) => {
+                stopSpeaking();
+                showToast('Error en la reproducción: ' + event.error, 'error');
+            };
+            
+            // Comenzar la reproducción
+            speechSynthesis.speak(utterance);
+            
+            // Actualizar la duración estimada (calculada en base a la cantidad de texto)
+            // Una aproximación es 5 caracteres por segundo a velocidad normal
+            const estimatedDuration = Math.ceil(text.length / 5);
+            document.getElementById('audioTime').textContent = `00:00 / ${formatTime(estimatedDuration)}`;
+        }
+        
+        function togglePlayPause() {
+            if (!utterance) return;
+            
+            if (isPaused) {
+                // Reanudar la reproducción
+                isPaused = false;
+                document.getElementById('audioPlayPauseBtn').innerHTML = '<i class="fas fa-pause"></i>';
+                
+                // Actualizar el tiempo transcurrido
+                speechStartTime = Date.now() - speechElapsedTime;
+                
+                // Crear un nuevo utterance con el texto restante
+                const text = documentContents[currentSpeakingDoc];
+                if (!text) return;
+                
+                const remainingText = text.substring(currentPosition);
+                utterance = new SpeechSynthesisUtterance(remainingText);
+                
+                // Configurar el utterance
+                const voices = speechSynthesis.getVoices();
+                const spanishVoice = voices.find(voice => voice.lang.includes('es'));
+                if (spanishVoice) {
+                    utterance.voice = spanishVoice;
+                }
+                
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                
+                utterance.onend = () => {
+                    stopSpeaking();
+                    showToast('Reproducción finalizada', 'success');
+                };
+                
+                speechSynthesis.speak(utterance);
+            } else {
+                // Pausar la reproducción
+                isPaused = true;
+                speechElapsedTime = Date.now() - speechStartTime;
+                document.getElementById('audioPlayPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
+                
+                speechSynthesis.cancel();
+            }
+        }
+        
+        function stopSpeaking() {
+            if (speechSynthesis) {
+                speechSynthesis.cancel();
+            }
+            
+            clearInterval(speakingInterval);
+            utterance = null;
+            
+            // Reiniciar la UI
+            document.getElementById('audioPlayerMini').classList.remove('active');
+            document.getElementById('audioProgressFill').style.width = '0%';
+            document.getElementById('audioTime').textContent = '00:00 / 00:00';
+        }
+        
+        function closeAudioPlayer() {
+            stopSpeaking();
+            document.getElementById('audioPlayerMini').classList.remove('active');
+        }
+        
+        function updateSpeakingProgress() {
+            if (!utterance || !currentSpeakingDoc) return;
+            
+            const text = documentContents[currentSpeakingDoc];
+            if (!text) return;
+            
+            if (!isPaused) {
+                // Calcular tiempo transcurrido
+                const currentTime = Date.now();
+                const elapsedSeconds = Math.floor((currentTime - speechStartTime) / 1000);
+                
+                // Estimar la posición en el texto basada en el tiempo transcurrido
+                // Asumiendo velocidad de lectura promedio (5 caracteres por segundo)
+                currentPosition = Math.min(elapsedSeconds * 5, text.length);
+                
+                // Estimar duración total
+                const estimatedDuration = Math.ceil(text.length / 5);
+                
+                // Actualizar la barra de progreso
+                const progressPercent = (currentPosition / text.length) * 100;
+                document.getElementById('audioProgressFill').style.width = `${progressPercent}%`;
+                
+                // Actualizar el contador de tiempo
+                document.getElementById('audioTime').textContent = `${formatTime(elapsedSeconds)} / ${formatTime(estimatedDuration)}`;
+            }
+        }
+        
+        // Función para permitir al usuario hacer clic en la barra de progreso para cambiar la posición
+        document.getElementById('audioProgressContainer').addEventListener('click', function(e) {
+            if (!currentSpeakingDoc || !utterance) return;
+            
+            const text = documentContents[currentSpeakingDoc];
+            if (!text) return;
+            
+            // Calcular la nueva posición basada en dónde hizo clic el usuario
+            const rect = this.getBoundingClientRect();
+            const clickPositionX = e.clientX - rect.left;
+            const clickPositionPercent = clickPositionX / rect.width;
+            
+            // Calcular la nueva posición en el texto
+            currentPosition = Math.floor(text.length * clickPositionPercent);
+            
+            // Detener la reproducción actual
+            speechSynthesis.cancel();
+            
+            // Crear un nuevo utterance con el texto desde la nueva posición
+            const remainingText = text.substring(currentPosition);
+            utterance = new SpeechSynthesisUtterance(remainingText);
+            
+            // Configurar el utterance
+            const voices = speechSynthesis.getVoices();
+            const spanishVoice = voices.find(voice => voice.lang.includes('es'));
+            if (spanishVoice) {
+                utterance.voice = spanishVoice;
+            }
+            
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            
+            utterance.onend = () => {
+                stopSpeaking();
+                showToast('Reproducción finalizada', 'success');
+            };
+            
+            // Actualizar el tiempo de inicio para que coincida con la nueva posición
+            speechStartTime = Date.now() - (currentPosition / 5) * 1000;
+            
+            // Si no está pausado, comenzar a hablar desde la nueva posición
+            if (!isPaused) {
+                speechSynthesis.speak(utterance);
+            }
+            
+            // Actualizar la barra de progreso
+            const progressPercent = (currentPosition / text.length) * 100;
+            document.getElementById('audioProgressFill').style.width = `${progressPercent}%`;
+        });
+        
+        // Funciones de utilidad
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // Crear elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Iconos según tipo
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas fa-${icon}"></i></div>
+                <div class="toast-message">${message}</div>
+                <div class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Eliminar toast después de 5 segundos
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Detector de carga del PDF
+        document.getElementById('pdfViewer').addEventListener('load', function() {
+            document.querySelector('.loader').style.display = 'none';
+        });
+        
+        // Manejador de errores
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'EMBED') {
+                document.querySelector('.loader').style.display = 'none';
+                const pdfContainer = document.querySelector('.pdf-container');
+                pdfContainer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 2rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #e74c3c; margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 1rem; color: #e74c3c;">No se pudo cargar el PDF</h3>
+                        <p style="margin-bottom: 1.5rem;">Es posible que el documento no exista o que su navegador no soporte la visualización de PDFs.</p>
+                        <a href="${currentPdfUrl}" download class="btn btn-primary" style="display: inline-flex; align-items: center;">
+                            <i class="fas fa-download" style="margin-right: 0.5rem;"></i> 
+                            Descargar PDF
+                        </a>
+                    </div>
+                `;
+            }
+        }, true);
+        
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('documentViewerModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+        
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+        
+        // Cargar voces disponibles
+        if (speechSynthesis) {
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = function() {
+                    const voices = speechSynthesis.getVoices();
+                    console.log('Voces disponibles:', voices.length);
+                };
+            }
+            
+            // Intentar cargar voces inmediatamente también
+            const voices = speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                console.log('Voces disponibles:', voices.length);
+            }
+        }
+    </script>
+</body>
+</html>
