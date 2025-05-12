@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
      <script src="iaaps-chatbot.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/siteConfig.js"></script>
+    <script src="js/userTracker.js"></script>
+    <script src="js/contactModule.js"></script>
      <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- jsPDF AutoTable (si luego vas a usar autoTable en otro método) -->
@@ -2980,6 +2984,159 @@ iaapsData = {
             // Actualizar tarjetas de centros
             actualizarTarjetasCentros();
         }
+
+        /**
+ * Función universal para aplicar colores de cumplimiento en todas las tablas
+ * según los criterios específicos:
+ * - Verde: Cumplimiento ≥ 100%
+ * - Amarillo: Cumplimiento entre 25% y 99%
+ * - Rojo: Cumplimiento < 25%
+ */
+function aplicarColoresCumplimiento() {
+    // Configuración de colores
+    const colores = {
+        cumplido: {
+            fondo: '#e8f5e9',
+            texto: '#1b5e20',
+            icono: 'fa-check-circle',
+            clase: 'bg-success'
+        },
+        proceso: {
+            fondo: '#fff8e1',
+            texto: '#f57f17',
+            icono: 'fa-exclamation-triangle',
+            clase: 'bg-warning'
+        },
+        critico: {
+            fondo: '#ffebee',
+            texto: '#b71c1c',
+            icono: 'fa-times-circle',
+            clase: 'bg-danger'
+        }
+    };
+    
+    // Seleccionar todas las celdas de cumplimiento en cualquier tabla
+    const selectorCumplimiento = '.cumplimiento, td:nth-child(6):not(.cumplimiento)';
+    const celdasCumplimiento = document.querySelectorAll(selectorCumplimiento);
+    
+    celdasCumplimiento.forEach(celda => {
+        // Obtener el texto de la celda
+        let valor = celda.textContent.trim();
+        
+        // Asegurarse de que solo procesamos celdas con valores porcentuales
+        if (valor && valor.includes('%')) {
+            // Extraer valor numérico
+            const porcentaje = parseFloat(valor.replace(/[^\d.-]/g, ''));
+            
+            // Determinar el estado según el valor exacto
+            let estado;
+            if (porcentaje >= 100) {
+                estado = colores.cumplido;
+            } else if (porcentaje >= 25) {
+                estado = colores.proceso;
+            } else {
+                estado = colores.critico;
+            }
+            
+            // Aplicar estilo según el tipo de celda
+            
+            // 1. Si tiene un ícono de checkmark, cambiarlo
+            const icono = celda.querySelector('i, svg');
+            if (icono) {
+                // Quitar todas las clases de ícono y añadir la correcta
+                icono.className = `fas ${estado.icono}`;
+                icono.style.color = estado.texto;
+            }
+            
+            // 2. Si tiene una barra de progreso, cambiar su color
+            const progressBar = celda.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                progressBar.classList.add(estado.clase);
+            }
+            
+            // 3. Si tiene un badge, actualizar su color
+            const badge = celda.querySelector('.badge');
+            if (badge) {
+                badge.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                badge.classList.add(estado.clase);
+            }
+            
+            // 4. Para celdas en la tabla de vista general
+            if (celda.classList.contains('cumplimiento')) {
+                // Guardar el valor actual
+                const valorActual = celda.innerHTML;
+                
+                // Reemplazar con una versión coloreada
+                celda.innerHTML = `<span style="color: ${estado.texto}; background-color: ${estado.fondo}; 
+                                         padding: 4px 8px; border-radius: 4px; font-weight: 600;">
+                                        <i class="fas ${estado.icono} mr-1"></i> ${porcentaje.toFixed(2)}%
+                                   </span>`;
+            }
+            
+            // 5. Para celdas con formato especial de la tabla comparativa
+            const percentageBg = celda.querySelector('.table-percentage-bg');
+            if (percentageBg) {
+                percentageBg.style.backgroundColor = estado.texto;
+                percentageBg.style.opacity = "0.2";
+                const percentageText = celda.querySelector('.table-percentage-text');
+                if (percentageText) {
+                    percentageText.style.color = estado.texto;
+                    percentageText.style.fontWeight = "bold";
+                }
+            }
+        }
+    });
+    
+    // También actualizar la función de estado para mantener consistencia
+    window.determinarEstadoIndicador = function(cumplimiento) {
+        if (cumplimiento >= 100) {
+            return {
+                statusClass: 'status-success',
+                statusIcon: 'fa-check-circle',
+                statusText: 'CUMPLIDO'
+            };
+        } else if (cumplimiento >= 25) {
+            return {
+                statusClass: 'status-warning',
+                statusIcon: 'fa-exclamation-triangle',
+                statusText: 'EN PROCESO'
+            };
+        } else {
+            return {
+                statusClass: 'status-danger',
+                statusIcon: 'fa-times-circle',
+                statusText: 'CRÍTICO'
+            };
+        }
+    };
+    
+    console.log("Colores de cumplimiento aplicados según los criterios: ≥100% verde, 25-99% amarillo, <25% rojo");
+}
+
+// Ejecutar la función después de cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(aplicarColoresCumplimiento, 1000);
+});
+
+// Conectar con eventos de actualización existentes
+const funcionesUpdate = ['actualizarDashboard', 'actualizarTablaIndicadores', 
+                         'actualizarDetalleCentro', 'actualizarDetalleIndicador', 
+                         'actualizarVistaComparativa'];
+
+funcionesUpdate.forEach(nombre => {
+    const funcionOriginal = window[nombre];
+    if (typeof funcionOriginal === 'function') {
+        window[nombre] = function() {
+            const resultado = funcionOriginal.apply(this, arguments);
+            setTimeout(aplicarColoresCumplimiento, 200);
+            return resultado;
+        };
+    }
+});
+
+// Llamar inmediatamente para aplicar a la página actual
+aplicarColoresCumplimiento();
         
         // Función para actualizar las tarjetas de resumen
 function actualizarTarjetasResumen() {
@@ -7603,6 +7760,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
     configurarEventosExportacion();
   }, 1000);
 }
+document.getElementById('currentYear').textContent = new Date().getFullYear();
 
 </script>
 

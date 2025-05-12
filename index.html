@@ -405,6 +405,8 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#contacto">Contacto</a>
                     </li>
+                    <!-- Enlace al Panel Admin oculto con URL críptica -->
+                    
                 </ul>
             </div>
         </div>
@@ -438,6 +440,9 @@
                 <a href="metas03_sanitarias-2025.html" class="btn btn-outline-light">
                     <i class="fas fa-bullseye me-2"></i> METAS CORTE MARZO 2025
                 </a>
+                <a href="tablero_poblacional2025.html" class="btn btn-outline-light">
+                    <i class="fas fa-user me-2"></i> TABLERO POBLACIONAL 2025
+                </a>
             </div>
             
             <!-- Logos de CESFAM -->
@@ -454,11 +459,30 @@
     <!-- Footer minimalista -->
     <footer class="footer">
         <div class="container">
-            <p>© <?php echo date('Y'); ?> INFOGES CURICÓ - Sistema Integrado de Información para la Gestión en Salud</p>
+            <p>© <span id="currentYear"></span> INFOGES CURICÓ - Sistema Integrado de Información para la Gestión en Salud</p>
         </div>
     </footer>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para actualizar el año actual -->
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+    
+    <!-- Sistema de Seguimiento de Usuarios y Registro -->
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/registroEstricto.js"></script>
+
+    <script src="js/siteConfig.js"></script>
+
+    <script src="js/userTracker.js"></script>
+    <script src="js/contactModule.js"></script>
+
+
+    
 </body>
 </html>
