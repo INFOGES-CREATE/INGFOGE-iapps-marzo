@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Portal Estadístico Salud Curicó</title>
+    <meta name="description" content="Registro obligatorio para acceder al Portal Estadístico del Sistema de Salud de Curicó.">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1DA64A; /* Verde principal */
+            --primary-dark: #0A5D29; /* Verde oscuro */
+            --primary-light: #74E39A; /* Verde claro */
+            --secondary-color: #002B2A; /* Oscuro verdoso */
+            --light-color: #f8fafc; /* Blanco ligeramente grisáceo */
+            --dark-color: #121212; /* Negro suave para texto */
+            --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            --gradient-dark: linear-gradient(135deg, var(--secondary-color), #000);
+            --transition-speed: 0.5s;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, rgba(0,43,42,0.9), rgba(0,0,0,0.85)), url('images/health-pattern.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        
+        .registro-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            background-color: white;
+        }
+        
+        .registro-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .registro-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .registro-header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+        
+        .registro-body {
+            padding: 30px;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-container img {
+            max-width: 120px;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 50px;
+            border: 1px solid #ddd;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(29, 166, 74, 0.2);
+            outline: none;
+        }
+        
+        .form-check {
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .form-check-input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+        
+        .form-check-label {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #555;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        .btn-registro {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-registro:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(29, 166, 74, 0.4);
+        }
+        
+        .registro-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+        
+        /* Mensajes de éxito/error */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.15);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #27ae60;
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.15);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--gradient-dark);
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        /* Iconos informativos */
+        .info-icon {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        /* Versión móvil */
+        @media (max-width: 768px) {
+            .registro-container {
+                margin: 20px 15px;
+                width: auto;
+            }
+            
+            .registro-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .registro-body {
+                padding: 20px 15px;
+            }
+            
+            .logo-container img {
+                max-width: 100px;
+            }
+        }
+        
+        /* Mensaje de éxito */
+        .success-message {
+            text-align: center;
+            padding: 30px 20px;
+            display: none;
+        }
+        
+        .success-message i {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .success-message h2 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+        
+        .success-message p {
+            color: #555;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="registro-container">
+            <div class="registro-header">
+                <h1><i class="fas fa-user-lock me-2"></i> Registro Obligatorio</h1>
+                <p>Para acceder al Portal Estadístico de Salud Curicó</p>
+            </div>
+            
+            <div class="registro-body">
+                <div class="logo-container">
+                    <img src="images/logo2.png" alt="Logo Salud Curicó">
+                </div>
+                
+                <!-- Formulario de registro -->
+                <form id="registroForm">
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-info-circle me-2"></i> El registro es obligatorio para acceder a cualquier sección del portal estadístico.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Correo electrónico <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" class="form-control" required placeholder="tu.correo@ejemplo.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre y apellido</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control" placeholder="Tu nombre completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="organizacion" class="form-label">Establecimiento</label>
+                        <input type="text" id="organizacion" name="organizacion" class="form-control" placeholder="Tu organización o institución">
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="consentimiento" name="consentimiento" class="form-check-input" required>
+                        <label for="consentimiento" class="form-check-label">
+                            Acepto recibir información y entiendo que mis datos serán tratados según la política de privacidad del Sistema de Salud Curicó.
+                        </label>
+                    </div>
+                    
+                    <div id="errorMessage" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-circle me-2"></i> <span id="errorText">Ha ocurrido un error. Por favor, intenta nuevamente.</span>
+                    </div>
+                    
+                    <button type="submit" class="btn-registro">
+                        <i class="fas fa-check-circle me-2"></i> Completar Registro
+                    </button>
+                </form>
+                
+                <!-- Mensaje de éxito (oculto inicialmente) -->
+                <div id="successMessage" class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>¡Registro Completado!</h2>
+                    <p>Gracias por registrarte. Ahora puedes acceder al Portal Estadístico.</p>
+                    <a href="index.html" class="btn-registro">
+                        <i class="fas fa-home me-2"></i> Ir al Inicio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer minimalista -->
+    <footer class="footer">
+        <div class="container">
+            <p>© <span id="currentYear"></span> INFOGES CURICÓ - Sistema Integrado de Información para la Gestión en Salud</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para actualizar el año actual -->
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+    
+    <!-- Sistema de Registro -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registroForm = document.getElementById('registroForm');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            // Función para validar correo electrónico
+            function isValidEmail(email) {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailPattern.test(email);
+            }
+            
+            // Manejar el envío del formulario
+            registroForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const nombre = document.getElementById('nombre').value.trim();
+                const organizacion = document.getElementById('organizacion').value.trim();
+                const consentimiento = document.getElementById('consentimiento').checked;
+                
+                // Validar datos
+                if (!email) {
+                    showError('El correo electrónico es obligatorio.');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showError('Por favor, ingresa un correo electrónico válido.');
+                    return;
+                }
+                
+                if (!consentimiento) {
+                    showError('Debes aceptar los términos para continuar.');
+                    return;
+                }
+                
+                // Ocultar mensaje de error si todo está bien
+                errorMessage.style.display = 'none';
+                
+                // Registrar usuario
+                try {
+                    registerUser(email, nombre, organizacion);
+                    showSuccess();
+                } catch (error) {
+                    console.error('Error al registrar:', error);
+                    showError('Ha ocurrido un error al registrar: ' + error.message);
+                }
+            });
+            
+            // Mostrar mensaje de error
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            // Mostrar mensaje de éxito
+            function showSuccess() {
+                registroForm.style.display = 'none';
+                successMessage.style.display = 'block';
+                
+                // Redireccionar después de 3 segundos
+                setTimeout(() => {
+                    const redirectUrl = sessionStorage.getItem('redirectAfterRegistration') || 'index.html';
+                    window.location.href = redirectUrl;
+                }, 3000);
+            }
+            
+            // Registrar usuario en el sistema
+            function registerUser(email, nombre, organizacion) {
+                // 1. Almacenar en cookies
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 30); // Cookie válida por 30 días
+                document.cookie = `saludCuricoRegistered=true; expires=${expiryDate.toUTCString()}; path=/`;
+                
+                // 2. Almacenar en localStorage
+                localStorage.setItem('saludCuricoUserRegisteredEmail', email);
+                if (nombre) localStorage.setItem('saludCuricoUserName', nombre);
+                if (organizacion) localStorage.setItem('saludCuricoUserOrg', organizacion);
+                
+                // 3. Almacenar en sessionStorage para la sesión actual
+                sessionStorage.setItem('saludCuricoRegistered', 'true');
+                
+                // 4. Registrar evento
+                const registrationEvent = {
+                    type: 'registration',
+                    email: email,
+                    name: nombre || '',
+                    organization: organizacion || '',
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 5. Guardar el evento si existe UserTracker
+                if (typeof UserTracker !== 'undefined') {
+                    try {
+                        // Asignar email a UserTracker
+                        if (UserTracker.userData) {
+                            UserTracker.userData.email = email;
+                        }
+                        
+                        // Guardar evento
+                        if (UserTracker.currentEvents && typeof UserTracker.currentEvents.push === 'function') {
+                            UserTracker.currentEvents.push(registrationEvent);
+                            
+                            if (typeof UserTracker.saveEvents === 'function') {
+                                UserTracker.saveEvents();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error al interactuar con UserTracker:', error);
+                    }
+                }
+                
+                console.log('Usuario registrado correctamente:', email);
+            }
+        });
+    </script>
+</body>
+</html>
