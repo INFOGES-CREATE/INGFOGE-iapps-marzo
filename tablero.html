@@ -13,8 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #4285f4;
+            --primary-color:rgb(97, 202, 118);
+            --secondary-color:rgb(127, 223, 68);
             --accent-color: #fbbc04;
             --danger-color: #ea4335;
             --success-color: #34a853;
@@ -2307,4 +2307,1659 @@
             
             const pyramidData = {
                 labels: pyramidLabels,
-                datasets
+                datasets : [{
+                    label: 'Hombres',
+                    data: pyramidMale,
+                    backgroundColor: colores.sexo.masculino,
+                    borderWidth: 1
+                }, {
+                    label: 'Mujeres',
+                    data: pyramidFemale,
+                    backgroundColor: colores.sexo.femenino,
+                    borderWidth: 1
+                }]
+            };
+            
+            const pyramidChart = new Chart(pyramidCtx, {
+                type: 'bar',
+                data: pyramidData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return Math.abs(value).toLocaleString();
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            reverse: true,
+                            title: {
+                                display: true,
+                                text: 'Grupos de Edad'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = Math.abs(context.parsed.x);
+                                    return `${context.dataset.label}: ${value.toLocaleString()}`;
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'Pirámide Poblacional'
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de grupos de edad (dona)
+            const ageGroupsCtx = document.getElementById('ageGroupsChart').getContext('2d');
+            const ageGroupsData = {
+                labels: Object.keys(poblacionData.comuna.edades),
+                datasets: [{
+                    data: Object.values(poblacionData.comuna.edades),
+                    backgroundColor: Object.values(colores.edades),
+                    borderWidth: 1
+                }]
+            };
+            
+            const ageGroupsChart = new Chart(ageGroupsCtx, {
+                type: 'doughnut',
+                data: ageGroupsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de tendencias históricas
+            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+            const trendsData = {
+                labels: poblacionData.tendencia.años,
+                datasets: [{
+                    label: 'Población Total',
+                    data: poblacionData.tendencia.población,
+                    borderColor: 'rgba(66, 133, 244, 1)',
+                    backgroundColor: 'rgba(66, 133, 244, 0.2)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1
+                }, {
+                    label: 'Masculino',
+                    data: poblacionData.tendencia.porSexo.masculino,
+                    borderColor: colores.sexo.masculino,
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                }, {
+                    label: 'Femenino',
+                    data: poblacionData.tendencia.porSexo.femenino,
+                    borderColor: colores.sexo.femenino,
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                }]
+            };
+            
+            const trendsChart = new Chart(trendsCtx, {
+                type: 'line',
+                data: trendsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Año'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de distribución por sexo y edad
+            const genderAgeCtx = document.getElementById('genderAgeChart').getContext('2d');
+            
+            // Preparar datos para el gráfico de barras apiladas
+            const genderAgeLabels = Object.keys(poblacionData.comuna.edades);
+            const maleData = Object.keys(poblacionData.comuna.edades).map(key => {
+                // Calculamos el porcentaje de hombres para cada grupo de edad
+                const total = Object.values(poblacionData.centros).reduce((sum, centro) => sum + centro.edades[key], 0);
+                const male = Object.values(poblacionData.centros).reduce((sum, centro) => {
+                    const centroTotal = centro.edades[key];
+                    const maleRatio = centro.sexo.masculino / (centro.sexo.masculino + centro.sexo.femenino);
+                    return sum + (centroTotal * maleRatio);
+                }, 0);
+                return Math.round(male);
+            });
+            
+            const femaleData = Object.keys(poblacionData.comuna.edades).map(key => {
+                // Calculamos el porcentaje de mujeres para cada grupo de edad
+                const total = Object.values(poblacionData.centros).reduce((sum, centro) => sum + centro.edades[key], 0);
+                const female = Object.values(poblacionData.centros).reduce((sum, centro) => {
+                    const centroTotal = centro.edades[key];
+                    const femaleRatio = centro.sexo.femenino / (centro.sexo.masculino + centro.sexo.femenino);
+                    return sum + (centroTotal * femaleRatio);
+                }, 0);
+                return Math.round(female);
+            });
+            
+            const genderAgeData = {
+                labels: genderAgeLabels,
+                datasets: [{
+                    label: 'Masculino',
+                    data: maleData,
+                    backgroundColor: colores.sexo.masculino,
+                    borderWidth: 1
+                }, {
+                    label: 'Femenino',
+                    data: femaleData,
+                    backgroundColor: colores.sexo.femenino,
+                    borderWidth: 1
+                }]
+            };
+            
+            const genderAgeChart = new Chart(genderAgeCtx, {
+                type: 'bar',
+                data: genderAgeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupo de Edad'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    return `${context.dataset.label}: ${value.toLocaleString()}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de población por centro y grupo etario
+            const centerAgeCtx = document.getElementById('centerAgeChart').getContext('2d');
+            
+            // Preparar datos
+            const centerAgeDatasets = [];
+            const edadLabels = Object.keys(poblacionData.comuna.edades);
+            
+            // Para cada centro, crear un dataset
+            Object.keys(poblacionData.centros).forEach((centroKey, index) => {
+                const centro = poblacionData.centros[centroKey];
+                centerAgeDatasets.push({
+                    label: centro.nombre,
+                    data: Object.values(centro.edades),
+                    backgroundColor: colores.centros[index],
+                    borderWidth: 1
+                });
+            });
+            
+            const centerAgeData = {
+                labels: edadLabels,
+                datasets: centerAgeDatasets
+            };
+            
+            const centerAgeChart = new Chart(centerAgeCtx, {
+                type: 'bar',
+                data: centerAgeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupo de Edad'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    return `${context.dataset.label}: ${value.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico detallado por edad
+            const detailedAgeCtx = document.getElementById('detailedAgeChart').getContext('2d');
+            
+            // Utilizamos los datos de la pirámide pero agrupamos por rangos de 10 años para mejor visualización
+            const detailedAgeLabels = [];
+            const detailedAgeData = [];
+            
+            for (let i = 0; i < poblacionData.piramide.grupos.length; i += 10) {
+                const rangoEdad = i + 10 >= poblacionData.piramide.grupos.length ? 
+                    `${i}+` : `${i}-${i+9}`;
+                detailedAgeLabels.push(rangoEdad);
+                
+                let suma = 0;
+                for (let j = 0; j < 10 && (i + j) < poblacionData.piramide.grupos.length; j++) {
+                    suma += poblacionData.piramide.masculino[i + j] + poblacionData.piramide.femenino[i + j];
+                }
+                
+                detailedAgeData.push(suma);
+            }
+            
+            const detailedAgeChartData = {
+                labels: detailedAgeLabels,
+                datasets: [{
+                    label: 'Población',
+                    data: detailedAgeData,
+                    backgroundColor: 'rgba(66, 133, 244, 0.8)',
+                    borderWidth: 1
+                }]
+            };
+            
+            const detailedAgeChartObj = new Chart(detailedAgeCtx, {
+                type: 'bar',
+                data: detailedAgeChartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Rango de Edad'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `Población: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de comparación INE vs Inscrita
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            
+            // Preparar datos
+            const comparisonLabels = Object.keys(poblacionData.comuna.edades);
+            const comparisonInscrita = Object.values(poblacionData.comuna.edades);
+            const comparisonINE = Object.values(poblacionData.datosINE.edades);
+            
+            const comparisonData = {
+                labels: comparisonLabels,
+                datasets: [{
+                    label: 'Población Inscrita',
+                    data: comparisonInscrita,
+                    backgroundColor: colores.comparativa.inscrita,
+                    borderWidth: 1
+                }, {
+                    label: 'Población INE',
+                    data: comparisonINE,
+                    backgroundColor: colores.comparativa.ine,
+                    borderWidth: 1
+                }]
+            };
+            
+            const comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: comparisonData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupo de Edad'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    return `${context.dataset.label}: ${value.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de cobertura por grupo etario
+            const coverageCtx = document.getElementById('coverageChart').getContext('2d');
+            
+            // Calcular tasas de cobertura (Inscritos / INE) * 100
+            const coverageLabels = Object.keys(poblacionData.comuna.edades);
+            const coverageData = coverageLabels.map((key, index) => {
+                const inscrita = poblacionData.comuna.edades[key];
+                const ine = poblacionData.datosINE.edades[key];
+                return ((inscrita / ine) * 100).toFixed(1);
+            });
+            
+            const coverageChartData = {
+                labels: coverageLabels,
+                datasets: [{
+                    label: 'Tasa de Cobertura (%)',
+                    data: coverageData,
+                    backgroundColor: 'rgba(52, 168, 83, 0.8)',
+                    borderColor: 'rgba(52, 168, 83, 1)',
+                    borderWidth: 1
+                }]
+            };
+            
+            const coverageChartObj = new Chart(coverageCtx, {
+                type: 'line',
+                data: coverageChartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Cobertura (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Grupo de Edad'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Cobertura: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.3
+                        },
+                        point: {
+                            radius: 5,
+                            hitRadius: 10,
+                            hoverRadius: 7
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de comparación de sexo: INE vs Inscrita
+            const genderComparisonCtx = document.getElementById('genderComparisonChart').getContext('2d');
+            
+            // Preparar datos
+            const genderComparisonData = {
+                labels: ['Masculino', 'Femenino'],
+                datasets: [{
+                    label: 'Población Inscrita',
+                    data: [
+                        poblacionData.comuna.sexo.masculino,
+                        poblacionData.comuna.sexo.femenino
+                    ],
+                    backgroundColor: colores.comparativa.inscrita,
+                    borderWidth: 1
+                }, {
+                    label: 'Población INE',
+                    data: [
+                        poblacionData.datosINE.sexo.masculino,
+                        poblacionData.datosINE.sexo.femenino
+                    ],
+                    backgroundColor: colores.comparativa.ine,
+                    borderWidth: 1
+                }]
+            };
+            
+            const genderComparisonChart = new Chart(genderComparisonCtx, {
+                type: 'bar',
+                data: genderComparisonData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Sexo'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.dataset.label}: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Inicializar mapa de Leaflet
+            const mapChart = L.map('mapChart').setView([poblacionData.comuna.geolocalizacion.lat, poblacionData.comuna.geolocalizacion.lng], 12);
+            
+            // Añadir capa de mapa base
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mapChart);
+            
+            // Añadir marcadores para cada centro de salud
+            Object.keys(poblacionData.centros).forEach(centroKey => {
+                const centro = poblacionData.centros[centroKey];
+                
+                // Añadir marcador
+                const marker = L.marker([centro.geolocalizacion.lat, centro.geolocalizacion.lng])
+                    .addTo(mapChart)
+                    .bindPopup(`
+                        <strong>${centro.nombre}</strong><br>
+                        Población Total: ${centro.total.toLocaleString()}<br>
+                        Masculino: ${centro.sexo.masculino.toLocaleString()}<br>
+                        Femenino: ${centro.sexo.femenino.toLocaleString()}
+                    `);
+                
+                // Añadir círculo que representa el área de cobertura
+                const circle = L.circle([centro.geolocalizacion.lat, centro.geolocalizacion.lng], {
+                    color: 'blue',
+                    fillColor: '#30f',
+                    fillOpacity: 0.1,
+                    radius: centro.geolocalizacion.radio * 1000 // En metros
+                }).addTo(mapChart);
+            });
+
+            // Gráfico de densidad poblacional por sector
+            const densityCtx = document.getElementById('densityChart').getContext('2d');
+            
+            // Calcular densidad (población / radio^2 * PI)
+            const densityLabels = Object.values(poblacionData.centros).map(centro => centro.nombre);
+            const densityData = Object.values(poblacionData.centros).map(centro => {
+                const area = Math.PI * Math.pow(centro.geolocalizacion.radio, 2);
+                return Math.round(centro.total / area);
+            });
+            
+            const densityChartData = {
+                labels: densityLabels,
+                datasets: [{
+                    label: 'Densidad (hab/km²)',
+                    data: densityData,
+                    backgroundColor: colores.centros,
+                    borderWidth: 1
+                }]
+            };
+            
+            const densityChartObj = new Chart(densityCtx, {
+                type: 'bar',
+                data: densityChartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Densidad Poblacional (hab/km²)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Densidad: ${context.raw.toLocaleString()} hab/km²`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de cobertura por área de servicio
+            const serviceAreaCtx = document.getElementById('serviceAreaChart').getContext('2d');
+            
+            // Calcular población por área de servicio
+            const serviceAreaLabels = Object.values(poblacionData.centros).map(centro => centro.nombre);
+            const populationData = Object.values(poblacionData.centros).map(centro => centro.total);
+            const areaData = Object.values(poblacionData.centros).map(centro => 
+                Math.PI * Math.pow(centro.geolocalizacion.radio, 2) // Área en km²
+            );
+            
+            const serviceAreaChartData = {
+                labels: serviceAreaLabels,
+                datasets: [{
+                    type: 'bar',
+                    label: 'Población',
+                    data: populationData,
+                    backgroundColor: 'rgba(66, 133, 244, 0.8)',
+                    borderColor: 'rgba(66, 133, 244, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                }, {
+                    type: 'line',
+                    label: 'Área de Cobertura (km²)',
+                    data: areaData,
+                    backgroundColor: 'rgba(234, 67, 53, 0.2)',
+                    borderColor: 'rgba(234, 67, 53, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y1'
+                }]
+            };
+            
+            const serviceAreaChartObj = new Chart(serviceAreaCtx, {
+                type: 'scatter',
+                data: serviceAreaChartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Población'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Área (km²)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+
+            // Almacenar referencias a los gráficos para futuras actualizaciones
+            window.dashboardCharts = {
+                distributionChart,
+                pyramidChart,
+                ageGroupsChart,
+                trendsChart,
+                genderAgeChart,
+                centerAgeChart,
+                detailedAgeChartObj,
+                comparisonChart,
+                coverageChartObj,
+                genderComparisonChart,
+                densityChartObj,
+                serviceAreaChartObj,
+                mapChart
+            };
+        }
+
+        // Actualizar estadísticas del dashboard
+        function updateStats() {
+            // En una implementación real, estos valores se calcularían dinámicamente
+            // según los filtros aplicados. Aquí solo mostramos los valores estáticos.
+            document.getElementById('totalPopulation').textContent = poblacionData.comuna.total.toLocaleString();
+            
+            const malePercentage = ((poblacionData.comuna.sexo.masculino / poblacionData.comuna.total) * 100).toFixed(1);
+            const femalePercentage = ((poblacionData.comuna.sexo.femenino / poblacionData.comuna.total) * 100).toFixed(1);
+            document.getElementById('genderRatio').textContent = `${malePercentage}% / ${femalePercentage}%`;
+            
+            document.getElementById('averageAge').textContent = '38.2';
+            
+            const pediatricPercentage = ((poblacionData.comuna.edades["0-9"] / poblacionData.comuna.total) * 100).toFixed(1);
+            document.getElementById('pediatricPopulation').textContent = `${pediatricPercentage}%`;
+        }
+
+        // Actualizar gráficos según filtros
+        function updateCharts() {
+            // En una implementación real, esta función filtraría los datos según los criterios
+            // y actualizaría cada gráfico con los nuevos datos. Aquí solo simulamos la actualización.
+            
+            // Obtener valores de filtros
+            const yearFilter = document.getElementById('yearFilter').value;
+            const communeFilter = document.getElementById('communeFilter').value;
+            const centerFilter = document.getElementById('centerFilter').value;
+            const maleFilter = document.getElementById('maleFilter').checked;
+            const femaleFilter = document.getElementById('femaleFilter').checked;
+            const infantilFilter = document.getElementById('infantilFilter').checked;
+            const adolescenteFilter = document.getElementById('adolescenteFilter').checked;
+            const adultoFilter = document.getElementById('adultoFilter').checked;
+            const adultoMayorFilter = document.getElementById('adultoMayorFilter').checked;
+            const ageRangeMin = parseInt(document.getElementById('ageRangeMin').value);
+            const ageRangeMax = parseInt(document.getElementById('ageRangeMax').value);
+            
+            // Actualizar lista de filtros en modal de exportación
+            document.getElementById('exportFiltersList').innerHTML = `
+                <li>Año: ${yearFilter}</li>
+                <li>Comuna: ${communeFilter === 'curico' ? 'Curicó' : communeFilter}</li>
+                <li>Centro de Salud: ${centerFilter === 'all' ? 'Todos' : poblacionData.centros[centerFilter].nombre}</li>
+                <li>Sexo: ${maleFilter && femaleFilter ? 'Ambos' : maleFilter ? 'Masculino' : femaleFilter ? 'Femenino' : 'Ninguno'}</li>
+                <li>Grupos Etarios: ${[
+                    infantilFilter ? '0-9' : null,
+                    adolescenteFilter ? '10-19' : null,
+                    adultoFilter ? '20-64' : null,
+                    adultoMayorFilter ? '≥65' : null
+                ].filter(Boolean).join(', ') || 'Ninguno'}</li>
+                <li>Rango de Edad: ${ageRangeMin} - ${ageRangeMax}</li>
+            `;
+            
+            // En una implementación real, aquí se filtrarían los datos y se actualizarían los gráficos
+            console.log('Filtros aplicados:', {
+                year: yearFilter,
+                commune: communeFilter,
+                center: centerFilter,
+                male: maleFilter,
+                female: femaleFilter,
+                infantil: infantilFilter,
+                adolescente: adolescenteFilter,
+                adulto: adultoFilter,
+                adultoMayor: adultoMayorFilter,
+                ageRange: [ageRangeMin, ageRangeMax]
+            });
+        }
+
+        // Funciones de utilidad UI
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const icon = notification.querySelector('.notification-icon i');
+            const messageEl = notification.querySelector('.notification-message');
+            
+            // Configurar tipo
+            if (type === 'success') {
+                icon.className = 'fas fa-check-circle';
+                notification.style.backgroundColor = '#323232';
+            } else if (type === 'warning') {
+                icon.className = 'fas fa-exclamation-triangle';
+                notification.style.backgroundColor = '#FFA000';
+            } else if (type === 'error') {
+                icon.className = 'fas fa-times-circle';
+                notification.style.backgroundColor = '#D32F2F';
+            } else {
+                icon.className = 'fas fa-info-circle';
+                notification.style.backgroundColor = '#323232';
+            }
+            
+            // Actualizar mensaje
+            messageEl.textContent = message;
+            
+            // Mostrar notificación
+            notification.classList.add('show');
+            
+            // Ocultar automáticamente
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Funciones para exportación de datos
+        function exportToExcel() {
+            // En una implementación real, esta función exportaría los datos a Excel
+            console.log('Exportando a Excel...');
+            showNotification('Datos exportados a Excel correctamente', 'success');
+        }
+        
+        function exportToPDF() {
+            // En una implementación real, esta función exportaría los datos a PDF
+            console.log('Exportando a PDF...');
+            showNotification('Datos exportados a PDF correctamente', 'success');
+        }
+        
+        function exportToCSV() {
+            // En una implementación real, esta función exportaría los datos a CSV
+            console.log('Exportando a CSV...');
+            showNotification('Datos exportados a CSV correctamente', 'success');
+        }
+
+        // Inicializar tooltips para botones de acción
+        function initTooltips() {
+            const tooltip = document.getElementById('tooltip');
+            
+            // Selector de elementos con tooltips
+            const elementsWithTooltips = document.querySelectorAll('[data-tooltip]');
+            
+            elementsWithTooltips.forEach(element => {
+                element.addEventListener('mouseenter', function(e) {
+                    const tooltipText = this.getAttribute('data-tooltip');
+                    tooltip.textContent = tooltipText;
+                    tooltip.style.opacity = 1;
+                    
+                    // Posicionar tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.top = `${rect.top - tooltip.offsetHeight - 5}px`;
+                    tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    tooltip.style.opacity = 0;
+                });
+            });
+        }
+
+        // Función para generar informes predefinidos
+        function generateReport(reportType) {
+            showLoading();
+            
+            // En una implementación real, esta función generaría el informe específico
+            setTimeout(() => {
+                hideLoading();
+                
+                switch(reportType) {
+                    case 'report_distribution':
+                        showNotification('Informe de Distribución generado correctamente', 'success');
+                        break;
+                    case 'report_age_gender':
+                        showNotification('Informe de Distribución por Edad y Sexo generado correctamente', 'success');
+                        break;
+                    case 'report_comparison':
+                        showNotification('Informe Comparativo generado correctamente', 'success');
+                        break;
+                    case 'report_trends':
+                        showNotification('Informe de Tendencias generado correctamente', 'success');
+                        break;
+                    case 'report_geo':
+                        showNotification('Informe Geográfico generado correctamente', 'success');
+                        break;
+                    case 'report_full':
+                        showNotification('Informe Completo generado correctamente', 'success');
+                        break;
+                    default:
+                        showNotification('Tipo de informe no válido', 'error');
+                }
+            }, 1500);
+        }
+
+        // Añadir funcionalidad de pantalla completa a los gráficos
+        function initFullscreenButtons() {
+            // Función genérica para hacer toggle de pantalla completa
+            function toggleFullscreen(elementId) {
+                const element = document.getElementById(elementId);
+                
+                if (!document.fullscreenElement) {
+                    if (element.requestFullscreen) {
+                        element.requestFullscreen();
+                    } else if (element.mozRequestFullScreen) {
+                        element.mozRequestFullScreen();
+                    } else if (element.webkitRequestFullscreen) {
+                        element.webkitRequestFullscreen();
+                    } else if (element.msRequestFullscreen) {
+                        element.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+            
+            // Configurar botones de pantalla completa para cada gráfico
+            document.getElementById('fullscreenDistributionChart').addEventListener('click', () => 
+                toggleFullscreen('distributionChart'));
+            
+            document.getElementById('fullscreenPyramidChart').addEventListener('click', () => 
+                toggleFullscreen('pyramidChart'));
+            
+            document.getElementById('fullscreenAgeGroupsChart').addEventListener('click', () => 
+                toggleFullscreen('ageGroupsChart'));
+            
+            document.getElementById('fullscreenTrendsChart').addEventListener('click', () => 
+                toggleFullscreen('trendsChart'));
+            
+            document.getElementById('fullscreenGenderAgeChart').addEventListener('click', () => 
+                toggleFullscreen('genderAgeChart'));
+            
+            document.getElementById('fullscreenCenterAgeChart').addEventListener('click', () => 
+                toggleFullscreen('centerAgeChart'));
+            
+            document.getElementById('fullscreenDetailedAgeChart').addEventListener('click', () => 
+                toggleFullscreen('detailedAgeChart'));
+            
+            document.getElementById('fullscreenComparisonChart').addEventListener('click', () => 
+                toggleFullscreen('comparisonChart'));
+            
+            document.getElementById('fullscreenCoverageChart').addEventListener('click', () => 
+                toggleFullscreen('coverageChart'));
+            
+            document.getElementById('fullscreenGenderComparisonChart').addEventListener('click', () => 
+                toggleFullscreen('genderComparisonChart'));
+            
+            document.getElementById('fullscreenMap').addEventListener('click', () => 
+                toggleFullscreen('mapChart'));
+            
+            document.getElementById('fullscreenDensityChart').addEventListener('click', () => 
+                toggleFullscreen('densityChart'));
+            
+            document.getElementById('fullscreenServiceAreaChart').addEventListener('click', () => 
+                toggleFullscreen('serviceAreaChart'));
+            
+            document.getElementById('fullscreenTable').addEventListener('click', () => 
+                toggleFullscreen('populationTable'));
+            
+            document.getElementById('fullscreenAgeTable').addEventListener('click', () => 
+                toggleFullscreen('ageGroupTable'));
+        }
+
+        // Inicializar botones de descarga para gráficos
+        function initDownloadButtons() {
+            // Función genérica para descargar un gráfico como imagen
+            function downloadChart(chartId, filename) {
+                const canvas = document.getElementById(chartId);
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+            
+            // Configurar botones de descarga para cada gráfico
+            document.getElementById('downloadDistributionChart').addEventListener('click', () => 
+                downloadChart('distributionChart', 'distribucion_centros_salud.png'));
+            
+            document.getElementById('downloadPyramidChart').addEventListener('click', () => 
+                downloadChart('pyramidChart', 'piramide_poblacional.png'));
+            
+            document.getElementById('downloadAgeGroupsChart').addEventListener('click', () => 
+                downloadChart('ageGroupsChart', 'grupos_etarios.png'));
+            
+            document.getElementById('downloadTrendsChart').addEventListener('click', () => 
+                downloadChart('trendsChart', 'tendencias_poblacionales.png'));
+            
+            document.getElementById('downloadGenderAgeChart').addEventListener('click', () => 
+                downloadChart('genderAgeChart', 'distribucion_sexo_edad.png'));
+            
+            document.getElementById('downloadCenterAgeChart').addEventListener('click', () => 
+                downloadChart('centerAgeChart', 'centro_grupo_etario.png'));
+            
+            document.getElementById('downloadDetailedAgeChart').addEventListener('click', () => 
+                downloadChart('detailedAgeChart', 'detalle_edad.png'));
+            
+            document.getElementById('downloadComparisonChart').addEventListener('click', () => 
+                downloadChart('comparisonChart', 'comparativa_ine_inscrita.png'));
+            
+            document.getElementById('downloadCoverageChart').addEventListener('click', () => 
+                downloadChart('coverageChart', 'tasa_cobertura.png'));
+            
+            document.getElementById('downloadGenderComparisonChart').addEventListener('click', () => 
+                downloadChart('genderComparisonChart', 'comparativa_sexo.png'));
+            
+            document.getElementById('downloadMap').addEventListener('click', () => {
+                // Para el mapa, usamos una biblioteca de captura HTML2Canvas
+                showNotification('La descarga del mapa requiere HTML2Canvas', 'info');
+            });
+            
+            document.getElementById('downloadDensityChart').addEventListener('click', () => 
+                downloadChart('densityChart', 'densidad_poblacional.png'));
+            
+            document.getElementById('downloadServiceAreaChart').addEventListener('click', () => 
+                downloadChart('serviceAreaChart', 'area_cobertura.png'));
+            
+            // Para las tablas, se usaría una función diferente para exportar a Excel
+            document.getElementById('downloadTable').addEventListener('click', () => {
+                exportToExcel('populationTable', 'datos_poblacionales.xlsx');
+            });
+            
+            document.getElementById('downloadAgeTable').addEventListener('click', () => {
+                exportToExcel('ageGroupTable', 'grupos_edad_detalle.xlsx');
+            });
+        }
+
+        // Función para exportar tablas a Excel
+        function exportToExcel(tableId, filename) {
+            // En una implementación real, esta función utilizaría SheetJS para exportar la tabla a Excel
+            console.log(`Exportando tabla ${tableId} a Excel como ${filename}...`);
+            showNotification(`Tabla exportada a Excel como ${filename}`, 'success');
+        }
+
+        // Función para modo oscuro
+        function initDarkModeToggle() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.style.setProperty('--primary-color', '#5c6bc0');
+                    document.documentElement.style.setProperty('--secondary-color', '#7986cb');
+                    document.documentElement.style.setProperty('--text-color', '#e0e0e0');
+                    document.documentElement.style.setProperty('--light-gray', '#424242');
+                    document.documentElement.style.setProperty('--medium-gray', '#616161');
+                    document.documentElement.style.setProperty('--dark-gray', '#9e9e9e');
+                    document.body.style.backgroundColor = '#303030';
+                    
+                    // Actualizar estilos de componentes
+                    document.querySelectorAll('.chart-container, .table-container, .stat-card, .sidebar').forEach(el => {
+                        el.style.backgroundColor = '#424242';
+                        el.style.color = '#e0e0e0';
+                    });
+                    
+                    document.querySelectorAll('table th, table td').forEach(el => {
+                        el.style.borderColor = '#616161';
+                    });
+                    
+                    // Actualizar gráficos
+                    updateChartsTheme(true);
+                    
+                    showNotification('Modo oscuro activado', 'info');
+                } else {
+                    // Restaurar tema claro
+                    document.documentElement.style.setProperty('--primary-color', '#1a73e8');
+                    document.documentElement.style.setProperty('--secondary-color', '#4285f4');
+                    document.documentElement.style.setProperty('--text-color', '#212121');
+                    document.documentElement.style.setProperty('--light-gray', '#f5f5f5');
+                    document.documentElement.style.setProperty('--medium-gray', '#e0e0e0');
+                    document.documentElement.style.setProperty('--dark-gray', '#757575');
+                    document.body.style.backgroundColor = '#f9fafb';
+                    
+                    // Restaurar estilos de componentes
+                    document.querySelectorAll('.chart-container, .table-container, .stat-card, .sidebar').forEach(el => {
+                        el.style.backgroundColor = 'white';
+                        el.style.color = '#212121';
+                    });
+                    
+                    document.querySelectorAll('table th, table td').forEach(el => {
+                        el.style.borderColor = '#e0e0e0';
+                    });
+                    
+                    // Actualizar gráficos
+                    updateChartsTheme(false);
+                    
+                    showNotification('Modo claro restaurado', 'info');
+                }
+            });
+        }
+
+        // Actualizar tema de gráficos
+        function updateChartsTheme(darkMode) {
+            // En una implementación real, esta función actualizaría las opciones de todos los gráficos
+            // para adaptarlos al tema oscuro o claro
+            console.log(`Actualizando tema de gráficos a ${darkMode ? 'oscuro' : 'claro'}...`);
+            
+            if (window.dashboardCharts) {
+                const textColor = darkMode ? '#e0e0e0' : '#666';
+                const gridColor = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                
+                // Actualizar opciones comunes
+                Object.values(window.dashboardCharts).forEach(chart => {
+                    if (chart.options && chart.options.scales) {
+                        // Actualizar ejes
+                        if (chart.options.scales.x) {
+                            chart.options.scales.x.grid = { color: gridColor };
+                            chart.options.scales.x.ticks = { color: textColor };
+                            if (chart.options.scales.x.title) {
+                                chart.options.scales.x.title.color = textColor;
+                            }
+                        }
+                        
+                        if (chart.options.scales.y) {
+                            chart.options.scales.y.grid = { color: gridColor };
+                            chart.options.scales.y.ticks = { color: textColor };
+                            if (chart.options.scales.y.title) {
+                                chart.options.scales.y.title.color = textColor;
+                            }
+                        }
+                        
+                        if (chart.options.scales.y1) {
+                            chart.options.scales.y1.grid = { color: gridColor };
+                            chart.options.scales.y1.ticks = { color: textColor };
+                            if (chart.options.scales.y1.title) {
+                                chart.options.scales.y1.title.color = textColor;
+                            }
+                        }
+                    }
+                    
+                    // Actualizar leyendas
+                    if (chart.options && chart.options.plugins && chart.options.plugins.legend) {
+                        chart.options.plugins.legend.labels = { color: textColor };
+                    }
+                    
+                    // Actualizar títulos
+                    if (chart.options && chart.options.plugins && chart.options.plugins.title) {
+                        chart.options.plugins.title.color = textColor;
+                    }
+                    
+                    // Actualizar gráfico
+                    if (chart.update) {
+                        chart.update();
+                    }
+                });
+            }
+        }
+
+        // Inicializar funcionalidades adicionales
+        function initAdditionalFunctionalities() {
+            initTooltips();
+            initFullscreenButtons();
+            initDownloadButtons();
+            initDarkModeToggle();
+            
+            // Auto-refresh toggle
+            document.getElementById('autoRefreshToggle').addEventListener('change', function() {
+                if (this.checked) {
+                    window.autoRefreshInterval = setInterval(() => {
+                        console.log('Auto-actualización...');
+                        updateStats();
+                        // En una implementación real, aquí se actualizarían los datos
+                    }, 60000); // Actualizar cada minuto
+                    
+                    showNotification('Actualización automática activada', 'info');
+                } else {
+                    if (window.autoRefreshInterval) {
+                        clearInterval(window.autoRefreshInterval);
+                        window.autoRefreshInterval = null;
+                    }
+                    
+                    showNotification('Actualización automática desactivada', 'info');
+                }
+            });
+            
+            // Live data toggle
+            document.getElementById('liveDataToggle').addEventListener('change', function() {
+                if (this.checked) {
+                    showNotification('Datos en tiempo real activados', 'info');
+                    // En una implementación real, aquí se activaría un WebSocket o SSE
+                } else {
+                    showNotification('Datos en tiempo real desactivados', 'info');
+                    // En una implementación real, aquí se desactivaría la conexión
+                }
+            });
+        }
+
+        // Inicializar todo al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar elementos de UI
+            initUI();
+            
+            // Iniciar carga de datos
+            showLoading();
+            
+            // Simular carga de datos (en una implementación real, aquí iría la carga desde la base de datos)
+            setTimeout(() => {
+                // Inicializar gráficos
+                initCharts();
+                
+                // Actualizar estadísticas
+                updateStats();
+                
+                // Inicializar funcionalidades adicionales
+                initAdditionalFunctionalities();
+                
+                // Ocultar carga
+                hideLoading();
+                
+                // Mostrar notificación de datos cargados
+                showNotification('Datos cargados correctamente', 'success');
+            }, 1000);
+        });
+
+        // Módulo de Persistencia de Datos
+        // En una implementación real, este módulo gestionaría la carga y guardado de datos
+        const persistenceModule = {
+            // Cargar datos del servidor
+            loadData: function() {
+                return new Promise((resolve, reject) => {
+                    // Aquí iría la lógica para cargar datos desde una API o base de datos
+                    setTimeout(() => {
+                        resolve(poblacionData);
+                    }, 500);
+                });
+            },
+            
+            // Guardar filtros de usuario
+            saveUserPreferences: function(preferences) {
+                localStorage.setItem('dashboardPreferences', JSON.stringify(preferences));
+            },
+            
+            // Cargar filtros guardados
+            loadUserPreferences: function() {
+                const saved = localStorage.getItem('dashboardPreferences');
+                return saved ? JSON.parse(saved) : null;
+            },
+            
+            // Exportar datos actuales
+            exportData: function(format) {
+                return new Promise((resolve, reject) => {
+                    // Aquí iría la lógica para exportar datos en diferentes formatos
+                    setTimeout(() => {
+                        resolve(`data_export.${format}`);
+                    }, 500);
+                });
+            }
+        };
+
+        // Módulo de Análisis de Datos
+        // En una implementación real, este módulo realizaría cálculos estadísticos avanzados
+        const analyticsModule = {
+            // Calcular estadísticas descriptivas
+            calculateStats: function(data) {
+                return {
+                    mean: this.calculateMean(data),
+                    median: this.calculateMedian(data),
+                    mode: this.calculateMode(data),
+                    stdDev: this.calculateStdDev(data)
+                };
+            },
+            
+            // Calcular media
+            calculateMean: function(data) {
+                return data.reduce((sum, value) => sum + value, 0) / data.length;
+            },
+            
+            // Calcular mediana
+            calculateMedian: function(data) {
+                const sorted = [...data].sort((a, b) => a - b);
+                const middle = Math.floor(sorted.length / 2);
+                
+                if (sorted.length % 2 === 0) {
+                    return (sorted[middle - 1] + sorted[middle]) / 2;
+                }
+                
+                return sorted[middle];
+            },
+            
+            // Calcular moda
+            calculateMode: function(data) {
+                const frequency = {};
+                data.forEach(value => {
+                    frequency[value] = (frequency[value] || 0) + 1;
+                });
+                
+                let maxFreq = 0;
+                let mode = null;
+                
+                for (const [value, freq] of Object.entries(frequency)) {
+                    if (freq > maxFreq) {
+                        maxFreq = freq;
+                        mode = parseFloat(value);
+                    }
+                }
+                
+                return mode;
+            },
+            
+            // Calcular desviación estándar
+            calculateStdDev: function(data) {
+                const mean = this.calculateMean(data);
+                const squareDiffs = data.map(value => Math.pow(value - mean, 2));
+                const variance = this.calculateMean(squareDiffs);
+                return Math.sqrt(variance);
+            },
+            
+            // Proyectar tendencia futura
+            projectTrend: function(historicalData, years) {
+                // Implementar algoritmo de regresión lineal simple
+                const n = historicalData.length;
+                let sumX = 0;
+                let sumY = 0;
+                let sumXY = 0;
+                let sumXX = 0;
+                
+                for (let i = 0; i < n; i++) {
+                    sumX += i;
+                    sumY += historicalData[i];
+                    sumXY += i * historicalData[i];
+                    sumXX += i * i;
+                }
+                
+                const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                
+                const projections = [];
+                for (let i = 0; i < years; i++) {
+                    projections.push(Math.round(intercept + slope * (n + i)));
+                }
+                
+                return projections;
+            }
+        };
+
+        // Módulo de Generación de Informes
+        // En una implementación real, este módulo generaría informes detallados
+        const reportModule = {
+            // Generar informe completo
+            generateFullReport: function() {
+                return {
+                    title: 'Informe Poblacional Completo',
+                    date: new Date().toLocaleString(),
+                    summary: this.generateSummary(),
+                    tables: this.generateTables(),
+                    charts: this.generateChartData(),
+                    analysis: this.generateAnalysis()
+                };
+            },
+            
+            // Generar resumen ejecutivo
+            generateSummary: function() {
+                return {
+                    totalPopulation: poblacionData.comuna.total,
+                    malePercentage: ((poblacionData.comuna.sexo.masculino / poblacionData.comuna.total) * 100).toFixed(1),
+                    femalePercentage: ((poblacionData.comuna.sexo.femenino / poblacionData.comuna.total) * 100).toFixed(1),
+                    ageGroups: poblacionData.comuna.edades,
+                    growthRate: '1.3%',
+                    coverage: '94.5%'
+                };
+            },
+            
+            // Generar tablas de datos
+            generateTables: function() {
+                return {
+                    populationByCenter: Object.values(poblacionData.centros).map(centro => ({
+                        name: centro.nombre,
+                        total: centro.total,
+                        male: centro.sexo.masculino,
+                        female: centro.sexo.femenino,
+                        ageGroups: centro.edades
+                    })),
+                    
+                    populationByAge: Object.entries(poblacionData.comuna.detalleEdades).map(([range, value]) => ({
+                        range,
+                        value,
+                        percentage: ((value / poblacionData.comuna.total) * 100).toFixed(1)
+                    })),
+                    
+                    comparison: Object.keys(poblacionData.comuna.edades).map(key => ({
+                        ageGroup: key,
+                        inscribed: poblacionData.comuna.edades[key],
+                        ine: poblacionData.datosINE.edades[key],
+                        coverage: ((poblacionData.comuna.edades[key] / poblacionData.datosINE.edades[key]) * 100).toFixed(1)
+                    }))
+                };
+            },
+            
+            // Generar datos para gráficos
+            generateChartData: function() {
+                return {
+                    distribution: {
+                        labels: Object.values(poblacionData.centros).map(centro => centro.nombre),
+                        data: Object.values(poblacionData.centros).map(centro => centro.total)
+                    },
+                    
+                    pyramid: {
+                        labels: pyramidLabels,
+                        male: pyramidMale.map(Math.abs),
+                        female: pyramidFemale
+                    },
+                    
+                    trends: {
+                        years: poblacionData.tendencia.años,
+                        data: poblacionData.tendencia.población,
+                        projection: analyticsModule.projectTrend(poblacionData.tendencia.población, 3)
+                    }
+                };
+            },
+            
+            // Generar análisis de datos
+            generateAnalysis: function() {
+                return {
+                    demographicChanges: 'La población de Curicó muestra una tendencia creciente del 1.3% anual, con un incremento notable en la población adulta mayor (≥65 años) que ha aumentado un 4.2% en el último año. La población infantil (0-9 años) ha disminuido ligeramente, lo que indica un proceso de envejecimiento poblacional.',
+                    
+                    centerComparison: 'El CESFAM Curicó Centro atiende al 27.7% de la población inscrita, siendo el de mayor cobertura. Le siguen el CESFAM Miguel Ángel Arenas López y el CESFAM Betty Muñoz Arce con 19.2% y 19.0% respectivamente. Los CESFAM Sarmiento y Los Niches son los de menor cobertura con 9.1% y 9.2% respectivamente.',
+                    
+                    coverageAnalysis: 'La cobertura general de la población inscrita respecto a la población INE es del 94.5%. El grupo etario con mayor cobertura es el de adultos mayores (≥65 años) con un 87.3%, mientras que el grupo de 20-64 años presenta la menor cobertura con un 95.1%. Esto sugiere la necesidad de fortalecer estrategias de inscripción en este último grupo.',
+                    
+                    recommendations: [
+                        'Implementar estrategias de captación específicas para la población de 20-64 años.',
+                        'Fortalecer los servicios geriátricos dado el crecimiento de la población adulta mayor.',
+                        'Evaluar la distribución de recursos entre centros de salud considerando la densidad poblacional por área de cobertura.',
+                        'Monitorear la tendencia decreciente de la población infantil para ajustar los servicios pediátricos.'
+                    ]
+                };
+            },
+            
+            // Generar informe específico por tipo
+            generateSpecificReport: function(type) {
+                switch(type) {
+                    case 'report_distribution':
+                        return {
+                            title: 'Informe de Distribución por Centro de Salud',
+                            date: new Date().toLocaleString(),
+                            content: {
+                                summary: 'Análisis detallado de la distribución poblacional entre los diferentes centros de salud de Curicó.',
+                                chartData: this.generateChartData().distribution,
+                                tableData: this.generateTables().populationByCenter,
+                                analysis: this.generateAnalysis().centerComparison
+                            }
+                        };
+                    
+                    case 'report_age_gender':
+                        return {
+                            title: 'Informe de Distribución por Edad y Sexo',
+                            date: new Date().toLocaleString(),
+                            content: {
+                                summary: 'Análisis detallado de la distribución poblacional por grupos etarios y sexo.',
+                                chartData: {
+                                    pyramid: this.generateChartData().pyramid,
+                                    ageGroups: {
+                                        labels: Object.keys(poblacionData.comuna.edades),
+                                        data: Object.values(poblacionData.comuna.edades)
+                                    }
+                                },
+                                tableData: this.generateTables().populationByAge,
+                                genderRatio: {
+                                    male: ((poblacionData.comuna.sexo.masculino / poblacionData.comuna.total) * 100).toFixed(1),
+                                    female: ((poblacionData.comuna.sexo.femenino / poblacionData.comuna.total) * 100).toFixed(1)
+                                }
+                            }
+                        };
+                    
+                    case 'report_comparison':
+                        return {
+                            title: 'Informe Comparativo: Población Inscrita vs. INE',
+                            date: new Date().toLocaleString(),
+                            content: {
+                                summary: 'Análisis comparativo entre la población inscrita en los centros de salud y las proyecciones del INE.',
+                                tableData: this.generateTables().comparison,
+                                coverage: {
+                                    overall: ((poblacionData.comuna.total / poblacionData.datosINE.total) * 100).toFixed(1),
+                                    byAgeGroup: Object.keys(poblacionData.comuna.edades).map(key => ({
+                                        ageGroup: key,
+                                        coverage: ((poblacionData.comuna.edades[key] / poblacionData.datosINE.edades[key]) * 100).toFixed(1)
+                                    }))
+                                },
+                                analysis: this.generateAnalysis().coverageAnalysis
+                            }
+                        };
+                    
+                    default:
+                        return this.generateFullReport();
+                }
+            }
+        };
+
+        // Sistema de Gestión de Usuarios
+        // En una implementación real, este módulo gestionaría la autenticación y permisos
+        const userModule = {
+            // Usuario actual (simulado)
+            currentUser: {
+                id: '001',
+                name: 'Administrador Sistema',
+                role: 'admin',
+                permissions: ['read', 'write', 'export', 'admin'],
+                lastLogin: '2024-05-12T08:30:15'
+            },
+            
+            // Verificar si el usuario tiene un permiso específico
+            hasPermission: function(permission) {
+                return this.currentUser.permissions.includes(permission);
+            },
+            
+            // Registrar acción del usuario
+            logAction: function(action, details) {
+                console.log(`USER ACTION [${new Date().toISOString()}]: ${this.currentUser.name} (${this.currentUser.role}) - ${action}`, details);
+            },
+            
+            // Obtener información del usuario actual
+            getCurrentUser: function() {
+                return { ...this.currentUser };
+            }
+        };
+
+        // Sistema de Notificaciones
+        // En una implementación real, este módulo gestionaría notificaciones y alertas
+        const notificationSystem = {
+            // Cola de notificaciones
+            queue: [],
+            
+            // Añadir notificación a la cola
+            addNotification: function(message, type = 'info', duration = 3000) {
+                const notification = {
+                    id: Date.now(),
+                    message,
+                    type,
+                    duration
+                };
+                
+                this.queue.push(notification);
+                this.processQueue();
+                
+                return notification.id;
+            },
+            
+            // Procesar cola de notificaciones
+            processQueue: function() {
+                if (this.queue.length > 0 && !this.processing) {
+                    this.processing = true;
+                    this.showNextNotification();
+                }
+            },
+            
+            // Mostrar siguiente notificación
+            showNextNotification: function() {
+                if (this.queue.length === 0) {
+                    this.processing = false;
+                    return;
+                }
+                
+                const notification = this.queue.shift();
+                showNotification(notification.message, notification.type);
+                
+                setTimeout(() => {
+                    this.showNextNotification();
+                }, notification.duration + 300); // Añadir tiempo para la transición
+            }
+        };
+
+        // Sistema de Ayuda Contextual
+        // En una implementación real, este módulo gestionaría la ayuda en línea
+        const helpSystem = {
+            // Temas de ayuda
+            topics: {
+                dashboard: {
+                    title: 'Vista General del Tablero',
+                    content: 'El tablero poblacional ofrece una vista consolidada de la información demográfica de Curicó. Desde aquí puede acceder a diferentes visualizaciones y análisis mediante las pestañas superiores.'
+                },
+                filters: {
+                    title: 'Uso de Filtros',
+                    content: 'Los filtros en el panel lateral permiten personalizar la visualización de datos. Puede filtrar por año, centro de salud, sexo y grupos etarios. Una vez seleccionados los criterios, haga clic en "Aplicar Filtros".'
+                },
+                charts: {
+                    title: 'Interacción con Gráficos',
+                    content: 'Cada gráfico ofrece opciones interactivas. Puede pasar el cursor sobre los elementos para ver detalles, hacer clic en las leyendas para ocultar/mostrar series, y utilizar los botones de exportación y pantalla completa.'
+                },
+                reports: {
+                    title: 'Generación de Informes',
+                    content: 'Para generar informes predefinidos, seleccione un tipo de informe en el panel lateral y haga clic en "Generar Informe". Los informes incluyen análisis detallados y pueden ser exportados en diferentes formatos.'
+                },
+                export: {
+                    title: 'Exportación de Datos',
+                    content: 'Puede exportar datos y gráficos en diferentes formatos (Excel, PDF, CSV). Utilice el botón de exportación en la barra superior para exportar todo el tablero, o los botones individuales para exportar elementos específicos.'
+                }
+            },
+            
+            // Obtener ayuda sobre un tema específico
+            getHelpTopic: function(topic) {
+                return this.topics[topic] || {
+                    title: 'Ayuda General',
+                    content: 'Si necesita asistencia, utilice el botón de ayuda en la barra superior para acceder a la documentación completa.'
+                };
+            },
+            
+            // Mostrar tooltip de ayuda
+            showTooltip: function(element, topic) {
+                const helpTopic = this.getHelpTopic(topic);
+                const tooltip = document.createElement('div');
+                tooltip.className = 'help-tooltip';
+                tooltip.innerHTML = `<h4>${helpTopic.title}</h4><p>${helpTopic.content}</p>`;
+                
+                document.body.appendChild(tooltip);
+                
+                const rect = element.getBoundingClientRect();
+                tooltip.style.top = `${rect.bottom + 10}px`;
+                tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)}px`;
+                
+                setTimeout(() => {
+                    tooltip.style.opacity = '1';
+                }, 50);
+                
+                const removeTooltip = () => {
+                    tooltip.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(tooltip);
+                    }, 300);
+                    
+                    document.removeEventListener('click', handleOutsideClick);
+                };
+                
+                const handleOutsideClick = (e) => {
+                    if (!tooltip.contains(e.target) && e.target !== element) {
+                        removeTooltip();
+                    }
+                };
+                
+                document.addEventListener('click', handleOutsideClick);
+                
+                return removeTooltip;
+            }
+        };
+    </script>
+</body>
+</html>
