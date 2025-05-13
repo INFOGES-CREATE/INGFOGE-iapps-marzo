@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const IAAPS_CONFIG = {
     apiUrl: '/api/iaaps-chat',
     apiKey: document.querySelector('meta[name="iaaps-api-key"]')?.getAttribute('content') || '',
-    logoUrl: '/img/logo-salud-curico-mini.png',
+    logoUrl: 'images/logo2.png',
     colors: {
         primary: "rgb(46, 155, 97)",       // Verde principal
         primaryDark: "#2d7d54",            // Verde oscuro
@@ -32,7 +32,7 @@ const IAAPS_CONFIG = {
     reportHeader: {
         title: "Reporte IAAPS Curicó",
         subtitle: "Índices de Actividad de la Atención Primaria de Salud",
-        logo: "/img/logo-municipalidad.png"
+        logo: "images/logo2.png"
     }
 };
 
@@ -159,7 +159,7 @@ function createBotElements() {
         <i class="fas fa-comment-medical"></i>
         <span class="iaaps-badge">1</span>
     `;
-    button.setAttribute('aria-label', 'Abrir asistente IAAPS');
+    button.setAttribute('aria-label', 'Abrir asistente INFOGES');
     
     // 3. Ventana de chat
     const chatWindow = document.createElement('div');
@@ -172,8 +172,8 @@ function createBotElements() {
     header.className = 'iaaps-chat-header';
     header.innerHTML = `
         <div class="iaaps-header-title">
-            <img src="${IAAPS_CONFIG.logoUrl}" alt="Logo IAAPS" class="iaaps-logo">
-            <span>Asistente IAAPS Curicó</span>
+            <img src="images/logo2.png alt="Logo IAAPS" class="iaaps-logo">
+            <span>INFOGES Curicó</span>
         </div>
         <div class="iaaps-header-actions">
             <button id="iaaps-minimize-btn" class="iaaps-header-btn" aria-label="Minimizar">
@@ -334,7 +334,7 @@ function openChat() {
     
     // Si no hay mensajes, mostrar mensaje de bienvenida
     if (IAAPS_STATE.messages.length === 0) {
-        addBotMessage(`👋 Hola, soy el asistente IAAPS de Salud Curicó.
+        addBotMessage(`👋 Hola, soy el asistente INFOGES de Salud Curicó.
 
 Puedo ayudarte con:
 • Generación de reportes PDF/Excel por centro o comunal
@@ -3250,7 +3250,7 @@ function openDashboard() {
         <div class="iaaps-dashboard-container">
             <div class="iaaps-dashboard-header">
                 <div class="iaaps-dashboard-title">
-                    <img src="${IAAPS_CONFIG.logoUrl}" alt="Logo IAAPS">
+                    <img src="images/logo2.png" alt="Logo IAAPS">
                     <h1>Dashboard IAAPS Curicó</h1>
                 </div>
                 <div class="iaaps-dashboard-actions">

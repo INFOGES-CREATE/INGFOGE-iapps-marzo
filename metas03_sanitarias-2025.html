@@ -6526,18 +6526,38 @@ function exportarPDF(tipo) {
 
 
 /**
- * Función para exportar informes IAAPS a PDF con diseño profesional
+ * Función premium para exportar informes de Metas Sanitarias a PDF con diseño profesional
  * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
+ * @param {Object} opciones - Opciones adicionales de configuración
  */
-function exportarPDF(tipo) {
+function exportarPDF(tipo, opciones = {}) {
+    // Mostrar indicador de carga
     mostrarCargando(true);
     
+    // Configuración por defecto
+    const configuracion = {
+        orientacion: opciones.orientacion || 'horizontal', // 'horizontal' o 'vertical'
+        temaColores: opciones.temaColores || 'default', // 'default', 'pastel', 'contraste'
+        mostrarGraficos: opciones.mostrarGraficos !== undefined ? opciones.mostrarGraficos : true,
+        mostrarMiniResumen: opciones.mostrarMiniResumen !== undefined ? opciones.mostrarMiniResumen : true,
+        calidadGraficos: opciones.calidadGraficos || 2 // Factor de escala para gráficos (2 = alta calidad)
+    };
+    
+    // Pequeño retraso para permitir que la interfaz se actualice
     setTimeout(() => {
         try {
+            // Obtener la variable de datos (sea iaapsData o datosMetasSanitarias)
+            const datos = typeof datosMetasSanitarias !== 'undefined' ? datosMetasSanitarias : 
+                         typeof iaapsData !== 'undefined' ? iaapsData : null;
+                         
+            if (!datos) {
+                throw new Error("No se encontró la fuente de datos. Verifique que está disponible iaapsData o datosMetasSanitarias.");
+            }
+            
             // Inicialización del documento PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
-                orientation: 'portrait', // Cambiado a vertical
+                orientation: configuracion.orientacion === 'horizontal' ? 'landscape' : 'portrait',
                 unit: 'mm',
                 format: 'a4'
             });
@@ -6545,107 +6565,184 @@ function exportarPDF(tipo) {
             // Variables para el informe
             let nombreArchivo = '';
             let titulo = '';
-            let subtitulo = 'Reporte del Sistema IAAPS - Marzo 2025';
-            let datos = [];
+            let subtitulo = 'Informe de Metas Sanitarias - Marzo 2025';
+            let datos_procesados = [];
             
             // Dimensiones de la página
             const anchoPagina = doc.internal.pageSize.getWidth();
             const altoPagina = doc.internal.pageSize.getHeight();
             const margen = 15;
             
-            // Definir paleta de colores institucional (mejorada)
-            const colores = {
-                primario: [45, 116, 186],      // Azul institucional más vibrante
-                secundario: [46, 204, 113],    // Verde más saturado (indicador bueno)
-                alerta: [241, 196, 15],        // Amarillo más brillante (indicador en progreso)
-                peligro: [231, 76, 60],        // Rojo (indicador crítico)
-                textoOscuro: [44, 62, 80],     // Texto principal
-                textoClaro: [255, 255, 255],   // Texto sobre fondos oscuros
-                fondoClaro: [248, 249, 250]    // Fondo de secciones
-            };
+            // Definir paleta de colores premium según tema seleccionado
+            let colores = {};
+            
+            if (configuracion.temaColores === 'pastel') {
+                colores = {
+                    primario: [41, 128, 185],     // Azul suave
+                    secundario: [46, 204, 113],   // Verde menta
+                    alerta: [241, 196, 15],       // Amarillo soleado
+                    peligro: [231, 76, 60],       // Rojo coral
+                    textoOscuro: [44, 62, 80],    // Gris azulado oscuro
+                    textoClaro: [255, 255, 255],  // Blanco puro
+                    fondoClaro: [248, 249, 250],  // Gris muy claro
+                    acento: [155, 89, 182]        // Púrpura
+                };
+            } else if (configuracion.temaColores === 'contraste') {
+                colores = {
+                    primario: [52, 73, 94],       // Azul oscuro
+                    secundario: [39, 174, 96],    // Verde intenso
+                    alerta: [243, 156, 18],       // Naranja intenso
+                    peligro: [192, 57, 43],       // Rojo intenso
+                    textoOscuro: [33, 33, 33],    // Negro profundo
+                    textoClaro: [255, 255, 255],  // Blanco puro
+                    fondoClaro: [245, 245, 245],  // Gris muy claro
+                    acento: [142, 68, 173]        // Púrpura intenso
+                };
+            } else { // default - profesional de lujo
+                colores = {
+                    primario: [41, 128, 185],       // Azul profundo profesional
+                    secundario: [16, 172, 56],    // Verde empresarial vibrante
+                    alerta: [241, 196, 15],        // Amarillo señal vibrante
+                    peligro: [221, 44, 0],        // Rojo corporativo intenso
+                    textoOscuro: [51, 51, 51],    // Negro texto premium
+                    textoClaro: [255, 255, 255],  // Blanco puro
+                    fondoClaro: [250, 250, 250],  // Gris ultra claro
+                    acento: [102, 45, 145],       // Púrpura elegante
+                    dorado: [212, 175, 55],       // Dorado premium
+                    grisClaro: [240, 240, 240]    // Gris suave para alternar filas
+                };
+            }
+            
+            /**
+             * Función para recortar texto garantizando visibilidad completa
+             * @param {string} texto - Texto a recortar
+             * @param {number} longitud - Longitud máxima
+             * @returns {string} Texto recortado
+             */
+            function recortarTextoTabla(texto, longitud) {
+                if (!texto) return '';
+                if (texto.length <= longitud) return texto;
+                
+                // Recortar considerando palabras completas cuando sea posible
+                let resultado = texto.substring(0, longitud);
+                const ultimoEspacio = resultado.lastIndexOf(' ');
+                if (ultimoEspacio !== -1) {
+                    resultado = resultado.substring(0, ultimoEspacio);
+                }
+                return resultado + '...';
+            }
+            
+            /**
+             * Determina el estado del indicador basado en el porcentaje de cumplimiento
+             * @param {number} cumplimiento - Porcentaje de cumplimiento
+             * @returns {string} Estado: 'cumplido', 'parcial' o 'critico'
+             */
+            function calcularEstado(cumplimiento) {
+                if (cumplimiento >= 100) return 'cumplido';
+                if (cumplimiento >= 25) return 'parcial';
+                return 'critico';
+            }
+            
+            /**
+             * Obtiene el color correspondiente al estado
+             * @param {string} estado - Estado del indicador
+             * @returns {Array} Color RGB
+             */
+            function obtenerColorEstado(estado) {
+                switch (estado) {
+                    case 'cumplido': return colores.secundario;
+                    case 'parcial': return colores.alerta;
+                    case 'critico': return colores.peligro;
+                    default: return [255, 255, 255]; // Blanco por defecto
+                }
+            }
             
             // ======== PREPARACIÓN DE DATOS SEGÚN EL TIPO DE INFORME ========
             if (tipo === 'centro') {
                 // Datos para informe de centro
-                const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
+                const centro = datos.centros.find(c => c.codigo === currentCentro);
                 if (!centro) {
                     mostrarCargando(false);
                     mostrarNotificacion('Error: Centro no encontrado', 'error');
                     return;
                 }
                 
-                nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
+                nombreArchivo = `Metas_Sanitarias_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
                 titulo = `Centro de Salud: ${centro.nombre}`;
                 
                 // Datos de la tabla
-                iaapsData.indicadores.forEach(indicador => {
+                datos.indicadores.forEach(indicador => {
                     const resultado = indicador.resultados.find(r => r.centro === currentCentro);
                     if (!resultado) return;
                     
-                    datos.push({
-                        indicador: `${indicador.codigo} - ${recortarTexto(indicador.nombre, 40)}`,
+                    datos_procesados.push({
+                        indicador: `${indicador.codigo} - ${recortarTextoTabla(indicador.nombre, configuracion.orientacion === 'horizontal' ? 60 : 40)}`,
                         numerador: formatearNumero(resultado.numerador),
                         denominador: formatearNumero(resultado.denominador),
                         resultado: formatearValor(resultado.resultado, indicador.tipo),
                         meta: formatearValor(indicador.meta, indicador.tipo),
-                        cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+                        cumplimiento: resultado.cumplimiento.toFixed(2) + '%',
+                        estado: calcularEstado(resultado.cumplimiento)
                     });
                 });
                 
             } else if (tipo === 'indicador') {
                 // Datos para informe de indicador
-                const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
+                const indicador = datos.indicadores.find(i => i.codigo === currentIndicador);
                 if (!indicador) {
                     mostrarCargando(false);
                     mostrarNotificacion('Error: Indicador no encontrado', 'error');
                     return;
                 }
                 
-                nombreArchivo = `IAAPS_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
+                nombreArchivo = `Metas_Sanitarias_Indicador_${indicador.codigo.replace('.', '_')}_Marzo_2025.pdf`;
                 titulo = `Indicador: ${indicador.codigo}`;
                 subtitulo = `${indicador.nombre} - Marzo 2025`;
                 
                 // Datos de la tabla
-                iaapsData.centros.forEach(centro => {
+                datos.centros.forEach(centro => {
                     const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
                     if (!resultado) return;
                     
-                    datos.push({
-                        centro: centro.nombre,
+                    datos_procesados.push({
+                        centro: recortarTextoTabla(centro.nombre, configuracion.orientacion === 'horizontal' ? 50 : 35),
                         numerador: formatearNumero(resultado.numerador),
                         denominador: formatearNumero(resultado.denominador),
                         resultado: formatearValor(resultado.resultado, indicador.tipo),
                         meta: formatearValor(indicador.meta, indicador.tipo),
-                        cumplimiento: resultado.cumplimiento.toFixed(2) + '%'
+                        cumplimiento: resultado.cumplimiento.toFixed(2) + '%',
+                        estado: calcularEstado(resultado.cumplimiento)
                     });
                 });
                 
             } else if (tipo === 'comparativo') {
                 // Datos para informe comparativo
-                nombreArchivo = `IAAPS_Comparativo_Marzo_2025.pdf`;
-                titulo = `Informe Comparativo IAAPS`;
+                nombreArchivo = `Metas_Sanitarias_Comparativo_Marzo_2025.pdf`;
+                titulo = `Informe Comparativo de Metas Sanitarias`;
                 subtitulo = `Todos los Centros - Marzo 2025`;
                 
-                // Datos para tabla comparativa - formato especial
+                // Datos para tabla comparativa - formato optimizado
                 const datosTabulares = [];
                 
-                // Preparar encabezados de centros
+                // Preparar encabezados de centros - limitando caracteres para evitar solapamiento
                 const centrosHeader = ['Indicador', 'Meta', 'Comunal'];
-                iaapsData.centros.filter(c => c.codigo !== 'comunal').forEach(centro => {
-                    centrosHeader.push(centro.nombre);
+                datos.centros.filter(c => c.codigo !== 'comunal').forEach(centro => {
+                    let longitudMax = configuracion.orientacion === 'horizontal' ? 25 : 15;
+                    centrosHeader.push(recortarTextoTabla(centro.nombre, longitudMax));
                 });
                 
                 datosTabulares.push(centrosHeader);
                 
                 // Añadir datos para cada indicador
-                iaapsData.indicadores.forEach(indicador => {
+                datos.indicadores.forEach(indicador => {
+                    let longitudIndicador = configuracion.orientacion === 'horizontal' ? 50 : 35;
                     const fila = [
-                        `${indicador.codigo} - ${recortarTexto(indicador.nombre, 30)}`,
+                        `${indicador.codigo} - ${recortarTextoTabla(indicador.nombre, longitudIndicador)}`,
                         formatearValor(indicador.meta, indicador.tipo)
                     ];
                     
                     // Añadir datos para cada centro
-                    iaapsData.centros.forEach(centro => {
+                    datos.centros.forEach(centro => {
                         const resultado = indicador.resultados.find(r => r.centro === centro.codigo);
                         if (resultado) {
                             fila.push(resultado.cumplimiento.toFixed(2) + '%');
@@ -6657,395 +6754,373 @@ function exportarPDF(tipo) {
                     datosTabulares.push(fila);
                 });
                 
-                datos = datosTabulares;
+                datos_procesados = datosTabulares;
             }
             
-            // ============ FUNCIÓN PARA CREAR ENCABEZADO ============
+            // ============ FUNCIÓN PARA CREAR ENCABEZADO PREMIUM ============
             function agregarEncabezado(pagina) {
                 // Fondo del encabezado
                 doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                doc.rect(0, 0, anchoPagina, 22, 'F');
+                doc.rect(0, 0, anchoPagina, 18, 'F');
                 
-                // Línea decorativa
-                doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
-                doc.rect(0, 22, anchoPagina, 2, 'F');
+                // Línea decorativa dorada
+                doc.setFillColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                doc.rect(0, 18, anchoPagina, 1.5, 'F');
                 
                 // Logo
                 try {
-                    // Ruta relativa para web (ajustar según la estructura del proyecto)
+                    // Ruta relativa para web
                     const rutaLogo = './images/logo2.png';
-                    doc.addImage(rutaLogo, 'PNG', margen, 4, 15, 15);
+                    doc.addImage(rutaLogo, 'PNG', margen, 3, 12, 12);
                 } catch (e) {
                     console.warn('No se pudo cargar el logo:', e);
                     // Alternativa al logo
                     doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(12);
-                    doc.text('LOGO', margen + 5, 12);
+                    doc.setFontSize(10);
+                    doc.text('LOGO', margen + 3, 9);
                 }
                 
                 // Título del documento
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
+                doc.setFontSize(14);
                 doc.setFont(undefined, 'bold');
-                doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 10);
+                doc.text('SERVICIO DE SALUD CURICÓ', margen + 20, 9);
                 
                 // Subtítulo
-                doc.setFontSize(12);
+                doc.setFontSize(11);
                 doc.setFont(undefined, 'normal');
-                doc.text('Informe de Indicadores de Atención Primaria de Salud (IAAPS)', margen + 25, 17);
+                doc.text('Sistema de Monitoreo y Seguimiento de Metas Sanitarias', margen + 20, 15);
                 
-                // Número de página
-                doc.text(`Página ${pagina}`, anchoPagina - margen - 15, 10);
+                // Número de página con diseño premium
+                doc.setFillColor(colores.dorado[0], colores.dorado[1], colores.dorado[2], 0.8);
+                const textoNumPagina = `Página ${pagina}`;
+                const anchoNumPagina = doc.getTextWidth(textoNumPagina) + 10;
+                doc.roundedRect(anchoPagina - margen - anchoNumPagina, 3, anchoNumPagina, 8, 2, 2, 'F');
+                doc.setTextColor(0, 0, 0);
+                doc.text(textoNumPagina, anchoPagina - margen - 5, 9, { align: 'right' });
                 
-                // Retornar posición Y donde termina el encabezado
-                return 30;
-            }
-            
-            // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA ============
-            function agregarPiePagina() {
-                const alturaPie = 12;
-                const posY = altoPagina - alturaPie;
-                
-                // Fondo del pie de página
-                doc.setFillColor(colores.fondoClaro[0], colores.fondoClaro[1], colores.fondoClaro[2]);
-                doc.rect(0, posY, anchoPagina, alturaPie, 'F');
-                
-                // Línea superior
-                doc.setDrawColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                doc.setLineWidth(0.5);
-                doc.line(0, posY, anchoPagina, posY);
-                
-                // Texto del pie
-                doc.setTextColor(80, 80, 80);
-                doc.setFontSize(8);
-                doc.setFont(undefined, 'italic');
-                
-                // Información a mostrar en el pie de página
-                const fechaGen = new Date().toLocaleDateString('es-CL', {
+                // Fecha de generación
+                const fechaActual = new Date().toLocaleDateString('es-CL', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
                 });
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(9);
+                doc.text(`Generado: ${fechaActual}`, anchoPagina - margen - 5, 15, { align: 'right' });
                 
-                doc.text(`INFOGES Curicó - Dashboard de Control IAAPS - Generado el ${fechaGen}`, margen, posY + 5);
-                doc.text('Servicio de Salud Curicó - Dirección: Carmen N°560, Curicó', margen, posY + 9);
+                // Retornar posición Y donde termina el encabezado
+                return 24;
+            }
+            
+            // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA PREMIUM ============
+            function agregarPiePagina() {
+                const alturaPie = 10;
+                const posY = altoPagina - alturaPie;
+                
+                // Línea superior dorada
+                doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                doc.setLineWidth(0.5);
+                doc.line(margen, posY, anchoPagina - margen, posY);
+                
+                // Texto del pie
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'normal');
+                
+                // Información a mostrar en el pie de página
+                doc.text('Sistema de Monitoreo y Seguimiento de Metas Sanitarias', margen, posY + 5);
+                
+                // Agregar QR code estilizado para documentos premium (simulado)
+                try {
+                    // Si existe un código QR real, se podría utilizar aquí
+                    doc.setFillColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                    doc.roundedRect(anchoPagina - margen - 50, posY + 1, 8, 8, 1, 1, 'F');
+                } catch (e) {
+                    console.warn('No se pudo agregar el código QR');
+                }
                 
                 // Copyright y nota legal a la derecha
-                doc.text('Documento confidencial - Uso interno', anchoPagina - margen - 50, posY + 7);
+                doc.text('Documento oficial - Servicio de Salud Curicó', anchoPagina - margen - 5, posY + 5, { align: 'right' });
                 
                 return posY;
             }
             
-            // ============ FUNCIÓN PARA CREAR TABLA MANUAL ============
-            function crearTablaManual(datos, startY, columnas) {
-                // Función para dibujar celdas con color de fondo
-                function dibujarCelda(texto, x, y, ancho, colorFondo) {
+            // ============ FUNCIÓN PARA CREAR TABLA PREMIUM ============
+            function crearTablaPremium(datos, startY, tipoTabla) {
+                // Función para dibujar celdas con color de fondo y bordes redondeados
+                function dibujarCelda(texto, x, y, ancho, alto, colorFondo, alineacion = 'left', negrita = false, header = false) {
+                    // Dibujar fondo si se especifica un color
                     if (colorFondo) {
-                        doc.setFillColor(colorFondo[0], colorFondo[1], colorFondo[2], colorFondo[3] || 1);
-                        doc.rect(x, y - 5, ancho, 7, 'F');
+                        if (header) {
+                            // Fondo para encabezados
+                            doc.setFillColor(colorFondo[0], colorFondo[1], colorFondo[2]);
+                            doc.rect(x, y - (alto - 2), ancho, alto, 'F');
+                        } else {
+                            // Fondo para datos con transparencia
+                            doc.setFillColor(colorFondo[0], colorFondo[1], colorFondo[2], colorFondo[3] || 0.2);
+                            doc.rect(x, y - (alto - 2), ancho, alto, 'F');
+                        }
                     }
-                    doc.text(texto, x + 2, y);
+                    
+                    // Establecer estilo de fuente
+                    if (negrita) {
+                        doc.setFont(undefined, 'bold');
+                    } else {
+                        doc.setFont(undefined, 'normal');
+                    }
+                    
+                    // Ajustar posición X según alineación
+                    let posX = x + 2; // Default: izquierda
+                    if (alineacion === 'center') {
+                        posX = x + (ancho / 2);
+                        doc.text(texto, posX, y, { align: 'center' });
+                    } else if (alineacion === 'right') {
+                        posX = x + ancho - 2;
+                        doc.text(texto, posX, y, { align: 'right' });
+                    } else {
+                        doc.text(texto, posX, y);
+                    }
                 }
                 
                 // Configuración de la tabla
                 const margenTabla = margen;
                 const anchoDisponible = anchoPagina - (2 * margenTabla);
+                const altoCelda = 8; // Altura uniforme para todas las celdas
                 let posY = startY;
                 
-                // Definir anchos de columna según el tipo de informe
+                // Definir anchos de columna según el tipo de tabla y orientación
                 let anchoColumnas = [];
+                let encabezados = [];
                 
-                if (tipo === 'centro') {
+                if (tipoTabla === 'centro') {
                     // Para informe de centro
-                    anchoColumnas = [
-                        anchoDisponible * 0.40, // Indicador
-                        anchoDisponible * 0.12, // Numerador
-                        anchoDisponible * 0.12, // Denominador
-                        anchoDisponible * 0.12, // Resultado
-                        anchoDisponible * 0.12, // Meta
-                        anchoDisponible * 0.12  // Cumplimiento
-                    ];
-                    
-                    // Encabezados
-                    const encabezados = ['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
-                    let posX = margenTabla;
-                    
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                    
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
-                    
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
-                    
-                    // Limitar a 20 filas por página
-                    const filasPorPagina = 15; // Reducido por orientación vertical
-                    const paginasTotales = Math.ceil(datos.length / filasPorPagina);
-                    
-                    for (let pagina = 0; pagina < paginasTotales; pagina++) {
-                        if (pagina > 0) {
-                            // Nueva página
-                            doc.addPage();
-                            posY = agregarEncabezado(pagina + 2) + 10;
-                            agregarPiePagina();
-                            
-                            // Repetir encabezados
-                            posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
-                            doc.setFont(undefined, 'bold');
-                            
-                            encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
-                                posX += anchoColumnas[index];
-                            });
-                            
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                        
-                        // Filas para esta página
-                        const inicio = pagina * filasPorPagina;
-                        const fin = Math.min((pagina + 1) * filasPorPagina, datos.length);
-                        
-                        for (let i = inicio; i < fin; i++) {
-                            const dato = datos[i];
-                            posX = margenTabla;
-                            
-                            // Fila con fondo alternado
-                            if (i % 2 === 1) {
-                                doc.setFillColor(245, 245, 250);
-                                doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            }
-                            
-                            // Indicador
-                            doc.text(dato.indicador, posX + 2, posY);
-                            posX += anchoColumnas[0];
-                            
-                            // Numerador
-                            doc.text(dato.numerador, posX + 2, posY);
-                            posX += anchoColumnas[1];
-                            
-                            // Denominador
-                            doc.text(dato.denominador, posX + 2, posY);
-                            posX += anchoColumnas[2];
-                            
-                            // Resultado
-                            doc.text(dato.resultado, posX + 2, posY);
-                            posX += anchoColumnas[3];
-                            
-                            // Meta
-                            doc.text(dato.meta, posX + 2, posY);
-                            posX += anchoColumnas[4];
-                            
-                            // Cumplimiento (con color según valor)
-                            const cumplimiento = parseFloat(dato.cumplimiento);
-                            let colorCumplimiento;
-                            
-                            // Colores más diferenciados y vibrantes para el estado
-                            if (cumplimiento >= 100) {
-                                colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                            } else if (cumplimiento >= 90) {
-                                colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                            } else {
-                                colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                            }
-                            
-                            dibujarCelda(dato.cumplimiento, posX, posY, anchoColumnas[5], colorCumplimiento);
-                            
-                            posY += 8;
-                        }
+                    if (configuracion.orientacion === 'horizontal') {
+                        anchoColumnas = [
+                            anchoDisponible * 0.43, // Indicador
+                            anchoDisponible * 0.11, // Numerador
+                            anchoDisponible * 0.11, // Denominador
+                            anchoDisponible * 0.11, // Resultado
+                            anchoDisponible * 0.11, // Meta
+                            anchoDisponible * 0.13  // Cumplimiento
+                        ];
+                    } else {
+                        anchoColumnas = [
+                            anchoDisponible * 0.40, // Indicador
+                            anchoDisponible * 0.12, // Numerador
+                            anchoDisponible * 0.12, // Denominador
+                            anchoDisponible * 0.12, // Resultado
+                            anchoDisponible * 0.12, // Meta
+                            anchoDisponible * 0.12  // Cumplimiento
+                        ];
                     }
-                } else if (tipo === 'indicador') {
-                    // Para informe de indicador - similar a 'centro' pero con diferentes encabezados
-                    anchoColumnas = [
-                        anchoDisponible * 0.30, // Centro
-                        anchoDisponible * 0.14, // Numerador
-                        anchoDisponible * 0.14, // Denominador
-                        anchoDisponible * 0.14, // Resultado
-                        anchoDisponible * 0.14, // Meta
-                        anchoDisponible * 0.14  // Cumplimiento
-                    ];
                     
-                    // Encabezados
-                    const encabezados = ['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
-                    let posX = margenTabla;
+                    encabezados = ['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
                     
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
+                } else if (tipoTabla === 'indicador') {
+                    // Para informe de indicador
+                    if (configuracion.orientacion === 'horizontal') {
+                        anchoColumnas = [
+                            anchoDisponible * 0.40, // Centro
+                            anchoDisponible * 0.12, // Numerador
+                            anchoDisponible * 0.12, // Denominador
+                            anchoDisponible * 0.12, // Resultado
+                            anchoDisponible * 0.12, // Meta
+                            anchoDisponible * 0.12  // Cumplimiento
+                        ];
+                    } else {
+                        anchoColumnas = [
+                            anchoDisponible * 0.35, // Centro
+                            anchoDisponible * 0.13, // Numerador
+                            anchoDisponible * 0.13, // Denominador
+                            anchoDisponible * 0.13, // Resultado
+                            anchoDisponible * 0.13, // Meta
+                            anchoDisponible * 0.13  // Cumplimiento
+                        ];
+                    }
                     
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
+                    encabezados = ['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
                     
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
+                } else if (tipoTabla === 'comparativo') {
+                    // Para tabla comparativa
+                    const numColumnas = datos[0].length;
                     
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
+                    // Darle más espacio a la primera columna (Indicador)
+                    const porcentajePrimeraColumna = configuracion.orientacion === 'horizontal' ? 0.28 : 0.25;
+                    anchoColumnas = [anchoDisponible * porcentajePrimeraColumna]; // Primera columna - Indicador
                     
-                    datos.forEach((dato, i) => {
-                        posX = margenTabla;
+                    // Distribuir el resto de espacio entre las demás columnas
+                    const espacioRestante = anchoDisponible - anchoColumnas[0];
+                    const anchoPorColumna = espacioRestante / (numColumnas - 1);
+                    
+                    for (let i = 1; i < numColumnas; i++) {
+                        anchoColumnas.push(anchoPorColumna);
+                    }
+                    
+                    encabezados = datos[0]; // La primera fila contiene los encabezados
+                }
+                
+                // Configuración de estilo para tabla premium
+                const estiloTabla = {
+                    header: {
+                        colorFondo: colores.primario,
+                        colorTexto: colores.textoClaro,
+                        fontSize: 10,
+                        negrita: true
+                    },
+                    body: {
+                        colorTexto: colores.textoOscuro,
+                        fontSize: 9,
+                        filaAlternaColorFondo: colores.grisClaro
+                    },
+                    estado: {
+                        fontSize: 9,
+                        negrita: true
+                    }
+                };
+                
+                // Dibujar encabezados
+                let posX = margenTabla;
+                
+                // Fondo para encabezados
+                doc.setFillColor(estiloTabla.header.colorFondo[0], estiloTabla.header.colorFondo[1], estiloTabla.header.colorFondo[2]);
+                doc.rect(margenTabla, posY - (altoCelda - 2), anchoDisponible, altoCelda, 'F');
+                
+                // Texto de encabezados
+                doc.setTextColor(estiloTabla.header.colorTexto[0], estiloTabla.header.colorTexto[1], estiloTabla.header.colorTexto[2]);
+                doc.setFontSize(estiloTabla.header.fontSize);
+                doc.setFont(undefined, 'bold');
+                
+                encabezados.forEach((encabezado, index) => {
+                    dibujarCelda(encabezado, posX, posY, anchoColumnas[index], altoCelda, null, 'center', true, true);
+                    posX += anchoColumnas[index];
+                });
+                
+                // Iniciar dibujo de datos
+                posY += altoCelda + 2;
+                doc.setTextColor(estiloTabla.body.colorTexto[0], estiloTabla.body.colorTexto[1], estiloTabla.body.colorTexto[2]);
+                doc.setFontSize(estiloTabla.body.fontSize);
+                doc.setFont(undefined, 'normal');
+                
+                // Calcular filas por página considerando el alto de página real
+                const espacioDisponible = altoPagina - posY - 15; // Espacio para pie de página
+                const filasPorPagina = Math.floor(espacioDisponible / (altoCelda + 1));
+                
+                // Función para dibujar una fila de datos
+                function dibujarFilaDatos(fila, indiceFila) {
+                    posX = margenTabla;
+                    
+                    // Fondo alternado para mejorar legibilidad
+                    if (indiceFila % 2 === 1) {
+                        doc.setFillColor(
+                            estiloTabla.body.filaAlternaColorFondo[0], 
+                            estiloTabla.body.filaAlternaColorFondo[1], 
+                            estiloTabla.body.filaAlternaColorFondo[2]
+                        );
+                        doc.rect(margenTabla, posY - (altoCelda - 2), anchoDisponible, altoCelda, 'F');
+                    }
+                    
+                    // Dibujar los datos según el tipo de tabla
+                    if (tipoTabla === 'centro' || tipoTabla === 'indicador') {
+                        // Determinar qué propiedades leer según el tipo
+                        const propIndicador = tipoTabla === 'centro' ? 'indicador' : 'centro';
                         
-                        // Fila con fondo alternado
-                        if (i % 2 === 1) {
-                            doc.setFillColor(245, 245, 250);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                        }
-                        
-                        // Centro
-                        doc.text(dato.centro, posX + 2, posY);
+                        // Primera columna
+                        dibujarCelda(fila[propIndicador], posX, posY, anchoColumnas[0], altoCelda);
                         posX += anchoColumnas[0];
                         
-                        // Numerador
-                        doc.text(dato.numerador, posX + 2, posY);
+                        // Numerador (alineado a la derecha)
+                        dibujarCelda(fila.numerador, posX, posY, anchoColumnas[1], altoCelda, null, 'right');
                         posX += anchoColumnas[1];
                         
-                        // Denominador
-                        doc.text(dato.denominador, posX + 2, posY);
+                        // Denominador (alineado a la derecha)
+                        dibujarCelda(fila.denominador, posX, posY, anchoColumnas[2], altoCelda, null, 'right');
                         posX += anchoColumnas[2];
                         
-                        // Resultado
-                        doc.text(dato.resultado, posX + 2, posY);
+                        // Resultado (alineado a la derecha)
+                        dibujarCelda(fila.resultado, posX, posY, anchoColumnas[3], altoCelda, null, 'right');
                         posX += anchoColumnas[3];
                         
-                        // Meta
-                        doc.text(dato.meta, posX + 2, posY);
+                        // Meta (alineado a la derecha)
+                        dibujarCelda(fila.meta, posX, posY, anchoColumnas[4], altoCelda, null, 'right');
                         posX += anchoColumnas[4];
                         
-                        // Cumplimiento (con color según valor)
-                        const cumplimiento = parseFloat(dato.cumplimiento);
-                        let colorCumplimiento;
-                        
-                        if (cumplimiento >= 100) {
-                            colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                        } else if (cumplimiento >= 90) {
-                            colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                        } else {
-                            colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                        }
-                        
-                        dibujarCelda(dato.cumplimiento, posX, posY, anchoColumnas[5], colorCumplimiento);
-                        
-                        posY += 8;
-                        
-                        // Si hay demasiadas filas, pasar a nueva página
-                        if (posY > altoPagina - 30 && i < datos.length - 1) {
-                            doc.addPage();
-                            posY = agregarEncabezado(doc.internal.getNumberOfPages()) + 10;
-                            agregarPiePagina();
+                        // Fondo de la celda
+const bg = obtenerColorEstado(fila.estado);
+doc.setFillColor(bg[0], bg[1], bg[2], 0.2);
+doc.rect(posX, posY - (altoCelda - 2), anchoColumnas[5], altoCelda, 'F');
+
+// Texto en blanco centrado
+doc.setTextColor(255, 255, 255);
+doc.setFont(undefined, 'bold');
+doc.text(
+  fila.cumplimiento,
+  posX + anchoColumnas[5] / 2,
+  posY,
+  { align: 'center' }
+);
+
+// y luego restauras tu color de texto por defecto para las siguientes celdas
+doc.setTextColor(...colores.textoOscuro);
+doc.setFont(undefined, 'normal');
+
+                    } else if (tipoTabla === 'comparativo') {
+                        // Para tabla comparativa - datos tabulares
+                        fila.forEach((celda, j) => {
+                            // Alineación según tipo de columna
+                            let alineacion = j === 0 ? 'left' : 'center';
                             
-                            // Repetir encabezados
-                            posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
+                            // Color para células de cumplimiento (columnas >= 2)
+                            let colorCelda = null;
+                            let esNegrita = false;
                             
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
-                            doc.setFont(undefined, 'bold');
+                            if (j >= 2 && celda !== '-' && celda.includes('%')) {
+                                const cumplimiento = parseFloat(celda);
+                                let estado = calcularEstado(cumplimiento);
+                                colorCelda = obtenerColorEstado(estado);
+                                esNegrita = true;
+                            }
                             
-                            encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
-                                posX += anchoColumnas[index];
-                            });
-                            
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                    });
-                } else if (tipo === 'comparativo') {
-                    // Para informe comparativo - estructura específica con datos tabulares
-                    const encabezados = datos[0];
-                    const filasDatos = datos.slice(1);
-                    
-                    // Calcular anchos de columna
-                    const numColumnas = encabezados.length;
-                    const anchoPorColumna = anchoDisponible / numColumnas;
-                    
-                    // Ajustar para indicador y meta
-                    anchoColumnas = Array(numColumnas).fill(anchoPorColumna);
-                    anchoColumnas[0] = anchoDisponible * 0.35; // Indicador - mayor espacio en vertical
-                    anchoColumnas[1] = anchoDisponible * 0.15; // Meta
-                    
-                    // Redistribuir el espacio restante para los centros
-                    const espacioRestante = anchoDisponible - anchoColumnas[0] - anchoColumnas[1];
-                    const anchoCentros = espacioRestante / (numColumnas - 2);
-                    
-                    for (let i = 2; i < numColumnas; i++) {
-                        anchoColumnas[i] = anchoCentros;
+                            dibujarCelda(celda, posX, posY, anchoColumnas[j], altoCelda, colorCelda, alineacion, esNegrita);
+                            posX += anchoColumnas[j];
+                        });
                     }
                     
-                    // Encabezados
-                    let posX = margenTabla;
+                    return posY + altoCelda + 1; // Retornar la nueva posición Y
+                }
+                
+                // Procesar filas según el tipo de tabla
+                if (tipoTabla === 'comparativo') {
+                    // Ignorar primera fila (encabezados) para tabla comparativa
+                    const filasDatos = datos.slice(1);
                     
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                    
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
-                    
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
-                    
-                    // Limitar filas por página
-                    const filasPorPagina = 15; // Reducido por orientación vertical
+                    // Calcular total de páginas necesarias
                     const paginasTotales = Math.ceil(filasDatos.length / filasPorPagina);
                     
                     for (let pagina = 0; pagina < paginasTotales; pagina++) {
                         if (pagina > 0) {
                             // Nueva página
                             doc.addPage();
-                            posY = agregarEncabezado(pagina + 2) + 10;
+                            posY = agregarEncabezado(pagina + 2) + 6;
                             agregarPiePagina();
                             
                             // Repetir encabezados
                             posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
+                            doc.setFillColor(estiloTabla.header.colorFondo[0], estiloTabla.header.colorFondo[1], estiloTabla.header.colorFondo[2]);
+                            doc.rect(margenTabla, posY - (altoCelda - 2), anchoDisponible, altoCelda, 'F');
                             
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
+                            doc.setTextColor(estiloTabla.header.colorTexto[0], estiloTabla.header.colorTexto[1], estiloTabla.header.colorTexto[2]);
+                            doc.setFontSize(estiloTabla.header.fontSize);
                             doc.setFont(undefined, 'bold');
                             
                             encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
+                                dibujarCelda(encabezado, posX, posY, anchoColumnas[index], altoCelda, null, 'center', true, true);
                                 posX += anchoColumnas[index];
                             });
                             
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
+                            posY += altoCelda + 2;
+                            doc.setTextColor(estiloTabla.body.colorTexto[0], estiloTabla.body.colorTexto[1], estiloTabla.body.colorTexto[2]);
+                            doc.setFontSize(estiloTabla.body.fontSize);
                             doc.setFont(undefined, 'normal');
                         }
                         
@@ -7054,148 +7129,150 @@ function exportarPDF(tipo) {
                         const fin = Math.min((pagina + 1) * filasPorPagina, filasDatos.length);
                         
                         for (let i = inicio; i < fin; i++) {
-                            const fila = filasDatos[i];
+                            posY = dibujarFilaDatos(filasDatos[i], i);
+                        }
+                    }
+                } else {
+                    // Para tablas de centro e indicador
+                    // Calcular total de páginas necesarias
+                    const paginasTotales = Math.ceil(datos.length / filasPorPagina);
+                    
+                    for (let pagina = 0; pagina < paginasTotales; pagina++) {
+                        if (pagina > 0) {
+                            // Nueva página
+                            doc.addPage();
+                            posY = agregarEncabezado(pagina + 2) + 6;
+                            agregarPiePagina();
+                            
+                            // Repetir encabezados
                             posX = margenTabla;
+                            doc.setFillColor(estiloTabla.header.colorFondo[0], estiloTabla.header.colorFondo[1], estiloTabla.header.colorFondo[2]);
+                            doc.rect(margenTabla, posY - (altoCelda - 2), anchoDisponible, altoCelda, 'F');
                             
-                            // Fila con fondo alternado
-                            if (i % 2 === 1) {
-                                doc.setFillColor(245, 245, 250);
-                                doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            }
+                            doc.setTextColor(estiloTabla.header.colorTexto[0], estiloTabla.header.colorTexto[1], estiloTabla.header.colorTexto[2]);
+                            doc.setFontSize(estiloTabla.header.fontSize);
+                            doc.setFont(undefined, 'bold');
                             
-                            // Recorrer cada columna de la fila
-                            fila.forEach((celda, j) => {
-                                // Para las columnas de cumplimiento (excepto indicador y meta)
-                                if (j >= 2 && celda !== '-' && celda.includes('%')) {
-                                    const cumplimiento = parseFloat(celda);
-                                    let colorCumplimiento;
-                                    
-                                    if (cumplimiento >= 100) {
-                                        colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                                    } else if (cumplimiento >= 90) {
-                                        colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                                    } else {
-                                        colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                                    }
-                                    
-                                    dibujarCelda(celda, posX, posY, anchoColumnas[j], colorCumplimiento);
-                                } else {
-                                    // Texto normal para otras columnas
-                                    doc.text(celda, posX + 2, posY);
-                                }
-                                
-                                posX += anchoColumnas[j];
+                            encabezados.forEach((encabezado, index) => {
+                                dibujarCelda(encabezado, posX, posY, anchoColumnas[index], altoCelda, null, 'center', true, true);
+                                posX += anchoColumnas[index];
                             });
                             
-                            posY += 8;
+                            posY += altoCelda + 2;
+                            doc.setTextColor(estiloTabla.body.colorTexto[0], estiloTabla.body.colorTexto[1], estiloTabla.body.colorTexto[2]);
+                            doc.setFontSize(estiloTabla.body.fontSize);
+                            doc.setFont(undefined, 'normal');
+                        }
+                        
+                        // Filas para esta página
+                        const inicio = pagina * filasPorPagina;
+                        const fin = Math.min((pagina + 1) * filasPorPagina, datos.length);
+                        
+                        for (let i = inicio; i < fin; i++) {
+                            posY = dibujarFilaDatos(datos[i], i);
                         }
                     }
                 }
                 
-                return posY + 10; // Retornar la posición Y final
+                return posY + 5; // Retornar la posición Y final con margen adicional
             }
             
-            // ============ INICIAR CONSTRUCCIÓN DEL PDF ============
-            // Primera página - Portada
-            let posY = agregarEncabezado(1);
-            agregarPiePagina();
-            
-            // Título del informe
-            posY += 15;
-            doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-            doc.setFontSize(24);
-            doc.setFont(undefined, 'bold');
-            doc.text(titulo, anchoPagina / 2, posY, { align: 'center' });
-            
-            // Subtítulo
-            posY += 10;
-            doc.setTextColor(80, 80, 80);
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'normal');
-            doc.text(subtitulo, anchoPagina / 2, posY, { align: 'center' });
-            
-            // Fecha de generación
-            posY += 8;
-            doc.setFontSize(12);
-            doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            })}`, anchoPagina / 2, posY, { align: 'center' });
-            
-            // Línea separadora
-            posY += 10;
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.5);
-            doc.line(margen, posY, anchoPagina - margen, posY);
-            
-            // Descripción del informe
-            posY += 10;
-            doc.setFontSize(12);
-            
-            let descripcion = '';
-            if (tipo === 'centro') {
-                const centro = iaapsData.centros.find(c => c.codigo === currentCentro);
-                descripcion = `Este informe presenta el cumplimiento de los indicadores IAAPS para el centro "${centro.nombre}" durante el mes de Marzo de 2025. El informe incluye el detalle de cada indicador con sus respectivos resultados, metas y nivel de cumplimiento.`;
-            } else if (tipo === 'indicador') {
-                const indicador = iaapsData.indicadores.find(i => i.codigo === currentIndicador);
-                descripcion = `Este informe presenta el comportamiento del indicador "${indicador.nombre}" (${indicador.codigo}) en todos los centros de salud durante el mes de Marzo de 2025. Se incluye el detalle para cada centro y su nivel de cumplimiento respecto a la meta establecida.`;
-            } else {
-                descripcion = `Este informe comparativo muestra el cumplimiento de todos los indicadores IAAPS para todos los centros de salud durante el mes de Marzo de 2025. La tabla permite visualizar y comparar el desempeño de cada centro respecto a cada indicador.`;
+            // ============ FUNCIÓN PARA CREAR RESUMEN ESTADÍSTICO ============
+            function crearResumenEstadistico(datos, posY) {
+                if (!configuracion.mostrarMiniResumen) return posY;
+                
+                // Añadir título de la sección
+                doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.setFontSize(14);
+                doc.setFont(undefined, 'bold');
+                doc.text('RESUMEN ESTADÍSTICO', margen, posY);
+                
+                posY += 8;
+                
+                // Para centro e indicador, calcular estadísticas relevantes
+                if (tipo === 'centro' || tipo === 'indicador') {
+                    let totalCumplidos = 0;
+                    let totalParciales = 0;
+                    let totalCriticos = 0;
+                    
+                    datos.forEach(item => {
+                        if (item.estado === 'cumplido') totalCumplidos++;
+                        else if (item.estado === 'parcial') totalParciales++;
+                        else totalCriticos++;
+                    });
+                    
+                    const totalIndicadores = datos.length;
+                    
+                    // Calcular cumplimiento general
+                    const porcentajeCumplidos = (totalCumplidos / totalIndicadores * 100).toFixed(1);
+                    const porcentajeParciales = (totalParciales / totalIndicadores * 100).toFixed(1);
+                    const porcentajeCriticos = (totalCriticos / totalIndicadores * 100).toFixed(1);
+                    
+                    // Crear gráfico de barras pequeño (simulado)
+                    const altoGrafico = 15;
+                    const anchoGrafico = 120;
+                    const x = margen;
+                    const y = posY;
+                    
+                    // Fondo
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(x, y, anchoGrafico, altoGrafico, 'F');
+                    
+                    // Barras
+                    let acumulado = 0;
+                    
+                    // Barra de cumplidos
+                    if (totalCumplidos > 0) {
+                        const anchoCumplidos = (totalCumplidos / totalIndicadores) * anchoGrafico;
+                        doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
+                        doc.rect(x + acumulado, y, anchoCumplidos, altoGrafico, 'F');
+                        acumulado += anchoCumplidos;
+                    }
+                    
+                    // Barra de parciales
+                    if (totalParciales > 0) {
+                        const anchoParciales = (totalParciales / totalIndicadores) * anchoGrafico;
+                        doc.setFillColor(colores.alerta[0], colores.alerta[1], colores.alerta[2]);
+                        doc.rect(x + acumulado, y, anchoParciales, altoGrafico, 'F');
+                        acumulado += anchoParciales;
+                    }
+                    
+                    // Barra de críticos
+                    if (totalCriticos > 0) {
+                        const anchoCriticos = (totalCriticos / totalIndicadores) * anchoGrafico;
+                        doc.setFillColor(colores.peligro[0], colores.peligro[1], colores.peligro[2]);
+                        doc.rect(x + acumulado, y, anchoCriticos, altoGrafico, 'F');
+                    }
+                    
+                    // Añadir texto de resumen
+                    doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'normal');
+                    
+                    const textoResumen = tipo === 'centro' ? 
+                        `Cumplimiento general: De ${totalIndicadores} indicadores, ` +
+                        `${totalCumplidos} cumplidos (${porcentajeCumplidos}%), ` +
+                        `${totalParciales} parciales (${porcentajeParciales}%) y ` +
+                        `${totalCriticos} críticos (${porcentajeCriticos}%).` :
+                        `Cumplimiento por centro: De ${totalIndicadores} centros, ` +
+                        `${totalCumplidos} cumplen la meta (${porcentajeCumplidos}%), ` +
+                        `${totalParciales} parciales (${porcentajeParciales}%) y ` +
+                        `${totalCriticos} críticos (${porcentajeCriticos}%).`;
+                    
+                    const lineasResumen = doc.splitTextToSize(textoResumen, anchoPagina - margen * 2 - anchoGrafico - 10);
+                    doc.text(lineasResumen, x + anchoGrafico + 10, y + 5);
+                    
+                    posY += Math.max(altoGrafico + 5, lineasResumen.length * 5 + 5);
+                }
+                
+                return posY + 10;
             }
             
-            // Texto informativo
-            const lineasDescripcion = doc.splitTextToSize(descripcion, anchoPagina - 2 * margen);
-            doc.text(lineasDescripcion, margen, posY);
-            
-            // Leyenda de colores para estados
-            posY += 25;
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text("Leyenda de estados:", margen, posY);
-            posY += 8;
-            doc.setFont(undefined, 'normal');
-            
-            // Cumplido
-            doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Cumplido (≥ 100%)", margen + 20, posY);
-            
-            // Parcial
-            posY += 10;
-            doc.setFillColor(colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Parcial (90-99%)", margen + 20, posY);
-            
-            // Crítico
-            posY += 10;
-            doc.setFillColor(colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Crítico (< 90%)", margen + 20, posY);
-            
-            // ============ PÁGINA DE TABLA DE DATOS ============
-            // Añadir nueva página para la tabla
-            doc.addPage();
-            posY = agregarEncabezado(2);
-            agregarPiePagina();
-            
-            // Título de la sección
-            posY += 10;
-            doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-            doc.setFontSize(16);
-            doc.setFont(undefined, 'bold');
-            doc.text('RESULTADOS DETALLADOS', anchoPagina / 2, posY, { align: 'center' });
-            
-            // Crear tabla manual
-            posY += 10;
-            const posYFinTabla = crearTablaManual(datos, posY);
-            
-            // ============ PÁGINA DE GRÁFICOS ============
-            // Capturar y añadir gráficos si existen
-            try {
+            // ============ FUNCIÓN PARA CREAR PÁGINA DE GRÁFICOS PREMIUM ============
+            function crearPaginaGraficos() {
+                if (!configuracion.mostrarGraficos) return;
+                
                 // Verificar si hay algún gráfico para el informe actual
-                let hayGraficos = false;
                 let graficos = [];
                 
                 if (tipo === 'centro') {
@@ -7205,97 +7282,443 @@ function exportarPDF(tipo) {
                     if (graficoEvolucion) {
                         graficos.push({
                             elemento: graficoEvolucion,
-                            titulo: 'Evolución Mensual',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            titulo: 'Evolución Mensual de Cumplimiento de Metas',
+                            descripcion: 'Muestra el avance mensual del cumplimiento de cada indicador, permitiendo identificar tendencias y patrones a lo largo del tiempo.'
                         });
-                        hayGraficos = true;
                     }
                     
                     if (graficoDistribucion) {
                         graficos.push({
                             elemento: graficoDistribucion,
                             titulo: 'Distribución por Tipo de Indicador',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            descripcion: 'Presenta la distribución de indicadores según su categoría y nivel de cumplimiento, facilitando la identificación de áreas de fortaleza y oportunidad.'
                         });
-                        hayGraficos = true;
                     }
                 } else if (tipo === 'indicador') {
                     const graficoComparativo = document.getElementById('comparativoIndicadorChart');
                     if (graficoComparativo) {
                         graficos.push({
                             elemento: graficoComparativo,
-                            titulo: 'Comparativo Entre Centros',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            titulo: 'Comparación de Resultados por Centro',
+                            descripcion: 'Compara el desempeño de todos los centros para este indicador específico, permitiendo identificar las mejores prácticas y centros que requieren apoyo.'
                         });
-                        hayGraficos = true;
+                    }
+                    
+                    // Buscar gráfico de tendencia si existe
+                    const graficoTendencia = document.getElementById('tendenciaIndicadorChart');
+                    if (graficoTendencia) {
+                        graficos.push({
+                            elemento: graficoTendencia,
+                            titulo: 'Tendencia del Indicador (Últimos 6 meses)',
+                            descripcion: 'Muestra la evolución del indicador durante los últimos 6 meses, permitiendo analizar su comportamiento y proyectar tendencias futuras.'
+                        });
                     }
                 } else if (tipo === 'comparativo') {
                     const graficoComparativo = document.getElementById('comparativoChart');
                     if (graficoComparativo) {
                         graficos.push({
                             elemento: graficoComparativo,
-                            titulo: 'Cumplimiento por Categoría y Centro',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 90
+                            titulo: 'Comparación de Cumplimiento por Centro y Categoría',
+                            descripcion: 'Proporciona una visión general del desempeño de todos los centros en todas las categorías de indicadores, facilitando la comparación de resultados entre centros.'
                         });
-                        hayGraficos = true;
+                    }
+                    
+                    // Buscar gráfico de ranking si existe
+                    const graficoRanking = document.getElementById('rankingCentrosChart');
+                    if (graficoRanking) {
+                        graficos.push({
+                            elemento: graficoRanking,
+                            titulo: 'Ranking de Centros por Cumplimiento Global',
+                            descripcion: 'Presenta el ranking de centros según su desempeño global en el cumplimiento de las metas sanitarias, destacando los mejores resultados y áreas de mejora.'
+                        });
                     }
                 }
                 
                 // Si hay gráficos, crear una página para ellos
-                if (hayGraficos) {
+                if (graficos.length > 0) {
                     doc.addPage();
-                    posY = agregarEncabezado(3);
+                    let posY = agregarEncabezado(doc.internal.getNumberOfPages()) + 5;
                     agregarPiePagina();
                     
                     // Título de la sección
-                    posY += 10;
                     doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
                     doc.setFontSize(16);
                     doc.setFont(undefined, 'bold');
                     doc.text('VISUALIZACIÓN GRÁFICA', anchoPagina / 2, posY, { align: 'center' });
                     
-                    // Agregar cada gráfico
-                    posY += 15;
+                    // Línea decorativa dorada
+                    posY += 5;
+                    doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                    doc.setLineWidth(0.5);
+                    doc.line(anchoPagina / 4, posY, (anchoPagina * 3) / 4, posY);
                     
+                    posY += 10;
+                    
+                    // Crear una distribución optimizada de gráficos
+                    const espacioDisponible = altoPagina - posY - 20; // Espacio disponible menos margen
+                    const espacioPorGrafico = graficos.length > 1 ? espacioDisponible / graficos.length : espacioDisponible;
+                    
+                    // Añadir cada gráfico con presentación premium
                     graficos.forEach((grafico, index) => {
-                        // Si no es el primer gráfico, agregar espacio
-                        if (index > 0) {
-                            posY += graficos[index-1].alto + 20;
-                        }
+                        // Calcular dimensiones para aprovechar mejor el espacio
+                        const altoGrafico = Math.min(espacioPorGrafico - 25, 75); // Altura máxima por gráfico
+                        const anchoGrafico = anchoPagina - 2 * margen;
                         
                         // Título del gráfico
-                        doc.setTextColor(80, 80, 80);
+                        doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
                         doc.setFontSize(12);
                         doc.setFont(undefined, 'bold');
-                        doc.text(grafico.titulo, anchoPagina / 2, posY, { align: 'center' });
+                        doc.text(grafico.titulo, margen, posY);
                         
-                        // Agregar el gráfico
+                        // Descripción del gráfico
+                        posY += 5;
+                        doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'italic');
+                        const lineasDescripcion = doc.splitTextToSize(grafico.descripcion, anchoPagina - 2 * margen);
+                        doc.text(lineasDescripcion, margen, posY);
+                        
+                        posY += lineasDescripcion.length * 4 + 5;
+                        
+                        // Agregar el gráfico con marco elegante
                         try {
-                            const imgData = grafico.elemento.toDataURL('image/png');
-                            doc.addImage(imgData, 'PNG', margen, posY + 5, grafico.ancho, grafico.alto);
-                        } catch (e) {
-                            console.warn('Error al capturar gráfico:', e);
-                            // Si falla la captura, mostrar un mensaje
+                            // Usar alta calidad para los gráficos
+                            const options = {
+                                scale: configuracion.calidadGraficos,
+                                backgroundColor: '#FFFFFF'
+                            };
+                            
+                            // Capturar el gráfico con HTML2Canvas (si está disponible)
+                            if (typeof html2canvas !== 'undefined') {
+                                html2canvas(grafico.elemento, options).then(canvas => {
+                                    const imgData = canvas.toDataURL('image/png');
+                                    doc.addImage(imgData, 'PNG', margen, posY, anchoGrafico, altoGrafico);
+                                    
+                                    // Añadir marco premium
+                                    doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                                    doc.setLineWidth(0.5);
+                                    doc.rect(margen, posY, anchoGrafico, altoGrafico);
+                                    
+                                    // Si es el último gráfico, guardar el PDF
+                                    if (index === graficos.length - 1) {
+                                        doc.save(nombreArchivo);
+                                        mostrarCargando(false);
+                                        mostrarNotificacion('PDF exportado correctamente', 'success');
+                                    }
+                                }).catch(error => {
+                                    console.warn('Error al renderizar gráfico con html2canvas:', error);
+                                    capturarGraficoSimple();
+                                });
+                            } else {
+                                capturarGraficoSimple();
+                            }
+                            
+                            function capturarGraficoSimple() {
+                                // Alternativa si html2canvas no está disponible
+                                try {
+                                    const imgData = grafico.elemento.toDataURL('image/png');
+                                    doc.addImage(imgData, 'PNG', margen, posY, anchoGrafico, altoGrafico);
+                                } catch (e) {
+                                    console.warn('Error al capturar gráfico:', e);
+                                    // Alternativa visual si falla la captura
+                                    doc.setFillColor(245, 245, 245);
+                                    doc.roundedRect(margen, posY, anchoGrafico, altoGrafico, 3, 3, 'F');
+                                    doc.setTextColor(150, 150, 150);
+                                    doc.setFontSize(12);
+                                    doc.text('Error al cargar gráfico', anchoPagina / 2, posY + altoGrafico / 2, { align: 'center' });
+                                }
+                                
+                                // Añadir marco premium
+                                doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                                doc.setLineWidth(0.5);
+                                doc.rect(margen, posY, anchoGrafico, altoGrafico);
+                                
+                                // Si es el último gráfico y estamos usando el método simple, guardar el PDF
+                                if (index === graficos.length - 1) {
+                                    // Solo guardamos aquí si usamos el método simple, 
+                                    // ya que html2canvas es asíncrono y guarda después de renderizar
+                                    if (typeof html2canvas === 'undefined') {
+                                        doc.save(nombreArchivo);
+                                        mostrarCargando(false);
+                                        mostrarNotificacion('PDF exportado correctamente', 'success');
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('Error al procesar gráfico:', error);
+                            // Alternativa visual si falla la captura
                             doc.setFillColor(245, 245, 245);
-                            doc.roundedRect(margen, posY + 5, grafico.ancho, grafico.alto, 2, 2, 'F');
+                            doc.roundedRect(margen, posY, anchoGrafico, altoGrafico, 3, 3, 'F');
                             doc.setTextColor(150, 150, 150);
-                            doc.text('Error al cargar gráfico', anchoPagina / 2, posY + 5 + grafico.alto / 2, { align: 'center' });
+                            doc.setFontSize(12);
+                            doc.text('Error al cargar gráfico', anchoPagina / 2, posY + altoGrafico / 2, { align: 'center' });
+                            
+                            // Si es el último gráfico y hay un error, igualmente guardar el PDF
+                            if (index === graficos.length - 1) {
+                                doc.save(nombreArchivo);
+                                mostrarCargando(false);
+                                mostrarNotificacion('PDF exportado correctamente', 'success');
+                            }
                         }
+                        
+                        posY += altoGrafico + 15;
                     });
+                    
+                    // Si no hay gráficos o si html2canvas no se usa, guardar aquí
+                    if (graficos.length === 0 || typeof html2canvas === 'undefined') {
+                        doc.save(nombreArchivo);
+                        mostrarCargando(false);
+                        mostrarNotificacion('PDF exportado correctamente', 'success');
+                    }
+                } else {
+                    // Si no hay gráficos, guardar el PDF directamente
+                    doc.save(nombreArchivo);
+                    mostrarCargando(false);
+                    mostrarNotificacion('PDF exportado correctamente', 'success');
                 }
-            } catch (error) {
-                console.warn('Error al procesar gráficos:', error);
             }
             
-            // Guardar el PDF
-            doc.save(nombreArchivo);
+            // ============ FUNCIÓN PARA CREAR PÁGINA DE PORTADA PREMIUM ============
+            function crearPortadaPremium() {
+                let posY = agregarEncabezado(1);
+                agregarPiePagina();
+                
+                // Marco decorativo dorado premium para la portada
+                doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                doc.setLineWidth(1);
+                doc.roundedRect(margen, posY + 5, anchoPagina - 2 * margen, 100, 3, 3);
+                
+                // Fondo sutil para el título
+                const altoFondoTitulo = 40;
+                const gradienteSteps = 20;
+                for (let i = 0; i < gradienteSteps; i++) {
+                    const alpha = 0.1 - (i / gradienteSteps) * 0.1; // Desde 0.1 hasta 0
+                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2], alpha);
+                    const altoStep = altoFondoTitulo / gradienteSteps;
+                    doc.rect(margen + 5, posY + 15 + (i * altoStep), anchoPagina - 2 * margen - 10, altoStep, 'F');
+                }
+                
+                // Título del informe con diseño premium
+                posY += 35;
+                doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.setFontSize(24);
+                doc.setFont(undefined, 'bold');
+                doc.text(titulo, anchoPagina / 2, posY, { align: 'center' });
+                
+                // Subtítulo
+                posY += 12;
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'normal');
+                doc.text(subtitulo, anchoPagina / 2, posY, { align: 'center' });
+                
+                // Línea decorativa dorada
+                posY += 20;
+                doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                doc.setLineWidth(0.7);
+                doc.line(anchoPagina / 4, posY, (anchoPagina * 3) / 4, posY);
+                
+                // Descripción del informe con diseño premium
+                posY += 15;
+                doc.setFontSize(11);
+                
+                let descripcion = '';
+                if (tipo === 'centro') {
+                    const centro = datos.centros.find(c => c.codigo === currentCentro);
+                    descripcion = `Este informe presenta el cumplimiento de las Metas Sanitarias para el centro "${centro.nombre}" durante el mes de Marzo de 2025. El informe incluye el detalle de cada indicador con sus respectivos resultados, metas y nivel de cumplimiento según los criterios de clasificación establecidos para el período actual.`;
+                } else if (tipo === 'indicador') {
+                    const indicador = datos.indicadores.find(i => i.codigo === currentIndicador);
+                    descripcion = `Este informe presenta el comportamiento del indicador "${indicador.nombre}" (${indicador.codigo}) en todos los centros de salud durante el mes de Marzo de 2025. Se incluye el detalle para cada centro y su nivel de cumplimiento respecto a la meta establecida según los criterios de evaluación actualizados.`;
+                } else {
+                    descripcion = `Este informe comparativo muestra el cumplimiento de todas las Metas Sanitarias para todos los centros de salud durante el mes de Marzo de 2025. La tabla permite visualizar y comparar el desempeño de cada centro respecto a cada indicador, facilitando la identificación de áreas de mejora y centros destacados.`;
+                }
+                
+                // Texto informativo con formato premium
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                const lineasDescripcion = doc.splitTextToSize(descripcion, anchoPagina - 2 * margen - 40);
+                doc.text(lineasDescripcion, anchoPagina / 2, posY, { align: 'center' });
+                
+                // Información de confidencialidad con estilo premium
+                posY += lineasDescripcion.length * 6 + 15;
+                doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2], 0.1);
+                const altoRectConfidencial = 10;
+                doc.roundedRect(anchoPagina / 4, posY - 5, anchoPagina / 2, altoRectConfidencial, 2, 2, 'F');
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'italic');
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.text('Documento oficial - Uso interno del Servicio de Salud', anchoPagina / 2, posY, { align: 'center' });
+                
+                // Añadir fecha decorativa
+                posY += 20;
+                doc.setFillColor(colores.dorado[0], colores.dorado[1], colores.dorado[2], 0.2);
+                const fechaActual = new Date().toLocaleDateString('es-CL', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const fechaTexto = `Generado: ${fechaActual}`;
+                const anchoFecha = doc.getTextWidth(fechaTexto) + 20;
+                doc.roundedRect(anchoPagina / 2 - anchoFecha / 2, posY - 5, anchoFecha, 10, 5, 5, 'F');
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.text(fechaTexto, anchoPagina / 2, posY, { align: 'center' });
+                
+                return posY;
+            }
             
-            mostrarCargando(false);
-            mostrarNotificacion('PDF exportado correctamente', 'success');
+            // ============ PÁGINA DE LEYENDA Y CRITERIOS PREMIUM ============
+            function crearPaginaCriterios() {
+                doc.addPage();
+                let posY = agregarEncabezado(2);
+                agregarPiePagina();
+                
+                // Título de la sección
+                posY += 10;
+                doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('CRITERIOS DE EVALUACIÓN', anchoPagina / 2, posY, { align: 'center' });
+                
+                // Descripción de los criterios
+                posY += 15;
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'normal');
+                
+                const descripcionCriterios = 'Los siguientes criterios se utilizan para evaluar el nivel de cumplimiento de las Metas Sanitarias. El porcentaje de cumplimiento se calcula como la relación entre el resultado obtenido y la meta establecida, expresado en porcentaje.';
+                const lineasCriterios = doc.splitTextToSize(descripcionCriterios, anchoPagina - 2 * margen);
+                doc.text(lineasCriterios, margen, posY);
+                
+                // Leyenda de colores para estados - Versión premium
+                posY += lineasCriterios.length * 6 + 10;
+                
+                // Crear tabla de leyenda premium
+                const anchoLeyenda = 140;
+                const xLeyenda = (anchoPagina - anchoLeyenda) / 2;
+                
+                // Fondo decorativo para toda la leyenda
+                doc.setFillColor(250, 250, 250);
+                doc.roundedRect(xLeyenda - 5, posY - 5, anchoLeyenda + 10, 48, 3, 3, 'F');
+                doc.setDrawColor(colores.dorado[0], colores.dorado[1], colores.dorado[2]);
+                doc.setLineWidth(0.5);
+                doc.roundedRect(xLeyenda - 5, posY - 5, anchoLeyenda + 10, 48, 3, 3);
+                
+                // Encabezado de la tabla de leyenda
+                doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.rect(xLeyenda, posY, anchoLeyenda, 10, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.text('CLASIFICACIÓN DE CUMPLIMIENTO', xLeyenda + anchoLeyenda / 2, posY + 6, { align: 'center' });
+                
+                // Cuerpo de la tabla de leyenda
+                posY += 10;
+                const altoFilaLeyenda = 12;
+                
+                // Cumplido
+                doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.2);
+                doc.rect(xLeyenda, posY, anchoLeyenda, altoFilaLeyenda, 'F');
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.setFont(undefined, 'bold');
+                doc.text('Cumplido', xLeyenda + 20, posY + 8);
+                doc.setFont(undefined, 'normal');
+                doc.text('100% o más de la meta', xLeyenda + anchoLeyenda - 10, posY + 8, { align: 'right' });
+                
+                // Parcial
+                posY += altoFilaLeyenda;
+                doc.setFillColor(colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.2);
+                doc.rect(xLeyenda, posY, anchoLeyenda, altoFilaLeyenda, 'F');
+                doc.setFont(undefined, 'bold');
+                doc.text('Parcial', xLeyenda + 20, posY + 8);
+                doc.setFont(undefined, 'normal');
+                doc.text('Entre 25% y 99,9% de la meta', xLeyenda + anchoLeyenda - 10, posY + 8, { align: 'right' });
+                
+                // Crítico
+                posY += altoFilaLeyenda;
+                doc.setFillColor(colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.2);
+                doc.rect(xLeyenda, posY, anchoLeyenda, altoFilaLeyenda, 'F');
+                doc.setFont(undefined, 'bold');
+                doc.text('Crítico', xLeyenda + 20, posY + 8);
+                doc.setFont(undefined, 'normal');
+                doc.text('Menos del 25% de la meta', xLeyenda + anchoLeyenda - 10, posY + 8, { align: 'right' });
+                
+                // Añadir nota aclaratoria con estilo premium
+                posY += altoFilaLeyenda + 20;
+                
+                // Marco decorativo para nota
+                doc.setFillColor(245, 245, 245);
+                doc.roundedRect(margen, posY - 5, anchoPagina - 2 * margen, 25, 2, 2, 'F');
+                doc.setDrawColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(margen, posY - 5, anchoPagina - 2 * margen, 25, 2, 2);
+                
+                // Icono de información (simulado)
+                doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.circle(margen + 8, posY + 8, 5, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'bold');
+                doc.text('i', margen + 8, posY + 10, { align: 'center' });
+                
+                // Texto de la nota
+                doc.setTextColor(colores.textoOscuro[0], colores.textoOscuro[1], colores.textoOscuro[2]);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'italic');
+                const notaAclaratoria = 'Nota: Los criterios de clasificación han sido actualizados según las directrices vigentes para el período 2025. Estos parámetros pueden estar sujetos a revisión trimestral por parte del equipo directivo.';
+                const lineasNota = doc.splitTextToSize(notaAclaratoria, anchoPagina - 2 * margen - 25);
+                doc.text(lineasNota, margen + 20, posY + 8);
+                
+                return posY + 30;
+            }
+            
+            // ============ PÁGINA DE TABLA DE DATOS ============
+            function crearPaginaTabla() {
+                doc.addPage();
+                let posY = agregarEncabezado(3);
+                agregarPiePagina();
+                
+                // Título de la sección
+                posY += 10;
+                doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('RESULTADOS DETALLADOS', anchoPagina / 2, posY, { align: 'center' });
+                
+                // Mini resumen estadístico
+                posY += 15;
+                posY = crearResumenEstadistico(datos_procesados, posY);
+                
+                // Crear tabla premium
+                posY = crearTablaPremium(datos_procesados, posY, tipo);
+                
+                return posY;
+            }
+            
+            // ============ EJECUTAR CREACIÓN DEL PDF ============
+            
+            // 1. Portada premium
+            crearPortadaPremium();
+            
+            // 2. Página de criterios
+            crearPaginaCriterios();
+            
+            // 3. Página de tabla de datos
+            crearPaginaTabla();
+            
+            // 4. Página de gráficos (si hay disponibles)
+            crearPaginaGraficos();
+            
+            // Si no hay gráficos o si no se usa html2canvas, se guardará en crearPaginaGraficos()
+            // En caso contrario, html2canvas manejará el guardado de forma asíncrona
+            if (!configuracion.mostrarGraficos) {
+                doc.save(nombreArchivo);
+                mostrarCargando(false);
+                mostrarNotificacion('PDF exportado correctamente', 'success');
+            }
+            
         } catch (error) {
             console.error('Error al exportar a PDF:', error);
             mostrarCargando(false);
@@ -7305,18 +7728,7 @@ function exportarPDF(tipo) {
 }
 
 /**
- * Recorta un texto a una longitud específica y añade puntos suspensivos
- * @param {string} texto - Texto a recortar
- * @param {number} longitud - Longitud máxima
- * @returns {string} Texto recortado
- */
-function recortarTexto(texto, longitud) {
-    if (!texto) return '';
-    return texto.length > longitud ? texto.substring(0, longitud) + '...' : texto;
-}
-
-/**
- * Formatea un número con separador de miles
+ * Función para formatear un número con separador de miles
  * @param {number} numero - Número a formatear
  * @returns {string} Número formateado
  */
@@ -7326,7 +7738,7 @@ function formatearNumero(numero) {
 }
 
 /**
- * Formatea un valor según su tipo (porcentaje o número)
+ * Función para formatear un valor según su tipo (porcentaje o número)
  * @param {number} valor - Valor a formatear
  * @param {string} tipo - Tipo de valor ('porcentaje', 'tasa', etc.)
  * @returns {string} Valor formateado
@@ -7336,191 +7748,233 @@ function formatearValor(valor, tipo) {
     
     if (tipo === 'porcentaje') {
         return valor.toFixed(2) + '%';
+    } else if (tipo === 'tasa') {
+        return valor.toFixed(2) + ' x 1000';
+    } else if (tipo === 'razon') {
+        return valor.toFixed(2) + ':1';
     } else {
         return valor.toFixed(2);
     }
 }
 
-// ==================== CONFIGURACIÓN DE EVENTOS ====================
+/**
+ * Muestra el diálogo de opciones para configurar la exportación PDF
+ * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
+ */
+function mostrarOpcionesExportacion(tipo) {
+    // Crear modal de opciones si no existe
+    if (!document.getElementById('opcionesPdfModal')) {
+        const modalHtml = `
+        <div id="opcionesPdfModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
+            <div class="modal-content" style="background-color: #fff; margin: 10% auto; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 400px;">
+                <h3 style="color:rgb(107, 221, 121); margin-top: 0;">Opciones de Exportación PDF</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Orientación del documento:</label>
+                    <label style="margin-right: 15px;">
+                        <input type="radio" name="orientacion" value="horizontal" checked> Horizontal
+                    </label>
+                    <label>
+                        <input type="radio" name="orientacion" value="vertical"> Vertical
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tema de colores:</label>
+                    <select id="temaColores" style="width: 100%; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+                        <option value="default">Premium (Azul/Dorado)</option>
+                        <option value="pastel">Corporativo (Azul/Verde)</option>
+                        <option value="contraste">Alto Contraste</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Contenido:</label>
+                    <label style="display: block; margin-bottom: 5px;">
+                        <input type="checkbox" id="mostrarGraficos" checked> Incluir gráficos
+                    </label>
+                    <label style="display: block;">
+                        <input type="checkbox" id="mostrarMiniResumen" checked> Incluir resumen estadístico
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Calidad de gráficos:</label>
+                    <select id="calidadGraficos" style="width: 100%; padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+                        <option value="1">Normal</option>
+                        <option value="2" selected>Alta</option>
+                        <option value="3">Máxima</option>
+                    </select>
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button id="cancelarPdfBtn" style="background-color: #f2f2f2; border: none; padding: 8px 15px; margin-right: 10px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+                    <button id="generarPdfBtn" style="background-color:rgb(106, 203, 93); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Generar PDF</button>
+                </div>
+            </div>
+        </div>
+        `;
+        
+        // Añadir modal al body
+        const modalDiv = document.createElement('div');
+        modalDiv.innerHTML = modalHtml;
+        document.body.appendChild(modalDiv.firstChild);
+        
+        // Configurar eventos para cerrar el modal
+        document.getElementById('cancelarPdfBtn').addEventListener('click', function() {
+            document.getElementById('opcionesPdfModal').style.display = 'none';
+        });
+    }
+    
+    // Mostrar modal
+    const modal = document.getElementById('opcionesPdfModal');
+    modal.style.display = 'block';
+    
+    // Configurar evento para generar PDF con opciones seleccionadas
+    document.getElementById('generarPdfBtn').addEventListener('click', function() {
+        // Obtener opciones seleccionadas
+        const orientacion = document.querySelector('input[name="orientacion"]:checked').value;
+        const temaColores = document.getElementById('temaColores').value;
+        const mostrarGraficos = document.getElementById('mostrarGraficos').checked;
+        const mostrarMiniResumen = document.getElementById('mostrarMiniResumen').checked;
+        const calidadGraficos = parseInt(document.getElementById('calidadGraficos').value);
+        
+        // Cerrar modal
+        modal.style.display = 'none';
+        
+        // Generar PDF con opciones
+        exportarPDF(tipo, {
+            orientacion, 
+            temaColores, 
+            mostrarGraficos, 
+            mostrarMiniResumen, 
+            calidadGraficos
+        });
+    });
+}
 
 /**
  * Configura los event listeners para los botones de exportación
  * Esta función debe llamarse al cargar la página
  */
 function configurarEventosExportacion() {
-  console.log("Configurando eventos de exportación...");
-  
-  // Botones para exportar detalles de centro
-  const btnExcelCentro = document.getElementById('exportCentroExcelBtn');
-  const btnPdfCentro = document.getElementById('exportCentroPdfBtn');
-  
-  if (btnExcelCentro) {
-    btnExcelCentro.addEventListener('click', function() {
-      console.log("Exportando centro a Excel...");
-      exportarExcel('centro');
-    });
-  }
-  
-  if (btnPdfCentro) {
-    btnPdfCentro.addEventListener('click', function() {
-      console.log("Exportando centro a PDF...");
-      exportarPDF('centro');
-    });
-  }
-  
-  // Botones para exportar detalles de indicador
-  const btnExcelIndicador = document.getElementById('exportIndicadorExcelBtn');
-  const btnPdfIndicador = document.getElementById('exportIndicadorPdfBtn');
-  
-  if (btnExcelIndicador) {
-    btnExcelIndicador.addEventListener('click', function() {
-      console.log("Exportando indicador a Excel...");
-      exportarExcel('indicador');
-    });
-  }
-  
-  if (btnPdfIndicador) {
-    btnPdfIndicador.addEventListener('click', function() {
-      console.log("Exportando indicador a PDF...");
-      exportarPDF('indicador');
-    });
-  }
-  
-  // Botones para exportar detalles comparativos
-  const btnExcelComparativo = document.getElementById('exportComparativoExcelBtn');
-  const btnPdfComparativo = document.getElementById('exportComparativoPdfBtn');
-  
-  if (btnExcelComparativo) {
-    btnExcelComparativo.addEventListener('click', function() {
-      console.log("Exportando comparativo a Excel...");
-      exportarExcel('comparativo');
-    });
-  }
-  
-  if (btnPdfComparativo) {
-    btnPdfComparativo.addEventListener('click', function() {
-      console.log("Exportando comparativo a PDF...");
-      exportarPDF('comparativo');
-    });
-  }
-  
-  // Botón general de exportación de detalle
-  const btnExportDetail = document.getElementById('exportDetailBtn');
-  if (btnExportDetail) {
-    btnExportDetail.addEventListener('click', function() {
-      console.log("Exportando detalle...");
-      
-      // Determinar qué vista está activa y exportar según corresponda
-      if (document.getElementById('centro-content') && 
-          document.getElementById('centro-content').classList.contains('active')) {
-        exportarPDF('centro');
-      } 
-      else if (document.getElementById('indicador-content') && 
-              document.getElementById('indicador-content').classList.contains('active')) {
-        exportarPDF('indicador');
-      }
-      else if (document.getElementById('comparativo-content') && 
-              document.getElementById('comparativo-content').classList.contains('active')) {
-        exportarPDF('comparativo');
-      }
-      else {
-        // Si no se puede determinar, usar la vista de centro por defecto
-        exportarPDF('centro');
-      }
-    });
-  }
-  
-  console.log("Configuración de eventos de exportación completada.");
+    console.log("Configurando eventos de exportación para Metas Sanitarias...");
+    
+    // Botones para exportar detalles de centro
+    const btnPdfCentro = document.getElementById('exportCentroPdfBtn');
+    if (btnPdfCentro) {
+        btnPdfCentro.addEventListener('click', function() {
+            console.log("Mostrando opciones para exportar centro a PDF...");
+            mostrarOpcionesExportacion('centro');
+        });
+    }
+    
+    // Botones para exportar detalles de indicador
+    const btnPdfIndicador = document.getElementById('exportIndicadorPdfBtn');
+    if (btnPdfIndicador) {
+        btnPdfIndicador.addEventListener('click', function() {
+            console.log("Mostrando opciones para exportar indicador a PDF...");
+            mostrarOpcionesExportacion('indicador');
+        });
+    }
+    
+    // Botones para exportar detalles comparativos
+    const btnPdfComparativo = document.getElementById('exportComparativoPdfBtn');
+    if (btnPdfComparativo) {
+        btnPdfComparativo.addEventListener('click', function() {
+            console.log("Mostrando opciones para exportar comparativo a PDF...");
+            mostrarOpcionesExportacion('comparativo');
+        });
+    }
+    
+    // Botón general de exportación
+    const btnExportDetail = document.getElementById('exportDetailBtn');
+    if (btnExportDetail) {
+        btnExportDetail.addEventListener('click', function() {
+            console.log("Mostrando opciones para exportar informe detallado...");
+            
+            // Determinar qué vista está activa
+            let tipoActivo = 'centro'; // Por defecto
+            
+            if (document.getElementById('centro-content') && 
+                document.getElementById('centro-content').classList.contains('active')) {
+                tipoActivo = 'centro';
+            } 
+            else if (document.getElementById('indicador-content') && 
+                    document.getElementById('indicador-content').classList.contains('active')) {
+                tipoActivo = 'indicador';
+            }
+            else if (document.getElementById('comparativo-content') && 
+                    document.getElementById('comparativo-content').classList.contains('active')) {
+                tipoActivo = 'comparativo';
+            }
+            
+            mostrarOpcionesExportacion(tipoActivo);
+        });
+    }
+    
+    console.log("Configuración de eventos de exportación completada.");
 }
-
-// ==================== CARGAR DINÁMICAMENTE LIBRERÍAS FALTANTES ====================
 
 /**
  * Carga dinámicamente las librerías necesarias para la exportación
  * si no están disponibles
  */
 function cargarLibreriasExportacion() {
-  console.log("Verificando librerías de exportación...");
-  
-  // Verificar SheetJS (XLSX)
-  if (typeof XLSX === 'undefined') {
-    console.warn("Librería XLSX no encontrada. Cargando dinámicamente...");
+    console.log("Verificando librerías de exportación...");
     
-    const xlsxScript = document.createElement('script');
-    xlsxScript.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
-    xlsxScript.onload = function() {
-      console.log("Librería XLSX cargada correctamente");
-    };
-    document.head.appendChild(xlsxScript);
-  } else {
-    console.log("Librería XLSX ya está disponible");
-  }
-  
-  // Verificar jsPDF
-  if (typeof window.jspdf === 'undefined') {
-    console.warn("Librería jsPDF no encontrada. Cargando dinámicamente...");
-    
-    const jspdfScript = document.createElement('script');
-    jspdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
-    jspdfScript.onload = function() {
-      console.log("Librería jsPDF cargada correctamente");
-      
-      // Cargar el plugin AutoTable después de jsPDF
-      if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
-        console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
+    // Verificar jsPDF
+    if (typeof window.jspdf === 'undefined') {
+        console.log("Librería jsPDF no encontrada. Cargando dinámicamente...");
         
-        const autoTableScript = document.createElement('script');
-        autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
-        autoTableScript.onload = function() {
-          console.log("Plugin AutoTable cargado correctamente");
+        const jspdfScript = document.createElement('script');
+        jspdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        jspdfScript.onload = function() {
+            console.log("Librería jsPDF cargada correctamente");
         };
-        document.head.appendChild(autoTableScript);
-      }
-    };
-    document.head.appendChild(jspdfScript);
-  } else {
-    console.log("Librería jsPDF ya está disponible");
-    
-    // Verificar AutoTable si jsPDF ya está disponible
-    if (typeof window.jspdf.jsPDF.prototype.autoTable === 'undefined') {
-      console.warn("Plugin AutoTable no encontrado. Cargando dinámicamente...");
-      
-      const autoTableScript = document.createElement('script');
-      autoTableScript.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js";
-      autoTableScript.onload = function() {
-        console.log("Plugin AutoTable cargado correctamente");
-      };
-      document.head.appendChild(autoTableScript);
+        document.head.appendChild(jspdfScript);
     } else {
-      console.log("Plugin AutoTable ya está disponible");
+        console.log("Librería jsPDF ya está disponible");
     }
-  }
+    
+    // Cargar html2canvas para la captura de gráficos de alta calidad
+    if (typeof html2canvas === 'undefined') {
+        console.log("Librería html2canvas no encontrada. Cargando dinámicamente...");
+        
+        const html2canvasScript = document.createElement('script');
+        html2canvasScript.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        html2canvasScript.onload = function() {
+            console.log("Librería html2canvas cargada correctamente");
+        };
+        document.head.appendChild(html2canvasScript);
+    } else {
+        console.log("Librería html2canvas ya está disponible");
+    }
 }
-
-// ==================== INICIALIZACIÓN SIMPLIFICADA ====================
 
 // Inicializar las funciones de exportación cuando se carga el documento
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("Inicializando funcionalidades de exportación simplificadas...");
-  
-  // Cargar librerías necesarias
-  cargarLibreriasExportacion();
-  
-  // Configurar eventos después de un retraso para asegurar que todo está cargado
-  setTimeout(function() {
-    configurarEventosExportacion();
-  }, 1000);
-  
-  console.log("Inicialización de funcionalidades de exportación completada.");
+    console.log("Inicializando funcionalidades de exportación para Metas Sanitarias...");
+    
+    // Cargar librerías necesarias
+    cargarLibreriasExportacion();
+    
+    // Configurar eventos después de un retraso para asegurar que todo está cargado
+    setTimeout(function() {
+        configurarEventosExportacion();
+    }, 1000);
+    
+    console.log("Inicialización de funcionalidades de exportación completada.");
 });
 
 // Ejecutar la inicialización inmediatamente si el documento ya está cargado
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  setTimeout(function() {
-    cargarLibreriasExportacion();
-    configurarEventosExportacion();
-  }, 1000);
+    setTimeout(function() {
+        cargarLibreriasExportacion();
+        configurarEventosExportacion();
+    }, 1000);
 }
+
 
 document.getElementById('currentYear').textContent = new Date().getFullYear();
 
