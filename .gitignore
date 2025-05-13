@@ -3,3 +3,10 @@
 package-lock.json
 
 package.json
+
+# ignorar archivos temporales de Excel
+~$*
+# ignorar los libros de datoscls
+
+POBLACIÓN_COMUNAL.xlsx
+REGISTRO.xlsx
