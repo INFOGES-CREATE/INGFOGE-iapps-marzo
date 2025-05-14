@@ -6119,7 +6119,7 @@ function aplicarTemaAGraficos() {
     // Aplicar colores según modo oscuro
     if (document.body.classList.contains('dark-mode')) {
         Chart.defaults.color = '#e0e0e0';
-        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.1)';
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 255)';
     } else {
         Chart.defaults.color = '#666';
         Chart.defaults.scale.grid.color = 'rgba(0, 0, 0, 0.1)';
@@ -6798,7 +6798,7 @@ function exportarPDF(tipo) {
                 secundario: [46, 204, 113],    // Verde más saturado (indicador bueno)
                 alerta: [241, 196, 15],        // Amarillo más brillante (indicador en progreso)
                 peligro: [231, 76, 60],        // Rojo (indicador crítico)
-                textoOscuro: [44, 62, 80],     // Texto principal
+                textoOscuro: [255, 255, 255],     // Texto principal
                 textoClaro: [255, 255, 255],   // Texto sobre fondos oscuros
                 fondoClaro: [248, 249, 250]    // Fondo de secciones
             };

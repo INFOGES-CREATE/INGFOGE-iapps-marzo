@@ -2080,7 +2080,13 @@ body {
     <!-- Core JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-
+document.addEventListener('DOMContentLoaded', () => {
+  const link = document.getElementById('exportDataLink');
+  link.addEventListener('click', (e) => {
+    e.preventDefault();       // no navegamos
+    alert('Próximamente');    // solo este texto
+  });
+});
     
         // Configuración global de Chart.js
         Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif";
@@ -2750,8 +2756,16 @@ iaapsData = {
             actualizarTarjetasCentros();
         }
         
-        // Función para actualizar las tarjetas de resumen
+ /**
+ * Actualiza las tarjetas de resumen aplicando reglas binarias 
+ * a indicadores especiales (I, II, IV.A, IV.B, V, VI, VII)
+ */
 function actualizarTarjetasResumen() {
+    console.log("Actualizando tarjetas de resumen con reglas binarias...");
+    
+    // Lista de indicadores con reglas binarias (solo verde o rojo)
+    const indicadoresBinarios = ['I', 'II', 'IV.A', 'IV.B', 'V', 'VI', 'VII'];
+    
     // Calcular estadísticas generales
     let totalIndicadores = 0;
     let indicadoresCumplidos = 0;
@@ -2766,56 +2780,88 @@ function actualizarTarjetasResumen() {
     // Solo contar indicadores comunales
     iaapsData.indicadores.forEach(indicador => {
         const resultadoComunal = indicador.resultados.find(r => r.centro === 'comunal');
-        if (resultadoComunal) {
-            totalIndicadores++;
-            cumplimientoTotal += resultadoComunal.cumplimiento || 0;
+        if (!resultadoComunal) return;
+        
+        totalIndicadores++;
+        cumplimientoTotal += resultadoComunal.cumplimiento || 0;
+        
+        // Verificar si es un indicador con regla binaria
+        const esBinario = indicadoresBinarios.includes(indicador.codigo);
+        
+        // CAMBIO PRINCIPAL: Aplicar reglas específicas según tipo de indicador
+        if (resultadoComunal.cumplimiento >= 100) {
+            // Para cualquier indicador con 100% o más: siempre es CUMPLIDO
+            indicadoresCumplidos++;
+        } else if (esBinario) {
+            // Para indicadores BINARIOS con menos del 100%: siempre es CRÍTICO
+            indicadoresCriticos++;
+        } else if (resultadoComunal.cumplimiento >= 25) {
+            // Para indicadores NORMALES entre 25% y 99.99%: PARCIAL
+            indicadoresParciales++;
+        } else {
+            // Para cualquier indicador con menos de 25%: CRÍTICO
+            indicadoresCriticos++;
+        }
+        
+        // Cálculo ponderado (ignorando indicador 10-GES) - MANTENER ORIGINAL
+        if (indicador.codigo !== '10') {
+            // Extraer valor numérico de importancia
+            const importanciaStr = importanciaIndicadores[indicador.codigo] || '0%';
+            const importancia = parseFloat(importanciaStr.replace('%', '')) || 0;
             
-            if (resultadoComunal.cumplimiento >= 100) {
-                indicadoresCumplidos++;
-            } else if (resultadoComunal.cumplimiento >= 25) {
-                indicadoresParciales++;
-            } else {
-                indicadoresCriticos++;
-            }
-            
-            // Cálculo ponderado (ignorando indicador 10-GES)
-            if (indicador.codigo !== '10') {
-                // Extraer valor numérico de importancia
-                const importanciaStr = importanciaIndicadores[indicador.codigo] || '0%';
-                const importancia = parseFloat(importanciaStr.replace('%', '')) || 0;
-                
-                if (importancia > 0) {
-                    // Limitar cumplimiento máximo a 100%
-                    const cumplimientoEfectivo = Math.min(resultadoComunal.cumplimiento || 0, 100);
-                    sumaPonderada += cumplimientoEfectivo * importancia;
-                    sumaPonderaciones += importancia;
-                }
+            if (importancia > 0) {
+                // Limitar cumplimiento máximo a 100%
+                const cumplimientoEfectivo = Math.min(resultadoComunal.cumplimiento || 0, 100);
+                sumaPonderada += cumplimientoEfectivo * importancia;
+                sumaPonderaciones += importancia;
             }
         }
     });
     
     // Cálculo simple (original)
-    const cumplimientoPromedio = totalIndicadores > 0 ? (cumplimientoTotal / totalIndicadores).toFixed(2) : 0;
+    const cumplimientoPromedio = totalIndicadores > 0 ? 
+        (cumplimientoTotal / totalIndicadores).toFixed(2) : 0;
     
     // Cálculo ponderado (nuevo)
     const cumplimientoGlobal = sumaPonderaciones > 0 ? 
         parseFloat((sumaPonderada / sumaPonderaciones).toFixed(2)) : 0;
     
     // Actualizar valores en la interfaz
-    document.getElementById('indicadorCumplidosValue').textContent = indicadoresCumplidos;
-    document.getElementById('indicadorParcialValue').textContent = indicadoresParciales;
-    document.getElementById('indicadorCriticosValue').textContent = indicadoresCriticos;
-    document.getElementById('cumplimientoComunalValue').textContent = cumplimientoGlobal + '%';
+    const elemCumplidos = document.getElementById('indicadorCumplidosValue');
+    const elemParciales = document.getElementById('indicadorParcialValue');
+    const elemCriticos = document.getElementById('indicadorCriticosValue');
+    const elemComunal = document.getElementById('cumplimientoComunalValue');
+    
+    if (elemCumplidos) elemCumplidos.textContent = indicadoresCumplidos;
+    if (elemParciales) elemParciales.textContent = indicadoresParciales;
+    if (elemCriticos) elemCriticos.textContent = indicadoresCriticos;
+    if (elemComunal) elemComunal.textContent = cumplimientoGlobal + '%';
     
     // Actualizar barras de progreso
-    document.getElementById('indicadorCumplidosProgress').style.width = (indicadoresCumplidos / totalIndicadores * 100) + '%';
-    document.getElementById('indicadorParcialProgress').style.width = (indicadoresParciales / totalIndicadores * 100) + '%';
-    document.getElementById('indicadorCriticosProgress').style.width = (indicadoresCriticos / totalIndicadores * 100) + '%';
-    document.getElementById('cumplimientoComunalProgress').style.width = cumplimientoGlobal + '%';
+    const progressCumplidos = document.getElementById('indicadorCumplidosProgress');
+    const progressParciales = document.getElementById('indicadorParcialProgress');
+    const progressCriticos = document.getElementById('indicadorCriticosProgress');
+    const progressComunal = document.getElementById('cumplimientoComunalProgress');
+    
+    if (progressCumplidos) {
+        progressCumplidos.style.width = (indicadoresCumplidos / totalIndicadores * 100) + '%';
+    }
+    if (progressParciales) {
+        progressParciales.style.width = (indicadoresParciales / totalIndicadores * 100) + '%';
+    }
+    if (progressCriticos) {
+        progressCriticos.style.width = (indicadoresCriticos / totalIndicadores * 100) + '%';
+    }
+    if (progressComunal) {
+        progressComunal.style.width = cumplimientoGlobal + '%';
+    }
+    
+    console.log(`Resumen actualizado: ${indicadoresCumplidos} cumplidos, ${indicadoresParciales} parciales, ${indicadoresCriticos} críticos`);
 }
         
-       // Declaración global (por ejemplo, justo después de tus imports y antes de cualquier función)
+// Declaración global (por ejemplo, justo después de tus imports y antes de cualquier función)
 let centroChartInstance = null;
+
 
 // Función para actualizar el gráfico de centros
 function actualizarGraficoCentros() {
@@ -7974,6 +8020,511 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
         configurarEventosExportacion();
     }, 1000);
 }
+
+/**
+ * SISTEMA DE GESTIÓN DE METAS SANITARIAS
+ * Módulo de evaluación y visualización de cumplimiento
+ * 
+ * @version 2.0.0
+ * @author Servicio de Salud Curicó
+ */
+
+/**
+ * Determina el estado de un indicador según su porcentaje de cumplimiento
+ * 
+ * @param {number} cumplimiento - Porcentaje de cumplimiento
+ * @param {number} meta - Valor de la meta establecida
+ * @param {string} codigoIndicador - Código del indicador
+ * @return {Object} - Objeto con clases CSS, ícono y texto descriptivo
+ */
+function determinarEstadoIndicador(cumplimiento, meta, codigoIndicador = '') {
+    // Validación de entrada
+    if (typeof cumplimiento !== 'number' || isNaN(cumplimiento)) {
+        console.warn(`Valor de cumplimiento inválido: ${cumplimiento}`);
+        cumplimiento = 0;
+    }
+    
+    // Lista de indicadores con reglas binarias (solo verde o rojo)
+    const indicadoresBinarios = ['I', 'II', 'IV.A', 'IV.B', 'V', 'VI', 'VII'];
+    
+    // Verificar si el indicador está en la lista de indicadores binarios
+    const esBinario = indicadoresBinarios.includes(codigoIndicador);
+    
+    // Determinar estado según el tipo de indicador
+    if (esBinario) {
+        // Para indicadores binarios: solo cumplido (100% o más) o no cumplido (menos de 100%)
+        if (cumplimiento >= 100) {
+            return {
+                statusClass: 'status-success',
+                statusIcon: 'fa-check-circle',
+                statusText: 'CUMPLIDO'
+            };
+        } else {
+            return {
+                statusClass: 'status-danger',
+                statusIcon: 'fa-times-circle',
+                statusText: 'NO CUMPLIDO'
+            };
+        }
+    } else {
+        // Para indicadores estándar: cumplido, en proceso o crítico
+        if (cumplimiento >= 100) {
+            return {
+                statusClass: 'status-success',
+                statusIcon: 'fa-check-circle',
+                statusText: 'CUMPLIDO'
+            };
+        } else if (cumplimiento >= 25) {
+            return {
+                statusClass: 'status-warning',
+                statusIcon: 'fa-exclamation-triangle',
+                statusText: 'EN PROCESO'
+            };
+        } else {
+            return {
+                statusClass: 'status-danger',
+                statusIcon: 'fa-times-circle',
+                statusText: 'CRÍTICO'
+            };
+        }
+    }
+}
+
+/**
+ * Extrae el código de indicador de un texto
+ * @param {string} texto - Texto que puede contener un código de indicador
+ * @return {string} - El código extraído o cadena vacía
+ */
+function extraerCodigoIndicador(texto) {
+    if (!texto) return '';
+    
+    // Intentar varios patrones de extracción
+    const patrones = [
+        /^([IVX]+\.?[AB]?)\s*[–-]/,                // I - Texto
+        /^(?:Indicador)?\s*([IVX]+\.?[AB]?)\s*:/,  // Indicador I: Texto
+        /^.*?\b([IVX]+\.?[AB]?)\b.*$/,             // Cualquier texto con I dentro
+        /^\s*([IVX]+\.?[AB]?)\s*$/                 // Solo I
+    ];
+    
+    for (const patron of patrones) {
+        const match = texto.match(patron);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    
+    return '';
+}
+
+/**
+ * Mapea un estado a colores y estilos visuales
+ * @param {Object} estadoObj - Objeto de estado retornado por determinarEstadoIndicador
+ * @param {Object} paleta - Paleta de colores para usar
+ * @return {Object} - Objeto con propiedades de estilo
+ */
+function mapearEstadoAEstilos(estadoObj, paleta) {
+    if (estadoObj.statusClass === 'status-success') {
+        return paleta.cumplido;
+    } else if (estadoObj.statusClass === 'status-warning') {
+        return paleta.proceso;
+    } else {
+        return paleta.critico;
+    }
+}
+
+/**
+ * Aplica los colores de cumplimiento a todos los elementos relevantes del DOM
+ */
+function aplicarColoresCumplimiento() {
+    console.log("⚙️ Aplicando colores de cumplimiento a todos los elementos...");
+    
+    // Definición de paleta de colores
+    const paleta = {
+        cumplido: {
+            fondo: '#e8f5e9',
+            texto: '#1b5e20',
+            icono: 'fa-check-circle',
+            clase: 'bg-success'
+        },
+        proceso: {
+            fondo: '#fff8e1',
+            texto: '#f57f17',
+            icono: 'fa-exclamation-triangle',
+            clase: 'bg-warning'
+        },
+        critico: {
+            fondo: '#ffebee',
+            texto: '#b71c1c',
+            icono: 'fa-times-circle',
+            clase: 'bg-danger'
+        }
+    };
+    
+    // Lista de indicadores con reglas binarias
+    const indicadoresBinarios = ['I', 'II', 'IV.A', 'IV.B', 'V', 'VI', 'VII'];
+
+    // ===== 1. PROCESAR TABLAS PRINCIPALES DE INDICADORES =====
+    const filasIndicadores = document.querySelectorAll('tr');
+    let contadorActualizados = 0;
+    
+    filasIndicadores.forEach(fila => {
+        // Buscar el código del indicador en la primera celda
+        const primeraCelda = fila.querySelector('td:first-child');
+        if (!primeraCelda) return;
+        
+        // Extraer el código del indicador del texto
+        const textoIndicador = primeraCelda.textContent || '';
+        const codigoIndicador = extraerCodigoIndicador(textoIndicador);
+        if (!codigoIndicador) return;
+        
+        // Buscamos celdas de cumplimiento en esta fila (pueden estar en diferentes posiciones)
+        const posiblesCeldasCumplimiento = [
+            fila.querySelector('td:nth-child(4)'), // Vista principal
+            fila.querySelector('td:nth-child(6)'), // Vista detalle
+            fila.querySelector('td:nth-child(7)'), // Vista comparativa
+            fila.querySelector('td.cumplimiento'), // Clase específica
+            fila.querySelector('td:last-child')    // Última celda (como respaldo)
+        ];
+        
+        // Procesamos cada celda candidata
+        posiblesCeldasCumplimiento.forEach(celda => {
+            if (!celda) return;
+            
+            const valor = celda.textContent.trim();
+            if (!valor || !valor.includes('%')) return;
+            
+            // Extraer valor numérico
+            const porcentaje = parseFloat(valor.replace(/[^\d.-]/g, ''));
+            if (isNaN(porcentaje)) return;
+            
+            // Comprobar si este indicador usa reglas binarias
+            const esBinario = indicadoresBinarios.includes(codigoIndicador);
+            
+            // Determinar estado según el tipo de indicador
+            let estado;
+            if (esBinario) {
+                // Regla binaria: verde si ≥100%, rojo si <100%
+                estado = porcentaje >= 100 ? paleta.cumplido : paleta.critico;
+            } else {
+                // Regla estándar: verde, amarillo o rojo
+                if (porcentaje >= 100) {
+                    estado = paleta.cumplido;
+                } else if (porcentaje >= 25) {
+                    estado = paleta.proceso;
+                } else {
+                    estado = paleta.critico;
+                }
+            }
+            
+            // Actualizar elementos visuales
+            const iconos = celda.querySelectorAll('i, svg');
+            iconos.forEach(icono => {
+                icono.className = `fas ${estado.icono}`;
+                icono.style.color = estado.texto;
+            });
+            
+            // Si tiene un badge
+            const badge = celda.querySelector('.badge');
+            if (badge) {
+                badge.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                badge.classList.add(estado.clase);
+                contadorActualizados++;
+            }
+            
+            // Si tiene una barra de progreso 
+            const progressBar = celda.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                progressBar.classList.add(estado.clase);
+                contadorActualizados++;
+            }
+            
+            // Si es una celda de la tabla principal, actualizar completamente
+            if (celda.classList.contains('cumplimiento') || 
+                celda === fila.querySelector('td:nth-child(4)')) {
+                
+                celda.innerHTML = `
+                    <span style="color: ${estado.texto}; background-color: ${estado.fondo}; 
+                          padding: 4px 8px; border-radius: 4px; font-weight: 600;">
+                        <i class="fas ${estado.icono} mr-1"></i> ${porcentaje.toFixed(2)}%
+                    </span>
+                `;
+                contadorActualizados++;
+            }
+        });
+    });
+
+    // ===== 2. PROCESAR TARJETAS DE RESUMEN DEL DASHBOARD =====
+    const tarjetasResumen = document.querySelectorAll('.summary-card, .centro-card');
+    
+    tarjetasResumen.forEach(tarjeta => {
+        // Buscar texto del indicador en la tarjeta
+        const textoIndicador = tarjeta.textContent || '';
+        let codigoIndicador = '';
+        
+        // Intentar extraer el código de indicador del texto
+        for (const codigo of indicadoresBinarios) {
+            if (textoIndicador.includes(codigo)) {
+                codigoIndicador = codigo;
+                break;
+            }
+        }
+        
+        // Buscar valores de cumplimiento
+        const elementosValor = tarjeta.querySelectorAll('.summary-value, [id$="Value"]');
+        elementosValor.forEach(elemento => {
+            const valor = elemento.textContent.trim();
+            if (!valor || !valor.includes('%')) return;
+            
+            // Extraer valor numérico
+            const porcentaje = parseFloat(valor.replace(/[^\d.-]/g, ''));
+            if (isNaN(porcentaje)) return;
+            
+            // Determinar estado según reglas
+            let estado;
+            if (codigoIndicador && indicadoresBinarios.includes(codigoIndicador)) {
+                // Regla binaria: verde si ≥100%, rojo si <100%
+                estado = porcentaje >= 100 ? paleta.cumplido : paleta.critico;
+            } else {
+                // Regla estándar para resúmenes generales
+                if (porcentaje >= 100) {
+                    estado = paleta.cumplido;
+                } else if (porcentaje >= 25) {
+                    estado = paleta.proceso;
+                } else {
+                    estado = paleta.critico;
+                }
+            }
+            
+            // Actualizar color de texto
+            elemento.style.color = estado.texto;
+            
+            // Buscar barra de progreso asociada
+            const progressBar = tarjeta.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                progressBar.classList.add(estado.clase);
+                contadorActualizados++;
+            }
+        });
+    });
+
+    // ===== 3. PROCESAR ELEMENTOS DE ESTADO EN DETALLES =====
+    document.querySelectorAll('[id$="IndicadoresTableBody"] tr, [id$="CentrosTableBody"] tr').forEach(fila => {
+        // Buscar el código del indicador (primera celda o dentro del texto)
+        let codigoIndicador = '';
+        const celdas = fila.querySelectorAll('td');
+        
+        // Revisar todas las celdas para encontrar un código de indicador
+        for (const celda of celdas) {
+            const posibleCodigo = extraerCodigoIndicador(celda.textContent);
+            if (posibleCodigo) {
+                codigoIndicador = posibleCodigo;
+                break;
+            }
+        }
+        
+        // Buscar celda de cumplimiento (generalmente la última o la 6ª)
+        const celdasCandidatas = [
+            fila.querySelector('td:nth-child(6)'),  // Posición estándar
+            fila.querySelector('td:nth-child(7)'),  // Posición alternativa
+            fila.querySelector('td:last-child')     // Última celda
+        ];
+        
+        celdasCandidatas.forEach(celda => {
+            if (!celda) return;
+            
+            // Verificar que la celda contenga porcentaje
+            const valor = celda.textContent.trim();
+            if (!valor || !valor.includes('%')) return;
+            
+            const porcentaje = parseFloat(valor.replace(/[^\d.-]/g, ''));
+            if (isNaN(porcentaje)) return;
+            
+            // Verificar si es un indicador con regla binaria
+            const esBinario = codigoIndicador && indicadoresBinarios.includes(codigoIndicador);
+            
+            // Determinar estado
+            const estadoObj = determinarEstadoIndicador(porcentaje, 0, codigoIndicador);
+            const estado = mapearEstadoAEstilos(estadoObj, paleta);
+            
+            // Actualizar elementos visuales
+            const badge = celda.querySelector('.badge');
+            if (badge) {
+                badge.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                badge.classList.add(estado.clase);
+                
+                // Actualizar ícono dentro del badge
+                const iconoBadge = badge.querySelector('i');
+                if (iconoBadge) {
+                    iconoBadge.className = `fas ${estado.icono} me-1`;
+                }
+                
+                // Actualizar texto
+                const textoOriginal = badge.textContent.replace(/\s*\S+\s*$/, '').trim(); // Quitar última palabra
+                badge.innerHTML = `<i class="fas ${estado.icono} me-1"></i> ${estadoObj.statusText}`;
+                
+                contadorActualizados++;
+            }
+            
+            // Actualizar barra de progreso si existe
+            const progressContainer = celda.querySelector('.progress');
+            if (progressContainer) {
+                const progressBar = progressContainer.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+                    progressBar.classList.add(estado.clase);
+                    contadorActualizados++;
+                }
+            }
+        });
+    });
+
+    // ===== 4. PROCESAR GRÁFICOS Y VISUALIZACIONES =====
+    // Actualizamos el fondo de los gráficos según las reglas
+    document.querySelectorAll('canvas').forEach(canvas => {
+        // Intentamos encontrar una referencia al objeto Chart.js asociado
+        const chartInstance = window.Chart && window.Chart.instances 
+            ? Object.values(window.Chart.instances).find(chart => chart.canvas === canvas) 
+            : null;
+        
+        if (!chartInstance) return;
+        
+        try {
+            // Intentar identificar el indicador del título del gráfico
+            const titulo = chartInstance.options.plugins && chartInstance.options.plugins.title 
+                ? chartInstance.options.plugins.title.text 
+                : '';
+            
+            let codigoIndicador = '';
+            if (titulo) {
+                codigoIndicador = extraerCodigoIndicador(titulo);
+            }
+            
+            // Si es un gráfico de un indicador con regla binaria, actualizamos los colores
+            if (codigoIndicador && indicadoresBinarios.includes(codigoIndicador)) {
+                const datasets = chartInstance.data.datasets;
+                
+                datasets.forEach(dataset => {
+                    // Para el color de fondo según el valor
+                    if (typeof dataset.backgroundColor === 'function') {
+                        const originalFunction = dataset.backgroundColor;
+                        dataset.backgroundColor = function(context) {
+                            const value = context.raw;
+                            // Aplicar regla binaria: solo verde o rojo
+                            return value >= 100 ? '#27ae60' : '#e74c3c';
+                        };
+                    }
+                });
+                
+                // Actualizar el gráfico
+                chartInstance.update();
+                contadorActualizados++;
+            }
+        } catch (error) {
+            console.warn("Error al actualizar gráfico:", error);
+        }
+    });
+
+    // Actualizar función global para mantener consistencia
+    window.determinarEstadoIndicador = determinarEstadoIndicador;
+    console.log(`✅ Actualización completada: ${contadorActualizados} elementos modificados.`);
+}
+
+/**
+ * Inicializa el sistema de evaluación y aplicación de reglas
+ */
+function inicializarSistemaEvaluacion() {
+    console.log("🚀 Inicializando Sistema de Evaluación de Metas Sanitarias v2.0...");
+    
+    // Aplicar colores después de que la página esté completamente cargada
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(aplicarColoresCumplimiento, 1000);
+    });
+    
+    // Integrar con las funciones de actualización existentes
+    const funcionesUpdate = [
+        'actualizarDashboard', 
+        'actualizarTablaIndicadores', 
+        'actualizarDetalleCentro', 
+        'actualizarDetalleIndicador', 
+        'actualizarVistaComparativa',
+        'actualizarGraficosDetalleCentro',
+        'actualizarTablaIndicadoresCentro',
+        'actualizarDetalleIndicador'
+    ];
+    
+    funcionesUpdate.forEach(nombre => {
+        const funcionOriginal = window[nombre];
+        if (typeof funcionOriginal === 'function') {
+            window[nombre] = function() {
+                const resultado = funcionOriginal.apply(this, arguments);
+                setTimeout(aplicarColoresCumplimiento, 200);
+                return resultado;
+            };
+        }
+    });
+    
+    // Registrar observer para cambios dinámicos en DOM
+    if (window.MutationObserver) {
+        const observer = new MutationObserver(function(mutations) {
+            // Solo aplicar colores si hay cambios significativos
+            let aplicarCambios = false;
+            
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    // Verificar si los nodos añadidos son relevantes
+                    for (let i = 0; i < mutation.addedNodes.length; i++) {
+                        const node = mutation.addedNodes[i];
+                        if (node.nodeType === 1) { // Elemento
+                            if (node.querySelector('.progress-bar, .badge, .cumplimiento') || 
+                                node.classList && (
+                                    node.classList.contains('progress-bar') || 
+                                    node.classList.contains('badge') || 
+                                    node.classList.contains('cumplimiento')
+                                )) {
+                                aplicarCambios = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            if (aplicarCambios) {
+                setTimeout(aplicarColoresCumplimiento, 200);
+            }
+        });
+        
+        // Observar todo el cuerpo del documento
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true 
+        });
+    }
+    
+    // Aplicar colores inmediatamente
+    aplicarColoresCumplimiento();
+}
+
+// Ejecutar inicialización
+inicializarSistemaEvaluacion();
+
+/**
+ * Función para actualizar manualmente los indicadores
+ * Expuesta globalmente para uso en consola o por otros scripts
+ * 
+ * @param {string} selector - Selector CSS opcional
+ * @return {number} - Número de elementos actualizados
+ */
+window.actualizarIndicadoresMetas = function(selector) {
+    console.log("🔄 Actualizando indicadores manualmente...");
+    aplicarColoresCumplimiento();
+    return "✅ Actualización manual completada";
+};
+
+
+
 
 
 document.getElementById('currentYear').textContent = new Date().getFullYear();
