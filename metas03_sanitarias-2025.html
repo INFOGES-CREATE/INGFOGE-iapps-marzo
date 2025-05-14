@@ -7009,164 +7009,150 @@ function exportarPDF(tipo) {
                 datos = datosTabulares;
             }
             
-            // ============ FUNCIÓN PARA CREAR ENCABEZADO FUTURISTA Y PREMIUM ============
-            function agregarEncabezado(pagina) {
-                // --- 1) Fondo blanco premium con sutiles patrones ---
-                doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
-                doc.rect(0, 0, anchoPagina, 30, 'F');
-                
-                // --- 2) Franja gradiente premium en la parte superior ---
-                for (let i = 0; i < 5; i++) {
-                    const factor = i / 4;
-                    const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
-                    const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
-                    const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
-                    
-                    doc.setFillColor(r, g, b);
-                    doc.rect(0, i, anchoPagina, 1, 'F');
-                }
-                
-                // --- 3) Logo con sombra ---
-                const logoX = margen;
-                const logoY = 8;
-                const logoW = 18;
-                const logoH = 18;
-                
-                // Sombra elegante para el logo
-                doc.setFillColor(230, 230, 230);
-                doc.circle(logoX + logoW/2 + 0.8, logoY + logoH/2 + 0.8, logoW/2, 'F');
-                
-                try {
-                    const rutaLogo = './images/logo_metas.png';
-                    doc.addImage(rutaLogo, 'PNG', logoX, logoY, logoW, logoH);
-                } catch (e) {
-                    // Crear logo placeholder con círculo premium
-                    doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
-                    doc.circle(logoX + logoW/2, logoY + logoH/2, logoW/2, 'F');
-                    
-                    // Iniciales o icono placeholder dentro del círculo
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(12);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('MS', logoX + logoW/2, logoY + logoH/2 + 4, { align: 'center' });
-                }
-                
-                // --- 4) Textos del encabezado con estilo premium ---
-                // Título principal con degradado simulado
-                doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 15);
-                
-                // Subtítulo con espaciado de letras ampliado
-                doc.setFontSize(11);
-                doc.setFont(undefined, 'normal');
-                doc.text(
-                    'Informe de Metas Sanitarias - Sistema de Gestión Integral',
-                    margen + 25,
-                    22
-                );
-                
-                // --- 5) Número de página con estilo futurista ---
-                doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
-                doc.rect(anchoPagina - margen - 25, 10, 20, 10, 'F');
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(9);
-                doc.setFont(undefined, 'bold');
-                doc.text(
-                    `PÁG ${pagina}`,
-                    anchoPagina - margen - 15,
-                    16,
-                    { align: 'center' }
-                );
-                
-                // --- 6) Línea separadora inferior con gradiente ---
-                for (let i = 0; i < 3; i++) {
-                    const factor = i / 2;
-                    const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
-                    const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
-                    const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
-                    
-                    doc.setDrawColor(r, g, b);
-                    doc.setLineWidth(0.2);
-                    doc.line(0, 30 - i, anchoPagina, 30 - i);
-                }
-                
-                // Retorna la Y donde termina el encabezado
-                return 40;
-            }
+           // ============ FUNCIÓN PARA CREAR ENCABEZADO FUTURISTA Y PREMIUM ============
+function agregarEncabezado(pagina) {
+    // --- 1) Fondo blanco premium con sutiles patrones ---
+    doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
+    doc.rect(0, 0, anchoPagina, 30, 'F');
+
+    // --- 2) Franja gradiente premium en la parte superior ---
+    for (let i = 0; i < 3; i++) {
+        const factor = i / 2;
+        const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
+        const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
+        const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
+
+        doc.setFillColor(r, g, b);
+        doc.rect(0, i, anchoPagina, 1, 'F');
+    }
+
+    // --- 3) Logo IAAPS 2025 ---
+    const logoX = margen;
+    const logoY = 7;
+    const logoW = 20;
+    const logoH = 20;
+    const rutaLogo = 'images/logo2.png'; // Ruta simplificada
+
+    try {
+        doc.addImage(rutaLogo, 'PNG', logoX, logoY, logoW, logoH);
+    } catch (e) {
+        console.error('Error al cargar el logo:', e);
+        // En caso de error, mostrar un placeholder (opcional)
+        doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+        doc.circle(logoX + logoW / 2, logoY + logoH / 2, logoW / 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('LOGO', logoX + logoW / 2, logoY + logoH / 2 + 3, { align: 'center' });
+    }
+
+    // --- 4) Textos del encabezado con estilo premium ---
+    // Título principal
+    doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 15);
+
+    // Subtítulo
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(
+        'Informe de Metas Sanitarias - Sistema de Gestión Integral',
+        margen + 25,
+        23
+    );
+
+    // --- 5) Número de página con estilo futurista ---
+    doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+    doc.rect(anchoPagina - margen - 22, 9, 18, 10, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont(undefined, 'bold');
+    doc.text(
+        `PÁG ${pagina}`,
+        anchoPagina - margen - 11,
+        15,
+        { align: 'center' }
+    );
+
+    // --- 6) Línea separadora inferior con gradiente ---
+    for (let i = 0; i < 2; i++) {
+        const factor = i;
+        const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
+        const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
+        const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
+
+        doc.setDrawColor(r, g, b);
+        doc.setLineWidth(0.2);
+        doc.line(0, 30 - i - 0.5, anchoPagina, 30 - i - 0.5);
+    }
+
+    // Retorna la Y donde termina el encabezado
+    return 35;
+}
             
             // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA PREMIUM Y FUTURISTA ============
             function agregarPiePagina() {
-                const alturaPie = 15;
-                const posY = altoPagina - alturaPie;
-                
-                // Fondo blanco para el pie de página con leve textura
-                doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
-                doc.rect(0, posY, anchoPagina, alturaPie, 'F');
-                
-                // Líneas decorativas superiores con gradiente
-                for (let i = 0; i < 3; i++) {
-                    const factor = i / 2;
-                    const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
-                    const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
-                    const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
-                    
-                    doc.setDrawColor(r, g, b);
-                    doc.setLineWidth(0.2);
-                    doc.line(0, posY + i, anchoPagina, posY + i);
-                }
-                
-                // Franja inferior con gradiente
-                for (let i = 0; i < 5; i++) {
-                    const factor = i / 4;
-                    const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
-                    const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
-                    const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
-                    
-                    doc.setFillColor(r, g, b);
-                    doc.rect(0, altoPagina - i - 1, anchoPagina, 1, 'F');
-                }
-                
-                // Línea dorada premium
-                doc.setFillColor(colores.acento[0], colores.acento[1], colores.acento[2]);
-                doc.rect(0, altoPagina - 5.5, anchoPagina, 0.5, 'F');
-                
-                // Texto del pie con estilo elegante
-                doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
-                doc.setFontSize(8);
-                doc.setFont(undefined, 'normal');
-                
-                // Información a mostrar en el pie de página
-                const fechaGen = new Date().toLocaleDateString('es-CL', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                // Lado izquierdo con fecha
-                doc.text(`SIGIS Curicó - Metas Sanitarias - Generado: ${fechaGen}`, margen, posY + 8);
-                
-                // Lado derecho con datos de contacto
-                doc.text('Servicio de Salud Curicó - Carmen N°560, Curicó', anchoPagina - margen, posY + 8, {align: 'right'});
-                
-                // QR code simulado (cuadrado pequeño)
-                doc.setFillColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
-                doc.rect(anchoPagina / 2 - 4, posY + 4, 8, 8, 'F');
-                
-                // Patrón dentro del QR
-                doc.setFillColor(255, 255, 255);
-                doc.rect(anchoPagina / 2 - 3, posY + 5, 2, 2, 'F');
-                doc.rect(anchoPagina / 2 + 1, posY + 5, 2, 2, 'F');
-                doc.rect(anchoPagina / 2 - 3, posY + 9, 2, 2, 'F');
-                doc.rect(anchoPagina / 2 + 1, posY + 9, 2, 2, 'F');
-                
-                return posY;
-            }
-            
+    const alturaPie = 15;
+    const posY = altoPagina - alturaPie;
+    
+    // Fondo blanco para el pie de página con leve textura
+    doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
+    doc.rect(0, posY, anchoPagina, alturaPie, 'F');
+    
+    // Líneas decorativas superiores con gradiente
+    for (let i = 0; i < 3; i++) {
+        const factor = i / 2;
+        const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
+        const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
+        const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
+        
+        doc.setDrawColor(r, g, b);
+        doc.setLineWidth(0.2);
+        doc.line(0, posY + i, anchoPagina, posY + i);
+    }
+    
+    // Franja inferior con gradiente
+    for (let i = 0; i < 5; i++) {
+        const factor = i / 4;
+        const r = Math.round(colores.gradientStart[0] * (1 - factor) + colores.gradientEnd[0] * factor);
+        const g = Math.round(colores.gradientStart[1] * (1 - factor) + colores.gradientEnd[1] * factor);
+        const b = Math.round(colores.gradientStart[2] * (1 - factor) + colores.gradientEnd[2] * factor);
+        
+        doc.setFillColor(r, g, b);
+        doc.rect(0, altoPagina - i - 1, anchoPagina, 1, 'F');
+    }
+    
+    // Línea dorada premium
+    doc.setFillColor(colores.acento[0], colores.acento[1], colores.acento[2]);
+    doc.rect(0, altoPagina - 5.5, anchoPagina, 0.5, 'F');
+    
+    // Texto del pie con estilo elegante
+    doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+    doc.setFontSize(8);
+    doc.setFont('Times', 'italic'); // Cursiva serif para un toque de lujo
+    
+    // Información a mostrar en el pie de página
+    const fechaGen = new Date().toLocaleDateString('es-CL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Lado izquierdo con fecha
+    doc.text(`SIGIS Curicó - Metas Sanitarias - Generado: ${fechaGen}`, margen, posY + 8);
+    
+    // Lado derecho con datos de contacto
+    doc.text('Servicio de Salud Curicó - Carmen N°925, Curicó', anchoPagina - margen, posY + 8, { align: 'right' });
+    
+    
+    
+    return posY;
+}
+     
             // ============ FUNCIÓN PARA CREAR TABLA PREMIUM Y FUTURISTA ============
             function crearTablaManual(datos, startY) {
                 // Configuración de la tabla
@@ -7641,8 +7627,8 @@ function exportarPDF(tipo) {
             doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
             doc.rect(margen, posY - 15, anchoPagina - 2*margen, 12, 'F');
             
-            // Título de la sección
-            doc.setTextColor(255, 255, 255);
+           // Título de la sección
+           doc.setTextColor(255, 255, 255);
             doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
             doc.text("DESCRIPCIÓN DEL INFORME", margen + 10, posY - 6);
@@ -7667,7 +7653,7 @@ function exportarPDF(tipo) {
             doc.text(lineasDescripcion, margen + 10, posY + 10);
             
             // Leyenda de Cumplimiento como tarjeta premium
-            posY += 90;
+            posY += 40;  // Reducido para acercar la tarjeta
             
             // Coordenadas y dimensiones de la tarjeta
             const leyendaX = margen;
@@ -7695,7 +7681,7 @@ function exportarPDF(tipo) {
             
             // Definir items de la leyenda
             const items = [
-                { tipo: 'fill', color: colores.secundario, texto: 'Cumplido (≥ 100%)' },
+                { tipo: 'fill', color: colores.secundario, texto: 'Cumplido (100%)' },
                 { tipo: 'stroke', color: colores.grisMedio, texto: 'No Cumplido (< 100%)' }
             ];
             
@@ -7743,7 +7729,7 @@ function exportarPDF(tipo) {
             doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            doc.text("Ejemplo: ", currentX, posY + 20 + textOffsetY);
+            doc.text(" ", currentX, posY + 20 + textOffsetY);
             
             // Casilla de ejemplo con cumplimiento exitoso
             for (let i = 0; i < boxSize; i++) {
@@ -7765,7 +7751,7 @@ function exportarPDF(tipo) {
             doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
             doc.setFontSize(10);
             doc.setFont(undefined, 'normal');
-            doc.text("Ejemplo: ", currentX, posY + 35 + textOffsetY);
+            doc.text(" ", currentX, posY + 35 + textOffsetY);
             
             doc.text("80.00%", currentX + 65, posY + 35 + textOffsetY, { align: 'center' });
             
