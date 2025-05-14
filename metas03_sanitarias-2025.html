@@ -2054,12 +2054,36 @@ body {
                                 <li><strong>Exportar</strong>: Opciones para generar reportes en PDF o Excel</li>
                             </ul>
                             
-                            <h5>¿Cómo actualizar los datos?</h5>
-                            <p>
-                                Los datos se cargan automáticamente desde el archivo Meta_Sanitaria _Corte_Marzo.xlsx. 
-                                Para actualizar los datos después de modificar el archivo Excel, haga clic en el 
-                                botón "Actualizar" en la barra de navegación.
-                            </p>
+                                                      
+                            <h5>¿Cómo usar el micrófono?</h5>
+<p>
+  • Para <strong>iniciar</strong> la escucha: presiona cualquier tecla (fuera de campos de texto) o haz clic en el icono de micrófono <code id="micButton">🎤</code>.<br>
+  • Para <strong>detener</strong> la escucha: suelta la tecla que presionaste o vuelve a hacer clic en el mismo icono.
+</p>
+
+<h6>Comandos disponibles</h6>
+<ul>
+  <li><strong>dashboard</strong> / <strong>inicio</strong>: ir a la pantalla principal del sistema.</li>
+  <li><strong>detalle</strong> / <strong>detalles</strong>: navegar a la vista de detalle del indicador o centro activo.</li>
+  <li><strong>ayuda</strong>: abrir el modal de ayuda.</li>
+  <li><strong>actualizar</strong> / <strong>refrescar</strong>: recargar datos en pantalla.</li>
+  <li><strong>exportar excel</strong> / <strong>descargar excel</strong>: generar y descargar el informe en Excel.</li>
+  <li><strong>exportar pdf</strong> / <strong>descargar pdf</strong>: generar y descargar el informe en PDF.</li>
+  <li><strong>modo oscuro</strong> / <strong>modo noche</strong>: activar o desactivar el tema oscuro.</li>
+  <li><strong>modo claro</strong> / <strong>modo día</strong>: volver al tema claro.</li>
+  <li><strong>salir</strong>: volver a la pantalla de inicio de sesión.</li>
+  <li><strong>iaaps</strong> / <strong>panel iaaps</strong>: ir al panel principal de IAAPS.</li>
+  <li><strong>metas sanitarias</strong> / <strong>panel metas sanitarias</strong>: ir al panel de Metas Sanitarias.</li>
+  <li><strong>tablero poblacional</strong> / <strong>poblacion</strong>: ir al Tablero Poblacional.</li>
+  <li><strong>centro [nombre]</strong>: mostrar detalle de un centro específico.</li>
+  <li><strong>indicador [número]</strong>: mostrar un indicador concreto.</li>
+  <li><strong>buscar [término]</strong>: filtrar indicadores por palabra clave.</li>
+</ul>
+
+
+
+                                
+
                             
                             <h5>Leyenda de cálculos</h5>
                             <ul>
@@ -4998,9 +5022,12 @@ function procesarComandoVoz(comando) {
     } else if (comando.includes('modo oscuro') || comando.includes('modo noche')) {
         document.getElementById('darkModeToggle').checked = !document.getElementById('darkModeToggle').checked;
         toggleDarkMode();
-        mostrarNotificacion(`Modo oscuro ${darkMode ? 'activado' : 'desactivado'}`, 'success');
+        mostrarNotificacion(
+          `Modo oscuro ${document.getElementById('darkModeToggle').checked ? 'activado' : 'desactivado'}`,
+          'success'
+        );
     } else if (comando.includes('modo claro') || comando.includes('modo día')) {
-        if (darkMode) {
+        if (document.getElementById('darkModeToggle').checked) {
             document.getElementById('darkModeToggle').checked = false;
             toggleDarkMode();
             mostrarNotificacion('Modo claro activado', 'success');
@@ -5008,7 +5035,35 @@ function procesarComandoVoz(comando) {
             mostrarNotificacion('Ya estás en modo claro', 'info');
         }
     }
-
+    // Comando salir
+    else if (comando.includes('salir')) {
+        window.location.href = 'index.html';
+    }
+    // Comando IAAPS
+    else if (comando.includes('panel iaaps') || comando.includes('iaaps')) {
+        if (window.location.pathname.endsWith('iaaps03_2025.html')) {
+            mostrarNotificacion('Ya estás en IAAPS', 'info');
+        } else {
+            window.location.href = 'iaaps03_2025.html';
+        }
+    }
+    // Comando Metas Sanitarias
+    else if (comando.includes('panel metas sanitarias') || comando.includes('meta sanitaria')) {
+        if (window.location.pathname.endsWith('metas03_sanitarias-2025.html')) {
+            mostrarNotificacion('Ya estás en Metas Sanitarias', 'info');
+        } else {
+            window.location.href = 'metas03_sanitarias-2025.html';
+        }
+    }
+    // Comando Tablero Poblacional
+    else if (comando.includes('tablero poblacional') || comando.includes('poblacion')) {
+        if (window.location.pathname.endsWith('tablero_poblacional2025.html')) {
+            mostrarNotificacion('Ya estás en Tablero Poblacional', 'info');
+        } else {
+            window.location.href = 'tablero_poblacional2025.html';
+        }
+    }
+    
     
     // Comandos de exportación
     else if (comando.includes('exportar') || comando.includes('descargar')) {
