@@ -5132,6 +5132,19 @@ function inicializarComandosVoz() {
         }
     });
     
+
+    // Aquí asumimos que tu botón de micrófono usa id="micButton" y que su handler .click() inicia/parar el reconocimiento
+document.addEventListener('keydown', function(event) {
+    // Si estás escribiendo en un input o textarea, evitamos dispararlo
+    const tag = event.target.tagName.toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    // “Clickea” el botón para activar el micrófono
+    document.getElementById('micButton').click();
+});
+
+
+    
     // Evento de finalización del reconocimiento
     recognition.onend = function() {
         micButton.innerHTML = '<i class="fas fa-microphone"></i>';
@@ -5177,7 +5190,17 @@ function procesarComandoVoz(comando) {
         document.getElementById('darkModeToggle').checked = !document.getElementById('darkModeToggle').checked;
         toggleDarkMode();
         mostrarNotificacion(`Modo oscuro ${darkMode ? 'activado' : 'desactivado'}`, 'success');
+    } else if (comando.includes('modo claro') || comando.includes('modo día')) {
+        if (darkMode) {
+            document.getElementById('darkModeToggle').checked = false;
+            toggleDarkMode();
+            mostrarNotificacion('Modo claro activado', 'success');
+        } else {
+            mostrarNotificacion('Ya estás en modo claro', 'info');
+        }
     }
+
+    
     
     // Comandos de exportación
     else if (comando.includes('exportar') || comando.includes('descargar')) {
@@ -6866,7 +6889,7 @@ function exportarPDF(tipo) {
                 });
                 
                 doc.text(`INFOGES Curicó - Dashboard de Control IAAPS - Generado: ${fechaGen}`, margen, posY + 5);
-                doc.text('Servicio de Salud Curicó - Carmen N°560, Curicó', anchoPagina - margen, posY + 5, {align: 'right'});
+                doc.text('Servicio de Salud Curicó - Carmen N°925, Curicó', anchoPagina - margen, posY + 5, {align: 'right'});
                 
                 return posY;
             }

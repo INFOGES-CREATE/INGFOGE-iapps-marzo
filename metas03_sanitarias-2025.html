@@ -4942,6 +4942,16 @@ function inicializarComandosVoz() {
             mostrarNotificacion('Escuchando... diga un comando', 'success');
         }
     });
+
+    // Aquí asumimos que tu botón de micrófono usa id="micButton" y que su handler .click() inicia/parar el reconocimiento
+document.addEventListener('keydown', function(event) {
+    // Si estás escribiendo en un input o textarea, evitamos dispararlo
+    const tag = event.target.tagName.toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    // “Clickea” el botón para activar el micrófono
+    document.getElementById('micButton').click();
+});
     
     // Evento de finalización del reconocimiento
     recognition.onend = function() {
@@ -4969,6 +4979,7 @@ function inicializarComandosVoz() {
 }
 
 // Procesar comandos de voz
+// Procesar comandos de voz
 function procesarComandoVoz(comando) {
     // Comandos de navegación
     if (comando.includes('dashboard') || comando.includes('inicio')) {
@@ -4988,7 +4999,16 @@ function procesarComandoVoz(comando) {
         document.getElementById('darkModeToggle').checked = !document.getElementById('darkModeToggle').checked;
         toggleDarkMode();
         mostrarNotificacion(`Modo oscuro ${darkMode ? 'activado' : 'desactivado'}`, 'success');
+    } else if (comando.includes('modo claro') || comando.includes('modo día')) {
+        if (darkMode) {
+            document.getElementById('darkModeToggle').checked = false;
+            toggleDarkMode();
+            mostrarNotificacion('Modo claro activado', 'success');
+        } else {
+            mostrarNotificacion('Ya estás en modo claro', 'info');
+        }
     }
+
     
     // Comandos de exportación
     else if (comando.includes('exportar') || comando.includes('descargar')) {
