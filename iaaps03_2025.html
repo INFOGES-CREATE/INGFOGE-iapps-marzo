@@ -6768,6 +6768,14 @@ function exportarPDF(tipo) {
  * Función para exportar informes IAAPS a PDF con diseño profesional
  * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
  */
+/**
+ * Función para exportar informes a PDF con diseño profesional
+ * - Usa color verde en lugar de azul
+ * - Textos correctamente alineados y sin superposición
+ * - Fondos blancos con detalles en verde
+ * - Logo visible y encabezado mejorado
+ * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
+ */
 function exportarPDF(tipo) {
     mostrarCargando(true);
     
@@ -6776,7 +6784,7 @@ function exportarPDF(tipo) {
             // Inicialización del documento PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({
-                orientation: 'portrait', // Cambiado a vertical
+                orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4'
             });
@@ -6792,15 +6800,14 @@ function exportarPDF(tipo) {
             const altoPagina = doc.internal.pageSize.getHeight();
             const margen = 15;
             
-            // Definir paleta de colores institucional (mejorada)
+            // Definir paleta de colores (verde y blanco principalmente)
             const colores = {
-                primario: [45, 116, 186],      // Azul institucional más vibrante
-                secundario: [46, 204, 113],    // Verde más saturado (indicador bueno)
-                alerta: [241, 196, 15],        // Amarillo más brillante (indicador en progreso)
-                peligro: [231, 76, 60],        // Rojo (indicador crítico)
-                textoOscuro: [255, 255, 255],     // Texto principal
-                textoClaro: [255, 255, 255],   // Texto sobre fondos oscuros
-                fondoClaro: [248, 249, 250]    // Fondo de secciones
+                verde: [35, 155, 86],        // Color verde principal
+                verdeClaro: [46, 204, 113],  // Verde claro para elementos secundarios
+                verdeOscuro: [20, 125, 60],  // Verde oscuro para detalles
+                grisClaro: [240, 240, 240],  // Gris muy claro para alternar filas
+                negro: [50, 50, 50],         // Negro para textos
+                blanco: [255, 255, 255]      // Blanco puro
             };
             
             // ======== PREPARACIÓN DE DATOS SEGÚN EL TIPO DE INFORME ========
@@ -6816,13 +6823,13 @@ function exportarPDF(tipo) {
                 nombreArchivo = `IAAPS_${centro.nombre.replace(/\s/g, '_')}_Marzo_2025.pdf`;
                 titulo = `Centro de Salud: ${centro.nombre}`;
                 
-                // Datos de la tabla
+                // Datos de la tabla con textos recortados
                 iaapsData.indicadores.forEach(indicador => {
                     const resultado = indicador.resultados.find(r => r.centro === currentCentro);
                     if (!resultado) return;
                     
                     datos.push({
-                        indicador: `${indicador.codigo} - ${recortarTexto(indicador.nombre, 40)}`,
+                        indicador: `${indicador.codigo} - ${recortarTexto(indicador.nombre, 35)}`,
                         numerador: formatearNumero(resultado.numerador),
                         denominador: formatearNumero(resultado.denominador),
                         resultado: formatearValor(resultado.resultado, indicador.tipo),
@@ -6850,7 +6857,7 @@ function exportarPDF(tipo) {
                     if (!resultado) return;
                     
                     datos.push({
-                        centro: centro.nombre,
+                        centro: recortarTexto(centro.nombre, 25), // Recortar nombre para evitar desbordamiento
                         numerador: formatearNumero(resultado.numerador),
                         denominador: formatearNumero(resultado.denominador),
                         resultado: formatearValor(resultado.resultado, indicador.tipo),
@@ -6868,10 +6875,11 @@ function exportarPDF(tipo) {
                 // Datos para tabla comparativa - formato especial
                 const datosTabulares = [];
                 
-                // Preparar encabezados de centros
+                // Preparar encabezados de centros (recortados)
                 const centrosHeader = ['Indicador', 'Meta', 'Comunal'];
                 iaapsData.centros.filter(c => c.codigo !== 'comunal').forEach(centro => {
-                    centrosHeader.push(centro.nombre);
+                    // Recortar nombres de centros para que quepan en la tabla
+                    centrosHeader.push(recortarTexto(centro.nombre, 12));
                 });
                 
                 datosTabulares.push(centrosHeader);
@@ -6879,7 +6887,7 @@ function exportarPDF(tipo) {
                 // Añadir datos para cada indicador
                 iaapsData.indicadores.forEach(indicador => {
                     const fila = [
-                        `${indicador.codigo} - ${recortarTexto(indicador.nombre, 30)}`,
+                        `${indicador.codigo} - ${recortarTexto(indicador.nombre, 25)}`,
                         formatearValor(indicador.meta, indicador.tipo)
                     ];
                     
@@ -6901,39 +6909,44 @@ function exportarPDF(tipo) {
             
             // ============ FUNCIÓN PARA CREAR ENCABEZADO ============
             function agregarEncabezado(pagina) {
-                // Fondo del encabezado
-                doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                // Fondo blanco para todo el encabezado
+                doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
                 doc.rect(0, 0, anchoPagina, 22, 'F');
                 
-                // Línea decorativa
-                doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
-                doc.rect(0, 22, anchoPagina, 2, 'F');
+                // Línea decorativa verde
+                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                doc.rect(0, 22, anchoPagina, 1.5, 'F');
                 
-                // Logo
+                // Logo (área reservada, fondo gris claro)
+                doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+                doc.roundedRect(margen, 4, 20, 15, 1, 1, 'F');
+                
                 try {
                     // Ruta relativa para web (ajustar según la estructura del proyecto)
                     const rutaLogo = './images/logo2.png';
-                    doc.addImage(rutaLogo, 'PNG', margen, 4, 15, 15);
+                    doc.addImage(rutaLogo, 'PNG', margen + 2.5, 5, 15, 13);
                 } catch (e) {
                     console.warn('No se pudo cargar el logo:', e);
                     // Alternativa al logo
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(12);
+                    doc.setTextColor(100, 100, 100);
+                    doc.setFontSize(10);
                     doc.text('LOGO', margen + 5, 12);
                 }
                 
-                // Título del documento
-                doc.setTextColor(255, 255, 255);
+                // Título del documento con color verde
+                doc.setTextColor(colores.verdeOscuro[0], colores.verdeOscuro[1], colores.verdeOscuro[2]);
                 doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
                 doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 10);
                 
                 // Subtítulo
-                doc.setFontSize(12);
+                doc.setFontSize(11);
                 doc.setFont(undefined, 'normal');
-                doc.text('Informe de Indicadores de Atención Primaria de Salud (IAAPS)', margen + 25, 17);
+                doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+                doc.text('Informe de Indicadores de Atención Primaria (IAAPS)', margen + 25, 17);
                 
                 // Número de página
+                doc.setFontSize(9);
                 doc.text(`Página ${pagina}`, anchoPagina - margen - 15, 10);
                 
                 // Retornar posición Y donde termina el encabezado
@@ -6942,20 +6955,19 @@ function exportarPDF(tipo) {
             
             // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA ============
             function agregarPiePagina() {
-                const alturaPie = 12;
+                const alturaPie = 10;
                 const posY = altoPagina - alturaPie;
                 
                 // Fondo del pie de página
-                doc.setFillColor(colores.fondoClaro[0], colores.fondoClaro[1], colores.fondoClaro[2]);
+                doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
                 doc.rect(0, posY, anchoPagina, alturaPie, 'F');
                 
-                // Línea superior
-                doc.setDrawColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                doc.setLineWidth(0.5);
-                doc.line(0, posY, anchoPagina, posY);
+                // Línea superior verde
+                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                doc.rect(0, posY, anchoPagina, 0.5, 'F');
                 
                 // Texto del pie
-                doc.setTextColor(80, 80, 80);
+                doc.setTextColor(100, 100, 100);
                 doc.setFontSize(8);
                 doc.setFont(undefined, 'italic');
                 
@@ -6966,33 +6978,23 @@ function exportarPDF(tipo) {
                     day: 'numeric'
                 });
                 
-                doc.text(`INFOGES Curicó - Dashboard de Control IAAPS - Generado el ${fechaGen}`, margen, posY + 5);
-                doc.text('Servicio de Salud Curicó - Dirección: Carmen N°560 , Curicó', margen, posY + 9);
-                
-                // Copyright y nota legal a la derecha
-                doc.text('Documento confidencial - Uso interno', anchoPagina - margen - 50, posY + 7);
+                doc.text(`INFOGES Curicó - Dashboard IAAPS - Generado: ${fechaGen}`, margen, posY + 5);
+                doc.text('Servicio de Salud Curicó - Carmen N°560, Curicó', anchoPagina - margen - 60, posY + 5);
                 
                 return posY;
             }
             
             // ============ FUNCIÓN PARA CREAR TABLA MANUAL ============
-            function crearTablaManual(datos, startY, columnas) {
-                // Función para dibujar celdas con color de fondo
-                function dibujarCelda(texto, x, y, ancho, colorFondo) {
-                    if (colorFondo) {
-                        doc.setFillColor(colorFondo[0], colorFondo[1], colorFondo[2], colorFondo[3] || 1);
-                        doc.rect(x, y - 5, ancho, 7, 'F');
-                    }
-                    doc.text(texto, x + 2, y);
-                }
-                
+            function crearTablaManual(datos, startY) {
                 // Configuración de la tabla
                 const margenTabla = margen;
                 const anchoDisponible = anchoPagina - (2 * margenTabla);
                 let posY = startY;
+                const altoFila = 10; // Altura ampliada de cada fila
                 
                 // Definir anchos de columna según el tipo de informe
                 let anchoColumnas = [];
+                let encabezados = [];
                 
                 if (tipo === 'centro') {
                     // Para informe de centro
@@ -7005,113 +7007,9 @@ function exportarPDF(tipo) {
                         anchoDisponible * 0.12  // Cumplimiento
                     ];
                     
-                    // Encabezados
-                    const encabezados = ['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
-                    let posX = margenTabla;
-                    
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                    
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
-                    
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
-                    
-                    // Limitar a 20 filas por página
-                    const filasPorPagina = 15; // Reducido por orientación vertical
-                    const paginasTotales = Math.ceil(datos.length / filasPorPagina);
-                    
-                    for (let pagina = 0; pagina < paginasTotales; pagina++) {
-                        if (pagina > 0) {
-                            // Nueva página
-                            doc.addPage();
-                            posY = agregarEncabezado(pagina + 2) + 10;
-                            agregarPiePagina();
-                            
-                            // Repetir encabezados
-                            posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
-                            doc.setFont(undefined, 'bold');
-                            
-                            encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
-                                posX += anchoColumnas[index];
-                            });
-                            
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                        
-                        // Filas para esta página
-                        const inicio = pagina * filasPorPagina;
-                        const fin = Math.min((pagina + 1) * filasPorPagina, datos.length);
-                        
-                        for (let i = inicio; i < fin; i++) {
-                            const dato = datos[i];
-                            posX = margenTabla;
-                            
-                            // Fila con fondo alternado
-                            if (i % 2 === 1) {
-                                doc.setFillColor(245, 245, 250);
-                                doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            }
-                            
-                            // Indicador
-                            doc.text(dato.indicador, posX + 2, posY);
-                            posX += anchoColumnas[0];
-                            
-                            // Numerador
-                            doc.text(dato.numerador, posX + 2, posY);
-                            posX += anchoColumnas[1];
-                            
-                            // Denominador
-                            doc.text(dato.denominador, posX + 2, posY);
-                            posX += anchoColumnas[2];
-                            
-                            // Resultado
-                            doc.text(dato.resultado, posX + 2, posY);
-                            posX += anchoColumnas[3];
-                            
-                            // Meta
-                            doc.text(dato.meta, posX + 2, posY);
-                            posX += anchoColumnas[4];
-                            
-                            // Cumplimiento (con color según valor)
-                            const cumplimiento = parseFloat(dato.cumplimiento);
-                            let colorCumplimiento;
-                            
-                            // Colores más diferenciados y vibrantes para el estado
-                            if (cumplimiento >= 100) {
-                                colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                            } else if (cumplimiento >= 90) {
-                                colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                            } else {
-                                colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                            }
-                            
-                            dibujarCelda(dato.cumplimiento, posX, posY, anchoColumnas[5], colorCumplimiento);
-                            
-                            posY += 8;
-                        }
-                    }
+                    encabezados = ['Indicador', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
                 } else if (tipo === 'indicador') {
-                    // Para informe de indicador - similar a 'centro' pero con diferentes encabezados
+                    // Para informe de indicador
                     anchoColumnas = [
                         anchoDisponible * 0.30, // Centro
                         anchoDisponible * 0.14, // Numerador
@@ -7121,217 +7019,180 @@ function exportarPDF(tipo) {
                         anchoDisponible * 0.14  // Cumplimiento
                     ];
                     
-                    // Encabezados
-                    const encabezados = ['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
-                    let posX = margenTabla;
-                    
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                    
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
-                    
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
-                    
-                    datos.forEach((dato, i) => {
-                        posX = margenTabla;
-                        
-                        // Fila con fondo alternado
-                        if (i % 2 === 1) {
-                            doc.setFillColor(245, 245, 250);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                        }
-                        
-                        // Centro
-                        doc.text(dato.centro, posX + 2, posY);
-                        posX += anchoColumnas[0];
-                        
-                        // Numerador
-                        doc.text(dato.numerador, posX + 2, posY);
-                        posX += anchoColumnas[1];
-                        
-                        // Denominador
-                        doc.text(dato.denominador, posX + 2, posY);
-                        posX += anchoColumnas[2];
-                        
-                        // Resultado
-                        doc.text(dato.resultado, posX + 2, posY);
-                        posX += anchoColumnas[3];
-                        
-                        // Meta
-                        doc.text(dato.meta, posX + 2, posY);
-                        posX += anchoColumnas[4];
-                        
-                        // Cumplimiento (con color según valor)
-                        const cumplimiento = parseFloat(dato.cumplimiento);
-                        let colorCumplimiento;
-                        
-                        if (cumplimiento >= 100) {
-                            colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                        } else if (cumplimiento >= 90) {
-                            colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                        } else {
-                            colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                        }
-                        
-                        dibujarCelda(dato.cumplimiento, posX, posY, anchoColumnas[5], colorCumplimiento);
-                        
-                        posY += 8;
-                        
-                        // Si hay demasiadas filas, pasar a nueva página
-                        if (posY > altoPagina - 30 && i < datos.length - 1) {
-                            doc.addPage();
-                            posY = agregarEncabezado(doc.internal.getNumberOfPages()) + 10;
-                            agregarPiePagina();
-                            
-                            // Repetir encabezados
-                            posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
-                            doc.setFont(undefined, 'bold');
-                            
-                            encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
-                                posX += anchoColumnas[index];
-                            });
-                            
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                    });
+                    encabezados = ['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
                 } else if (tipo === 'comparativo') {
                     // Para informe comparativo - estructura específica con datos tabulares
-                    const encabezados = datos[0];
-                    const filasDatos = datos.slice(1);
-                    
-                    // Calcular anchos de columna
+                    encabezados = datos[0];
                     const numColumnas = encabezados.length;
-                    const anchoPorColumna = anchoDisponible / numColumnas;
                     
-                    // Ajustar para indicador y meta
-                    anchoColumnas = Array(numColumnas).fill(anchoPorColumna);
-                    anchoColumnas[0] = anchoDisponible * 0.35; // Indicador - mayor espacio en vertical
-                    anchoColumnas[1] = anchoDisponible * 0.15; // Meta
+                    // Ajustar anchos específicamente para este caso
+                    anchoColumnas = [];
+                    anchoColumnas.push(anchoDisponible * 0.30); // Indicador
+                    anchoColumnas.push(anchoDisponible * 0.10); // Meta
                     
-                    // Redistribuir el espacio restante para los centros
-                    const espacioRestante = anchoDisponible - anchoColumnas[0] - anchoColumnas[1];
-                    const anchoCentros = espacioRestante / (numColumnas - 2);
+                    // Distribuir el resto del espacio equitativamente entre los centros
+                    const espacioRestante = anchoDisponible - (anchoDisponible * 0.40);
+                    const anchoPorCentro = espacioRestante / (numColumnas - 2);
                     
                     for (let i = 2; i < numColumnas; i++) {
-                        anchoColumnas[i] = anchoCentros;
-                    }
-                    
-                    // Encabezados
-                    let posX = margenTabla;
-                    
-                    // Fondo para encabezados
-                    doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                    doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                    
-                    // Texto de encabezados
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFontSize(10);
-                    doc.setFont(undefined, 'bold');
-                    
-                    encabezados.forEach((encabezado, index) => {
-                        doc.text(encabezado, posX + 2, posY);
-                        posX += anchoColumnas[index];
-                    });
-                    
-                    // Datos
-                    posY += 10;
-                    doc.setTextColor(0, 0, 0);
-                    doc.setFont(undefined, 'normal');
-                    
-                    // Limitar filas por página
-                    const filasPorPagina = 15; // Reducido por orientación vertical
-                    const paginasTotales = Math.ceil(filasDatos.length / filasPorPagina);
-                    
-                    for (let pagina = 0; pagina < paginasTotales; pagina++) {
-                        if (pagina > 0) {
-                            // Nueva página
-                            doc.addPage();
-                            posY = agregarEncabezado(pagina + 2) + 10;
-                            agregarPiePagina();
-                            
-                            // Repetir encabezados
-                            posX = margenTabla;
-                            doc.setFillColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-                            doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            
-                            doc.setTextColor(255, 255, 255);
-                            doc.setFontSize(10);
-                            doc.setFont(undefined, 'bold');
-                            
-                            encabezados.forEach((encabezado, index) => {
-                                doc.text(encabezado, posX + 2, posY);
-                                posX += anchoColumnas[index];
-                            });
-                            
-                            posY += 10;
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                        
-                        // Filas para esta página
-                        const inicio = pagina * filasPorPagina;
-                        const fin = Math.min((pagina + 1) * filasPorPagina, filasDatos.length);
-                        
-                        for (let i = inicio; i < fin; i++) {
-                            const fila = filasDatos[i];
-                            posX = margenTabla;
-                            
-                            // Fila con fondo alternado
-                            if (i % 2 === 1) {
-                                doc.setFillColor(245, 245, 250);
-                                doc.rect(margenTabla, posY - 5, anchoDisponible, 7, 'F');
-                            }
-                            
-                            // Recorrer cada columna de la fila
-                            fila.forEach((celda, j) => {
-                                // Para las columnas de cumplimiento (excepto indicador y meta)
-                                if (j >= 2 && celda !== '-' && celda.includes('%')) {
-                                    const cumplimiento = parseFloat(celda);
-                                    let colorCumplimiento;
-                                    
-                                    if (cumplimiento >= 100) {
-                                        colorCumplimiento = [colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3];
-                                    } else if (cumplimiento >= 90) {
-                                        colorCumplimiento = [colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3];
-                                    } else {
-                                        colorCumplimiento = [colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3];
-                                    }
-                                    
-                                    dibujarCelda(celda, posX, posY, anchoColumnas[j], colorCumplimiento);
-                                } else {
-                                    // Texto normal para otras columnas
-                                    doc.text(celda, posX + 2, posY);
-                                }
-                                
-                                posX += anchoColumnas[j];
-                            });
-                            
-                            posY += 8;
-                        }
+                        anchoColumnas.push(anchoPorCentro);
                     }
                 }
                 
-                return posY + 10; // Retornar la posición Y final
+                // ---- ENCABEZADOS DE LA TABLA ----
+                // Fondo verde para encabezados
+                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
+                
+                // Texto blanco para encabezados
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                
+                // Colocar texto de encabezados centrado verticalmente
+                let posX = margenTabla;
+                encabezados.forEach((encabezado, index) => {
+                    const textoX = posX + 2;
+                    const textoY = posY + 1; // Centrado vertical
+                    doc.text(encabezado, textoX, textoY);
+                    posX += anchoColumnas[index];
+                });
+                
+                // ---- FILAS DE DATOS ----
+                posY += altoFila + 2; // Espacio extra después de encabezados
+                doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+                doc.setFont(undefined, 'normal');
+                
+                // Calcular cuántas filas caben por página
+                const filasPorPagina = Math.floor((altoPagina - posY - 20) / (altoFila + 1));
+                
+                // Determinar qué datos procesar según el tipo de informe
+                let datosAProcesar = [];
+                if (tipo === 'comparativo') {
+                    datosAProcesar = datos.slice(1); // Quitar la fila de encabezados
+                } else {
+                    datosAProcesar = datos;
+                }
+                
+                // Calcular número total de páginas
+                const paginasTotales = Math.ceil(datosAProcesar.length / filasPorPagina);
+                
+                // Procesar cada página
+                for (let pagina = 0; pagina < paginasTotales; pagina++) {
+                    if (pagina > 0) {
+                        // Nueva página
+                        doc.addPage();
+                        posY = agregarEncabezado(pagina + 2) + 5;
+                        agregarPiePagina();
+                        
+                        // Repetir encabezados en la nueva página
+                        doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                        doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
+                        
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        
+                        posX = margenTabla;
+                        encabezados.forEach((encabezado, index) => {
+                            doc.text(encabezado, posX + 2, posY + 1);
+                            posX += anchoColumnas[index];
+                        });
+                        
+                        posY += altoFila + 2;
+                        doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+                        doc.setFont(undefined, 'normal');
+                    }
+                    
+                    // Calcular rango de filas para esta página
+                    const inicio = pagina * filasPorPagina;
+                    const fin = Math.min((pagina + 1) * filasPorPagina, datosAProcesar.length);
+                    
+                    // Procesar cada fila de esta página
+                    for (let i = inicio; i < fin; i++) {
+                        const fila = datosAProcesar[i];
+                        
+                        // Fondo de la fila (alternar blanco y gris muy claro)
+                        if (i % 2 === 0) {
+                            doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
+                        } else {
+                            doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+                        }
+                        doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
+                        
+                        // Procesar cada celda según el tipo de informe
+                        if (tipo === 'centro' || tipo === 'indicador') {
+                            posX = margenTabla;
+                            
+                            // Primera columna (Indicador o Centro)
+                            const primeraColumna = tipo === 'centro' ? fila.indicador : fila.centro;
+                            doc.text(primeraColumna, posX + 2, posY);
+                            posX += anchoColumnas[0];
+                            
+                            // Numerador
+                            doc.text(fila.numerador, posX + 2, posY);
+                            posX += anchoColumnas[1];
+                            
+                            // Denominador
+                            doc.text(fila.denominador, posX + 2, posY);
+                            posX += anchoColumnas[2];
+                            
+                            // Resultado
+                            doc.text(fila.resultado, posX + 2, posY);
+                            posX += anchoColumnas[3];
+                            
+                            // Meta
+                            doc.text(fila.meta, posX + 2, posY);
+                            posX += anchoColumnas[4];
+                            
+                            // Cumplimiento
+                            const cumplimiento = parseFloat(fila.cumplimiento);
+                            
+                            // Celda de cumplimiento: verde si cumple, blanco si no
+                            if (cumplimiento >= 100) {
+                                doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
+                                doc.rect(posX, posY - 5, anchoColumnas[5], altoFila, 'F');
+                            } else {
+                                // Fondo blanco para no cumplimiento
+                                doc.setFillColor(255, 255, 255);
+                                doc.rect(posX, posY - 5, anchoColumnas[5], altoFila, 'F');
+                            }
+                            
+                            // Texto del porcentaje de cumplimiento
+                            doc.text(fila.cumplimiento, posX + 2, posY);
+                            
+                        } else if (tipo === 'comparativo') {
+                            // Informe comparativo (tabla especial)
+                            posX = margenTabla;
+                            
+                            fila.forEach((celda, j) => {
+                                if (j >= 2 && celda !== '-' && celda.includes('%')) {
+                                    // Es una celda de cumplimiento
+                                    const cumplimiento = parseFloat(celda);
+                                    
+                                    // Colorear según cumplimiento
+                                    if (cumplimiento >= 100) {
+                                        doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
+                                        doc.rect(posX, posY - 5, anchoColumnas[j], altoFila, 'F');
+                                    } else {
+                                        // Fondo blanco para no cumplimiento
+                                        doc.setFillColor(255, 255, 255);
+                                        doc.rect(posX, posY - 5, anchoColumnas[j], altoFila, 'F');
+                                    }
+                                }
+                                
+                                // Texto de la celda
+                                doc.text(celda, posX + 2, posY);
+                                posX += anchoColumnas[j];
+                            });
+                        }
+                        
+                        // Avanzar a la siguiente fila
+                        posY += altoFila + 1;
+                    }
+                }
+                
+                return posY + 10; // Retornar la posición final
             }
             
             // ============ INICIAR CONSTRUCCIÓN DEL PDF ============
@@ -7340,9 +7201,9 @@ function exportarPDF(tipo) {
             agregarPiePagina();
             
             // Título del informe
-            posY += 15;
-            doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
-            doc.setFontSize(24);
+            posY += 10;
+            doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+            doc.setFontSize(20);
             doc.setFont(undefined, 'bold');
             doc.text(titulo, anchoPagina / 2, posY, { align: 'center' });
             
@@ -7365,13 +7226,14 @@ function exportarPDF(tipo) {
             
             // Línea separadora
             posY += 10;
-            doc.setDrawColor(200, 200, 200);
+            doc.setDrawColor(colores.verde[0], colores.verde[1], colores.verde[2]);
             doc.setLineWidth(0.5);
             doc.line(margen, posY, anchoPagina - margen, posY);
             
             // Descripción del informe
-            posY += 10;
-            doc.setFontSize(12);
+            posY += 15;
+            doc.setFontSize(11);
+            doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
             
             let descripcion = '';
             if (tipo === 'centro') {
@@ -7384,54 +7246,49 @@ function exportarPDF(tipo) {
                 descripcion = `Este informe comparativo muestra el cumplimiento de todos los indicadores IAAPS para todos los centros de salud durante el mes de Marzo de 2025. La tabla permite visualizar y comparar el desempeño de cada centro respecto a cada indicador.`;
             }
             
-            // Texto informativo
             const lineasDescripcion = doc.splitTextToSize(descripcion, anchoPagina - 2 * margen);
             doc.text(lineasDescripcion, margen, posY);
             
-            // Leyenda de colores para estados
-            posY += 25;
-            doc.setFontSize(12);
+            // Leyenda de colores - SIMPLIFICADA (solo 2 estados)
+            posY += lineasDescripcion.length * 7;
+            doc.setFontSize(11);
             doc.setFont(undefined, 'bold');
-            doc.text("Leyenda de estados:", margen, posY);
+            doc.text("Leyenda:", margen, posY);
             posY += 8;
             doc.setFont(undefined, 'normal');
             
-            // Cumplido
-            doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2], 0.3);
+            // Estado Cumplido (Verde)
+            doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
             doc.rect(margen, posY - 5, 15, 7, 'F');
             doc.text("Cumplido (≥ 100%)", margen + 20, posY);
             
-            // Parcial
+            // Estado No Cumplido (Blanco)
             posY += 10;
-            doc.setFillColor(colores.alerta[0], colores.alerta[1], colores.alerta[2], 0.3);
+            doc.setFillColor(255, 255, 255);
             doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Parcial (90-99%)", margen + 20, posY);
-            
-            // Crítico
-            posY += 10;
-            doc.setFillColor(colores.peligro[0], colores.peligro[1], colores.peligro[2], 0.3);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Crítico (< 90%)", margen + 20, posY);
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.3);
+            doc.rect(margen, posY - 5, 15, 7, 'S'); // Borde para visualizar el blanco
+            doc.setDrawColor(0, 0, 0);
+            doc.text("No cumplido (< 100%)", margen + 20, posY);
             
             // ============ PÁGINA DE TABLA DE DATOS ============
-            // Añadir nueva página para la tabla
             doc.addPage();
             posY = agregarEncabezado(2);
             agregarPiePagina();
             
             // Título de la sección
             posY += 10;
-            doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+            doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
             doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
             doc.text('RESULTADOS DETALLADOS', anchoPagina / 2, posY, { align: 'center' });
             
             // Crear tabla manual
             posY += 10;
-            const posYFinTabla = crearTablaManual(datos, posY);
+            crearTablaManual(datos, posY);
             
             // ============ PÁGINA DE GRÁFICOS ============
-            // Capturar y añadir gráficos si existen
             try {
                 // Verificar si hay algún gráfico para el informe actual
                 let hayGraficos = false;
@@ -7492,7 +7349,7 @@ function exportarPDF(tipo) {
                     
                     // Título de la sección
                     posY += 10;
-                    doc.setTextColor(colores.primario[0], colores.primario[1], colores.primario[2]);
+                    doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
                     doc.setFontSize(16);
                     doc.setFont(undefined, 'bold');
                     doc.text('VISUALIZACIÓN GRÁFICA', anchoPagina / 2, posY, { align: 'center' });
@@ -7507,7 +7364,7 @@ function exportarPDF(tipo) {
                         }
                         
                         // Título del gráfico
-                        doc.setTextColor(80, 80, 80);
+                        doc.setTextColor(colores.verdeOscuro[0], colores.verdeOscuro[1], colores.verdeOscuro[2]);
                         doc.setFontSize(12);
                         doc.setFont(undefined, 'bold');
                         doc.text(grafico.titulo, anchoPagina / 2, posY, { align: 'center' });
@@ -7736,11 +7593,9 @@ function cargarLibreriasExportacion() {
   }
 }
 
-// ==================== INICIALIZACIÓN SIMPLIFICADA ====================
-
 // Inicializar las funciones de exportación cuando se carga el documento
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("Inicializando funcionalidades de exportación simplificadas...");
+  console.log("Inicializando funcionalidades de exportación...");
   
   // Cargar librerías necesarias
   cargarLibreriasExportacion();
@@ -7761,7 +7616,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
   }, 1000);
 }
 document.getElementById('currentYear').textContent = new Date().getFullYear();
-
 </script>
 
 </html>
