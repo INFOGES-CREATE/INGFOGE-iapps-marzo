@@ -6769,11 +6769,8 @@ function exportarPDF(tipo) {
  * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
  */
 /**
- * Función para exportar informes a PDF con diseño profesional
- * - Usa color verde en lugar de azul
- * - Textos correctamente alineados y sin superposición
- * - Fondos blancos con detalles en verde
- * - Logo visible y encabezado mejorado
+ * Función para exportar informes a PDF con diseño formal, elegante y premium
+ * Usa solo datos reales y gráficos existentes en el sistema
  * @param {string} tipo - Tipo de informe: 'centro', 'indicador' o 'comparativo'
  */
 function exportarPDF(tipo) {
@@ -6800,14 +6797,15 @@ function exportarPDF(tipo) {
             const altoPagina = doc.internal.pageSize.getHeight();
             const margen = 15;
             
-            // Definir paleta de colores (verde y blanco principalmente)
+            // Definir paleta de colores formal pero premium
             const colores = {
-                verde: [35, 155, 86],        // Color verde principal
-                verdeClaro: [46, 204, 113],  // Verde claro para elementos secundarios
-                verdeOscuro: [20, 125, 60],  // Verde oscuro para detalles
-                grisClaro: [240, 240, 240],  // Gris muy claro para alternar filas
-                negro: [50, 50, 50],         // Negro para textos
-                blanco: [255, 255, 255]      // Blanco puro
+                principal: [0, 123, 70],      // Azul oscuro formal
+                secundario: [0, 123, 30],     // Verde institucional
+                acento: [180, 151, 90],       // Dorado premium
+                neutro: [79, 79, 79],         // Gris oscuro para textos
+                grisClaro: [245, 245, 245],   // Gris claro para alternar filas
+                grisMedio: [220, 220, 220],   // Gris medio para bordes
+                blanco: [255, 255, 255]       // Blanco puro
             };
             
             // ======== PREPARACIÓN DE DATOS SEGÚN EL TIPO DE INFORME ========
@@ -6857,7 +6855,7 @@ function exportarPDF(tipo) {
                     if (!resultado) return;
                     
                     datos.push({
-                        centro: recortarTexto(centro.nombre, 25), // Recortar nombre para evitar desbordamiento
+                        centro: recortarTexto(centro.nombre, 25),
                         numerador: formatearNumero(resultado.numerador),
                         denominador: formatearNumero(resultado.denominador),
                         resultado: formatearValor(resultado.resultado, indicador.tipo),
@@ -6872,13 +6870,12 @@ function exportarPDF(tipo) {
                 titulo = `Informe Comparativo IAAPS`;
                 subtitulo = `Todos los Centros - Marzo 2025`;
                 
-                // Datos para tabla comparativa - formato especial
+                // Datos para tabla comparativa
                 const datosTabulares = [];
                 
                 // Preparar encabezados de centros (recortados)
                 const centrosHeader = ['Indicador', 'Meta', 'Comunal'];
                 iaapsData.centros.filter(c => c.codigo !== 'comunal').forEach(centro => {
-                    // Recortar nombres de centros para que quepan en la tabla
                     centrosHeader.push(recortarTexto(centro.nombre, 12));
                 });
                 
@@ -6907,69 +6904,91 @@ function exportarPDF(tipo) {
                 datos = datosTabulares;
             }
             
-            // ============ FUNCIÓN PARA CREAR ENCABEZADO ============
+            // ============ FUNCIÓN PARA CREAR ENCABEZADO FORMAL Y ELEGANTE ============
             function agregarEncabezado(pagina) {
-                // Fondo blanco para todo el encabezado
-                doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
-                doc.rect(0, 0, anchoPagina, 22, 'F');
-                
-                // Línea decorativa verde
-                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
-                doc.rect(0, 22, anchoPagina, 1.5, 'F');
-                
-                // Logo (área reservada, fondo gris claro)
-                doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
-                doc.roundedRect(margen, 4, 20, 15, 1, 1, 'F');
-                
-                try {
-                    // Ruta relativa para web (ajustar según la estructura del proyecto)
-                    const rutaLogo = './images/logo2.png';
-                    doc.addImage(rutaLogo, 'PNG', margen + 2.5, 5, 15, 13);
-                } catch (e) {
-                    console.warn('No se pudo cargar el logo:', e);
-                    // Alternativa al logo
-                    doc.setTextColor(100, 100, 100);
-                    doc.setFontSize(10);
-                    doc.text('LOGO', margen + 5, 12);
-                }
-                
-                // Título del documento con color verde
-                doc.setTextColor(colores.verdeOscuro[0], colores.verdeOscuro[1], colores.verdeOscuro[2]);
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 10);
-                
-                // Subtítulo
-                doc.setFontSize(11);
-                doc.setFont(undefined, 'normal');
-                doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
-                doc.text('Informe de Indicadores de Atención Primaria (IAAPS)', margen + 25, 17);
-                
-                // Número de página
-                doc.setFontSize(9);
-                doc.text(`Página ${pagina}`, anchoPagina - margen - 15, 10);
-                
-                // Retornar posición Y donde termina el encabezado
-                return 30;
-            }
+    // --- 1) Fondo blanco en todo el encabezado ---
+    doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
+    doc.rect(0, 0, anchoPagina, 25, 'F');
+
+    // --- 2) Logo ---
+    const logoX = margen;
+    const logoY = 4;
+    const logoW = 18;
+    const logoH = 18;
+    try {
+        const rutaLogo = './images/logo2.png';
+        doc.addImage(rutaLogo, 'PNG', logoX, logoY, logoW, logoH);
+    } catch (e) {
+        console.warn('No se pudo cargar el logo:', e);
+        // Marco un recuadro gris si falla
+        doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+        doc.setLineWidth(0.2);
+        doc.rect(logoX, logoY, logoW, logoH, 'S');
+    }
+
+    // --- 3) Texto en verde (colores.secundario) ---
+    doc.setTextColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
+
+    // Título principal
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('SERVICIO DE SALUD CURICÓ', margen + 25, 12);
+
+    // Subtítulo
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(
+        'Informe de Indicadores de Atención Primaria de Salud (IAAPS)',
+        margen + 25,
+        18
+    );
+
+    // Número de página
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text(
+        `Página ${pagina}`,
+        anchoPagina - margen - 15,
+        15,
+        { align: 'center' }
+    );
+
+    // --- 4) Línea separadora inferior ---
+    doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+    doc.setLineWidth(0.5);
+    doc.line(0, 25, anchoPagina, 25);
+
+    // Retorna la Y donde termina el encabezado
+    return 32;
+}
+
             
-            // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA ============
+            // ============ FUNCIÓN PARA CREAR PIE DE PÁGINA ELEGANTE ============
             function agregarPiePagina() {
-                const alturaPie = 10;
+                const alturaPie = 12;
                 const posY = altoPagina - alturaPie;
                 
-                // Fondo del pie de página
+                // Fondo blanco para el pie de página
                 doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
                 doc.rect(0, posY, anchoPagina, alturaPie, 'F');
                 
-                // Línea superior verde
-                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
-                doc.rect(0, posY, anchoPagina, 0.5, 'F');
+                // Línea superior que separa el contenido del pie de página
+                doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                doc.setLineWidth(0.5);
+                doc.line(0, posY, anchoPagina, posY);
                 
-                // Texto del pie
-                doc.setTextColor(100, 100, 100);
+                // Línea inferior de color principal
+                doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+                doc.rect(0, altoPagina - 3, anchoPagina, 3, 'F');
+                
+                // Línea secundaria de color acento (dorado)
+                doc.setFillColor(colores.acento[0], colores.acento[1], colores.acento[2]);
+                doc.rect(0, altoPagina - 3.5, anchoPagina, 0.5, 'F');
+                
+                // Texto del pie con estilo elegante
+                doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
                 doc.setFontSize(8);
-                doc.setFont(undefined, 'italic');
+                doc.setFont(undefined, 'normal');
                 
                 // Información a mostrar en el pie de página
                 const fechaGen = new Date().toLocaleDateString('es-CL', {
@@ -6978,19 +6997,21 @@ function exportarPDF(tipo) {
                     day: 'numeric'
                 });
                 
-                doc.text(`INFOGES Curicó - Dashboard IAAPS - Generado: ${fechaGen}`, margen, posY + 5);
-                doc.text('Servicio de Salud Curicó - Carmen N°560, Curicó', anchoPagina - margen - 60, posY + 5);
+                doc.text(`INFOGES Curicó - Dashboard de Control IAAPS - Generado: ${fechaGen}`, margen, posY + 5);
+                doc.text('Servicio de Salud Curicó - Carmen N°560, Curicó', anchoPagina - margen, posY + 5, {align: 'right'});
                 
                 return posY;
             }
             
-            // ============ FUNCIÓN PARA CREAR TABLA MANUAL ============
+            // ============ FUNCIÓN PARA CREAR TABLA PROFESIONAL ============
             function crearTablaManual(datos, startY) {
                 // Configuración de la tabla
                 const margenTabla = margen;
                 const anchoDisponible = anchoPagina - (2 * margenTabla);
                 let posY = startY;
-                const altoFila = 10; // Altura ampliada de cada fila
+                const altoFila = 9; // Altura para cada fila
+                const altoEncabezado = 14;  // altura mayor para que quepa el texto wrappeado
+
                 
                 // Definir anchos de columna según el tipo de informe
                 let anchoColumnas = [];
@@ -7021,7 +7042,7 @@ function exportarPDF(tipo) {
                     
                     encabezados = ['Centro', 'Numerador', 'Denominador', 'Resultado', 'Meta', 'Cumplimiento'];
                 } else if (tipo === 'comparativo') {
-                    // Para informe comparativo - estructura específica con datos tabulares
+                    // Para informe comparativo
                     encabezados = datos[0];
                     const numColumnas = encabezados.length;
                     
@@ -7039,9 +7060,19 @@ function exportarPDF(tipo) {
                     }
                 }
                 
-                // ---- ENCABEZADOS DE LA TABLA ----
-                // Fondo verde para encabezados
-                doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                // Marco completo para la tabla
+                doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                doc.setLineWidth(0.3);
+                
+                // Altura total aproximada basada en la cantidad de filas
+                const numFilas = tipo === 'comparativo' ? datos.length : datos.length;
+                const alturaTabla = (altoFila * numFilas) + 5;
+                
+                // Marco exterior de la tabla completa
+                doc.rect(margenTabla, posY - 5, anchoDisponible, altoEncabezado, 'F');
+                
+                // ---- FILA DE ENCABEZADOS ----
+                doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
                 doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
                 
                 // Texto blanco para encabezados
@@ -7049,22 +7080,31 @@ function exportarPDF(tipo) {
                 doc.setFontSize(10);
                 doc.setFont(undefined, 'bold');
                 
-                // Colocar texto de encabezados centrado verticalmente
+                // Colocar texto de encabezados 
                 let posX = margenTabla;
                 encabezados.forEach((encabezado, index) => {
-                    const textoX = posX + 2;
-                    const textoY = posY + 1; // Centrado vertical
-                    doc.text(encabezado, textoX, textoY);
+                    // Centrar el texto en cada columna
+                    const textoX = posX + anchoColumnas[index]/2;
+                    doc.text(encabezado, textoX, posY, {align: 'center'});
+                    
+                    // Dibujar líneas verticales separadoras (excepto última)
+                    if (index < encabezados.length - 1) {
+                        doc.setDrawColor(255, 255, 255);
+                        doc.setLineWidth(0.2);
+                        doc.line(posX + anchoColumnas[index], posY - 5, posX + anchoColumnas[index], posY + altoFila - 5);
+                    }
+                    
                     posX += anchoColumnas[index];
                 });
                 
                 // ---- FILAS DE DATOS ----
-                posY += altoFila + 2; // Espacio extra después de encabezados
-                doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+                posY += altoFila; // Avanzar a la primera fila de datos
+                doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
                 doc.setFont(undefined, 'normal');
+                doc.setLineWidth(0.2);
                 
                 // Calcular cuántas filas caben por página
-                const filasPorPagina = Math.floor((altoPagina - posY - 20) / (altoFila + 1));
+                const filasPorPagina = Math.floor((altoPagina - posY - 25) / altoFila);
                 
                 // Determinar qué datos procesar según el tipo de informe
                 let datosAProcesar = [];
@@ -7082,12 +7122,19 @@ function exportarPDF(tipo) {
                     if (pagina > 0) {
                         // Nueva página
                         doc.addPage();
-                        posY = agregarEncabezado(pagina + 2) + 5;
+                        posY = agregarEncabezado(pagina + 2);
                         agregarPiePagina();
                         
                         // Repetir encabezados en la nueva página
-                        doc.setFillColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+                        doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
                         doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
+                        
+                        // Marco para esta página
+                        const filasRestantes = Math.min(filasPorPagina, datosAProcesar.length - (pagina * filasPorPagina));
+                        const alturaTablaRestante = (altoFila * (filasRestantes + 1));
+                        
+                        doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                        doc.rect(margenTabla, posY - 5, anchoDisponible, alturaTablaRestante, 'S');
                         
                         doc.setTextColor(255, 255, 255);
                         doc.setFontSize(10);
@@ -7095,12 +7142,22 @@ function exportarPDF(tipo) {
                         
                         posX = margenTabla;
                         encabezados.forEach((encabezado, index) => {
-                            doc.text(encabezado, posX + 2, posY + 1);
+                            // Centrar el texto en cada columna
+                            const textoX = posX + anchoColumnas[index]/2;
+                            doc.text(encabezado, textoX, posY, {align: 'center'});
+                            
+                            // Dibujar líneas verticales separadoras (excepto última)
+                            if (index < encabezados.length - 1) {
+                                doc.setDrawColor(255, 255, 255);
+                                doc.setLineWidth(0.2);
+                                doc.line(posX + anchoColumnas[index], posY - 5, posX + anchoColumnas[index], posY + altoFila - 5);
+                            }
+                            
                             posX += anchoColumnas[index];
                         });
                         
-                        posY += altoFila + 2;
-                        doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+                        posY += altoFila; // Avanzar a la primera fila de datos en la nueva página
+                        doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
                         doc.setFont(undefined, 'normal');
                     }
                     
@@ -7112,13 +7169,17 @@ function exportarPDF(tipo) {
                     for (let i = inicio; i < fin; i++) {
                         const fila = datosAProcesar[i];
                         
-                        // Fondo de la fila (alternar blanco y gris muy claro)
+                        // Alternar colores de fondo para las filas
                         if (i % 2 === 0) {
-                            doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
-                        } else {
                             doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+                        } else {
+                            doc.setFillColor(colores.blanco[0], colores.blanco[1], colores.blanco[2]);
                         }
                         doc.rect(margenTabla, posY - 5, anchoDisponible, altoFila, 'F');
+                        
+                        // Dibujar líneas horizontales para separar filas
+                        doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                        doc.line(margenTabla, posY - 5, margenTabla + anchoDisponible, posY - 5);
                         
                         // Procesar cada celda según el tipo de informe
                         if (tipo === 'centro' || tipo === 'indicador') {
@@ -7126,114 +7187,214 @@ function exportarPDF(tipo) {
                             
                             // Primera columna (Indicador o Centro)
                             const primeraColumna = tipo === 'centro' ? fila.indicador : fila.centro;
+                            doc.setFontSize(9);
+                            doc.setFont(undefined, 'bold');
                             doc.text(primeraColumna, posX + 2, posY);
+                            
+                            // Dibujar línea vertical después de la primera columna
+                            doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                            doc.line(posX + anchoColumnas[0], posY - 5, posX + anchoColumnas[0], posY + altoFila - 5);
+                            
                             posX += anchoColumnas[0];
                             
+                            // Restaurar estilo para datos
+                            doc.setFontSize(9);
+                            doc.setFont(undefined, 'normal');
+                            
                             // Numerador
-                            doc.text(fila.numerador, posX + 2, posY);
+                            doc.text(fila.numerador, posX + anchoColumnas[1]/2, posY, {align: 'center'});
+                            doc.line(posX + anchoColumnas[1], posY - 5, posX + anchoColumnas[1], posY + altoFila - 5);
                             posX += anchoColumnas[1];
                             
                             // Denominador
-                            doc.text(fila.denominador, posX + 2, posY);
+                            doc.text(fila.denominador, posX + anchoColumnas[2]/2, posY, {align: 'center'});
+                            doc.line(posX + anchoColumnas[2], posY - 5, posX + anchoColumnas[2], posY + altoFila - 5);
                             posX += anchoColumnas[2];
                             
                             // Resultado
-                            doc.text(fila.resultado, posX + 2, posY);
+                            doc.text(fila.resultado, posX + anchoColumnas[3]/2, posY, {align: 'center'});
+                            doc.line(posX + anchoColumnas[3], posY - 5, posX + anchoColumnas[3], posY + altoFila - 5);
                             posX += anchoColumnas[3];
                             
                             // Meta
-                            doc.text(fila.meta, posX + 2, posY);
+                            doc.text(fila.meta, posX + anchoColumnas[4]/2, posY, {align: 'center'});
+                            doc.line(posX + anchoColumnas[4], posY - 5, posX + anchoColumnas[4], posY + altoFila - 5);
                             posX += anchoColumnas[4];
                             
-                            // Cumplimiento
+                            // Cumplimiento con formato especial
                             const cumplimiento = parseFloat(fila.cumplimiento);
                             
-                            // Celda de cumplimiento: verde si cumple, blanco si no
                             if (cumplimiento >= 100) {
-                                doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
+                                doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
                                 doc.rect(posX, posY - 5, anchoColumnas[5], altoFila, 'F');
+                                
+                                doc.setTextColor(255, 255, 255);
+                                doc.setFontSize(9);
+                                doc.setFont(undefined, 'bold');
+                                doc.text(fila.cumplimiento, posX + anchoColumnas[5]/2, posY, {align: 'center'});
+                                doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+                                doc.setFont(undefined, 'normal');
                             } else {
-                                // Fondo blanco para no cumplimiento
-                                doc.setFillColor(255, 255, 255);
-                                doc.rect(posX, posY - 5, anchoColumnas[5], altoFila, 'F');
+                                doc.text(fila.cumplimiento, posX + anchoColumnas[5]/2, posY, {align: 'center'});
                             }
-                            
-                            // Texto del porcentaje de cumplimiento
-                            doc.text(fila.cumplimiento, posX + 2, posY);
                             
                         } else if (tipo === 'comparativo') {
                             // Informe comparativo (tabla especial)
                             posX = margenTabla;
                             
                             fila.forEach((celda, j) => {
-                                if (j >= 2 && celda !== '-' && celda.includes('%')) {
-                                    // Es una celda de cumplimiento
-                                    const cumplimiento = parseFloat(celda);
+                                // Primera columna (indicador)
+                                if (j === 0) {
+                                    doc.setFontSize(9);
+                                    doc.setFont(undefined, 'bold');
+                                    doc.text(celda, posX + 2, posY);
+                                } else {
+                                    // Centrar texto en otras columnas
+                                    doc.setFontSize(9);
+                                    doc.setFont(undefined, 'normal');
                                     
-                                    // Colorear según cumplimiento
-                                    if (cumplimiento >= 100) {
-                                        doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
-                                        doc.rect(posX, posY - 5, anchoColumnas[j], altoFila, 'F');
+                                    // Celda de cumplimiento
+                                    if (j >= 2 && celda !== '-' && celda.includes('%')) {
+                                        const cumplimiento = parseFloat(celda);
+                                        
+                                        if (cumplimiento >= 100) {
+                                            doc.setFillColor(colores.secundario[0], colores.secundario[1], colores.secundario[2]);
+                                            doc.rect(posX, posY - 5, anchoColumnas[j], altoFila, 'F');
+                                            
+                                            doc.setTextColor(255, 255, 255);
+                                            doc.setFont(undefined, 'bold');
+                                            doc.text(celda, posX + anchoColumnas[j]/2, posY, {align: 'center'});
+                                            doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+                                            doc.setFont(undefined, 'normal');
+                                        } else {
+                                            doc.text(celda, posX + anchoColumnas[j]/2, posY, {align: 'center'});
+                                        }
                                     } else {
-                                        // Fondo blanco para no cumplimiento
-                                        doc.setFillColor(255, 255, 255);
-                                        doc.rect(posX, posY - 5, anchoColumnas[j], altoFila, 'F');
+                                        doc.text(celda, posX + anchoColumnas[j]/2, posY, {align: 'center'});
                                     }
                                 }
                                 
-                                // Texto de la celda
-                                doc.text(celda, posX + 2, posY);
+                                // Dibujar línea vertical después de cada columna (excepto la última)
+                                if (j < fila.length - 1) {
+                                    doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                                    doc.line(posX + anchoColumnas[j], posY - 5, posX + anchoColumnas[j], posY + altoFila - 5);
+                                }
+                                
                                 posX += anchoColumnas[j];
                             });
                         }
                         
                         // Avanzar a la siguiente fila
-                        posY += altoFila + 1;
+                        posY += altoFila;
                     }
                 }
                 
                 return posY + 10; // Retornar la posición final
             }
             
+            // ============ FUNCIÓN PARA CREAR MARCO PARA GRÁFICOS ============
+            function crearMarcoGrafico(x, y, ancho, alto, titulo) {
+                // Marco para el gráfico
+                doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                doc.setLineWidth(0.5);
+                doc.rect(x, y, ancho, alto, 'S');
+                
+                // Barra superior para el título
+                doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+                doc.rect(x, y, ancho, 8, 'F');
+                
+                // Título del gráfico
+                if (titulo) {
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(10);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(titulo, x + ancho/2, y + 5.5, {align: 'center'});
+                }
+                
+                // Retornar el área útil para el gráfico (con márgenes internos)
+                return {
+                    x: x + 5,
+                    y: y + 12, // Después del título
+                    ancho: ancho - 10,
+                    alto: alto - 15
+                };
+            }
+            
             // ============ INICIAR CONSTRUCCIÓN DEL PDF ============
-            // Primera página - Portada
+            // Primera página - Portada formal y elegante
             let posY = agregarEncabezado(1);
             agregarPiePagina();
             
-            // Título del informe
-            posY += 10;
-            doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
-            doc.setFontSize(20);
+            // Título principal
+            posY += 15;
+            doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+            doc.setFontSize(18);
             doc.setFont(undefined, 'bold');
             doc.text(titulo, anchoPagina / 2, posY, { align: 'center' });
             
+            // Línea decorativa bajo el título
+            const anchoTitulo = doc.getTextWidth(titulo);
+            doc.setDrawColor(colores.acento[0], colores.acento[1], colores.acento[2]);
+            doc.setLineWidth(0.8);
+            doc.line(anchoPagina/2 - anchoTitulo/2, posY + 3, anchoPagina/2 + anchoTitulo/2, posY + 3);
+            
             // Subtítulo
-            posY += 10;
-            doc.setTextColor(80, 80, 80);
+            posY += 15;
+            doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
             doc.setFontSize(14);
             doc.setFont(undefined, 'normal');
             doc.text(subtitulo, anchoPagina / 2, posY, { align: 'center' });
             
-            // Fecha de generación
-            posY += 8;
-            doc.setFontSize(12);
-            doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL', {
+            // Fecha del reporte
+            posY += 12;
+            doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+            doc.setLineWidth(0.3);
+            doc.rect(anchoPagina/2 - 40, posY - 8, 80, 12, 'S');
+            
+            doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+            doc.rect(anchoPagina/2 - 40, posY - 8, 80, 12, 'F');
+            
+            doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            const fechaTexto = new Date().toLocaleDateString('es-CL', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-            })}`, anchoPagina / 2, posY, { align: 'center' });
+            });
+            doc.text(fechaTexto, anchoPagina / 2, posY, { align: 'center' });
             
-            // Línea separadora
-            posY += 10;
-            doc.setDrawColor(colores.verde[0], colores.verde[1], colores.verde[2]);
+            // Separador
+            posY += 20;
+            doc.setDrawColor(colores.principal[0], colores.principal[1], colores.principal[2]);
             doc.setLineWidth(0.5);
             doc.line(margen, posY, anchoPagina - margen, posY);
             
             // Descripción del informe
             posY += 15;
             doc.setFontSize(11);
-            doc.setTextColor(colores.negro[0], colores.negro[1], colores.negro[2]);
+            doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+            doc.setFont(undefined, 'normal');
+            
+            // Marco para la descripción
+            doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+            doc.setLineWidth(0.3);
+            doc.rect(margen, posY - 10, anchoPagina - 2*margen, 60, 'S');
+            
+            doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+            doc.rect(margen, posY - 10, anchoPagina - 2*margen, 10, 'F');
+            
+            // Título de la sección
+            doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text("DESCRIPCIÓN DEL INFORME", margen + 10, posY - 3);
+            
+            // Texto de la descripción
+            doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
             
             let descripcion = '';
             if (tipo === 'centro') {
@@ -7246,51 +7407,86 @@ function exportarPDF(tipo) {
                 descripcion = `Este informe comparativo muestra el cumplimiento de todos los indicadores IAAPS para todos los centros de salud durante el mes de Marzo de 2025. La tabla permite visualizar y comparar el desempeño de cada centro respecto a cada indicador.`;
             }
             
-            const lineasDescripcion = doc.splitTextToSize(descripcion, anchoPagina - 2 * margen);
-            doc.text(lineasDescripcion, margen, posY);
+            const lineasDescripcion = doc.splitTextToSize(descripcion, anchoPagina - 2 * margen - 10);
+            doc.text(lineasDescripcion, margen + 5, posY + 5);
             
-            // Leyenda de colores - SIMPLIFICADA (solo 2 estados)
-            posY += lineasDescripcion.length * 7;
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text("Leyenda:", margen, posY);
-            posY += 8;
-            doc.setFont(undefined, 'normal');
-            
-            // Estado Cumplido (Verde)
-            doc.setFillColor(colores.verdeClaro[0], colores.verdeClaro[1], colores.verdeClaro[2]);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.text("Cumplido (≥ 100%)", margen + 20, posY);
-            
-            // Estado No Cumplido (Blanco)
-            posY += 10;
-            doc.setFillColor(255, 255, 255);
-            doc.rect(margen, posY - 5, 15, 7, 'F');
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.3);
-            doc.rect(margen, posY - 5, 15, 7, 'S'); // Borde para visualizar el blanco
-            doc.setDrawColor(0, 0, 0);
-            doc.text("No cumplido (< 100%)", margen + 20, posY);
-            
+           // ——— Leyenda de Cumplimiento como tarjeta ———
+posY += 65;
+
+// Coordenadas y dimensiones de la tarjeta
+const leyendaX = margen;
+const leyendaWidth = anchoPagina - 2 * margen;
+const leyendaHeight = 50;  // altura total de la tarjeta
+
+// 1) Marco exterior de la tarjeta
+doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+doc.setLineWidth(0.3);
+doc.rect(leyendaX, posY - 5, leyendaWidth, leyendaHeight, 'S');
+
+// 2) Fondo de header
+doc.setFillColor(colores.grisClaro[0], colores.grisClaro[1], colores.grisClaro[2]);
+doc.rect(leyendaX, posY - 5, leyendaWidth, 10, 'F');
+
+// 3) Título (header)
+doc.setTextColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+doc.setFontSize(10);
+doc.setFont(undefined, 'bold');
+doc.text('LEYENDA DE CUMPLIMIENTO', leyendaX + 8, posY + 2);
+
+// 4) Definir items de la leyenda
+const items = [
+  { tipo: 'fill',  color: colores.secundario, texto: 'Cumplido (≥ 100%)' },
+  { tipo: 'stroke', color: colores.grisMedio,  texto: 'No Cumplido (< 100%)' }
+];
+
+const boxSize   = 7;    // tamaño de la “tarjeta” interna
+const gapX      = 60;   // separación horizontal entre tarjetas
+const startX    = leyendaX + 10;
+let   currentX  = startX;
+const textOffsetY = 5;  // para centrar verticalmente el texto
+
+// 5) Dibujar cada tarjeta y su texto, alineadas dentro de la tarjeta
+items.forEach(item => {
+  if (item.tipo === 'fill') {
+    doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+    doc.rect(currentX, posY + 8, boxSize, boxSize, 'F');
+  } else {
+    doc.setDrawColor(item.color[0], item.color[1], item.color[2]);
+    doc.rect(currentX, posY + 8, boxSize, boxSize, 'S');
+  }
+
+  doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.text(item.texto, currentX + boxSize + 4, posY + 8 + textOffsetY);
+
+  // Avanzar X para la siguiente tarjeta
+  currentX += gapX;
+});
+
             // ============ PÁGINA DE TABLA DE DATOS ============
             doc.addPage();
             posY = agregarEncabezado(2);
             agregarPiePagina();
             
             // Título de la sección
-            posY += 10;
-            doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
-            doc.setFontSize(16);
+            posY += 5;
+            // Barra de título
+            doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+            doc.rect(margen, posY - 5, anchoPagina - 2*margen, 10, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(12);
             doc.setFont(undefined, 'bold');
-            doc.text('RESULTADOS DETALLADOS', anchoPagina / 2, posY, { align: 'center' });
+            doc.text('RESULTADOS DETALLADOS', anchoPagina / 2, posY + 2, { align: 'center' });
             
-            // Crear tabla manual
-            posY += 10;
-            crearTablaManual(datos, posY);
+            // Crear tabla formal
+            posY += 15;
+            const posYFinTabla = crearTablaManual(datos, posY);
             
-            // ============ PÁGINA DE GRÁFICOS ============
+            // ============ PÁGINA DE GRÁFICOS REALES ============
             try {
-                // Verificar si hay algún gráfico para el informe actual
+                // Verificar si hay algún gráfico real para el informe actual
                 let hayGraficos = false;
                 let graficos = [];
                 
@@ -7301,9 +7497,7 @@ function exportarPDF(tipo) {
                     if (graficoEvolucion) {
                         graficos.push({
                             elemento: graficoEvolucion,
-                            titulo: 'Evolución Mensual',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            titulo: 'EVOLUCIÓN MENSUAL DEL CUMPLIMIENTO'
                         });
                         hayGraficos = true;
                     }
@@ -7311,9 +7505,7 @@ function exportarPDF(tipo) {
                     if (graficoDistribucion) {
                         graficos.push({
                             elemento: graficoDistribucion,
-                            titulo: 'Distribución por Tipo de Indicador',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            titulo: 'DISTRIBUCIÓN POR TIPOS DE INDICADOR'
                         });
                         hayGraficos = true;
                     }
@@ -7322,9 +7514,7 @@ function exportarPDF(tipo) {
                     if (graficoComparativo) {
                         graficos.push({
                             elemento: graficoComparativo,
-                            titulo: 'Comparativo Entre Centros',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 80
+                            titulo: 'COMPARATIVO DEL INDICADOR ENTRE CENTROS'
                         });
                         hayGraficos = true;
                     }
@@ -7333,54 +7523,97 @@ function exportarPDF(tipo) {
                     if (graficoComparativo) {
                         graficos.push({
                             elemento: graficoComparativo,
-                            titulo: 'Cumplimiento por Categoría y Centro',
-                            ancho: anchoPagina - 2 * margen,
-                            alto: 90
+                            titulo: 'ANÁLISIS COMPARATIVO ENTRE CENTROS'
                         });
                         hayGraficos = true;
                     }
                 }
                 
-                // Si hay gráficos, crear una página para ellos
+                // Si hay gráficos reales, crear una página para ellos
                 if (hayGraficos) {
                     doc.addPage();
                     posY = agregarEncabezado(3);
                     agregarPiePagina();
                     
                     // Título de la sección
-                    posY += 10;
-                    doc.setTextColor(colores.verde[0], colores.verde[1], colores.verde[2]);
-                    doc.setFontSize(16);
-                    doc.setFont(undefined, 'bold');
-                    doc.text('VISUALIZACIÓN GRÁFICA', anchoPagina / 2, posY, { align: 'center' });
+                    posY += 5;
+                    // Barra de título
+                    doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+                    doc.rect(margen, posY - 5, anchoPagina - 2*margen, 10, 'F');
                     
-                    // Agregar cada gráfico
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('VISUALIZACIÓN GRÁFICA', anchoPagina / 2, posY + 2, { align: 'center' });
+                    
+                    // Agregar cada gráfico real
                     posY += 15;
                     
                     graficos.forEach((grafico, index) => {
-                        // Si no es el primer gráfico, agregar espacio
+                        // Si no es el primer gráfico y no cabe en la página actual, crear nueva página
                         if (index > 0) {
-                            posY += graficos[index-1].alto + 20;
+                            const alturaDisponible = altoPagina - posY - 20;
+                            if (alturaDisponible < 120) { // Altura mínima para un gráfico
+                                doc.addPage();
+                                posY = agregarEncabezado(4) + 5;
+                                agregarPiePagina();
+                                
+                                // Repetir título en la nueva página
+                                posY += 5;
+                                doc.setFillColor(colores.principal[0], colores.principal[1], colores.principal[2]);
+                                doc.rect(margen, posY - 5, anchoPagina - 2*margen, 10, 'F');
+                                
+                                doc.setTextColor(255, 255, 255);
+                                doc.setFontSize(12);
+                                doc.setFont(undefined, 'bold');
+                                doc.text('VISUALIZACIÓN GRÁFICA (CONTINUACIÓN)', anchoPagina / 2, posY + 2, { align: 'center' });
+                                
+                                posY += 15;
+                            } else {
+                                posY += 15; // Espacio entre gráficos
+                            }
                         }
                         
-                        // Título del gráfico
-                        doc.setTextColor(colores.verdeOscuro[0], colores.verdeOscuro[1], colores.verdeOscuro[2]);
-                        doc.setFontSize(12);
-                        doc.setFont(undefined, 'bold');
-                        doc.text(grafico.titulo, anchoPagina / 2, posY, { align: 'center' });
+                        // Altura del gráfico adaptada según el espacio disponible
+                        const altoGrafico = 120;
                         
-                        // Agregar el gráfico
+                        // Crear marco formal para el gráfico
+                        const areaGrafico = crearMarcoGrafico(
+                            margen, 
+                            posY, 
+                            anchoPagina - 2*margen, 
+                            altoGrafico, 
+                            grafico.titulo
+                        );
+                        
+                        // Agregar el gráfico real
                         try {
                             const imgData = grafico.elemento.toDataURL('image/png');
-                            doc.addImage(imgData, 'PNG', margen, posY + 5, grafico.ancho, grafico.alto);
+                            doc.addImage(
+                                imgData, 
+                                'PNG', 
+                                areaGrafico.x, 
+                                areaGrafico.y, 
+                                areaGrafico.ancho, 
+                                areaGrafico.alto
+                            );
                         } catch (e) {
                             console.warn('Error al capturar gráfico:', e);
-                            // Si falla la captura, mostrar un mensaje
-                            doc.setFillColor(245, 245, 245);
-                            doc.roundedRect(margen, posY + 5, grafico.ancho, grafico.alto, 2, 2, 'F');
-                            doc.setTextColor(150, 150, 150);
-                            doc.text('Error al cargar gráfico', anchoPagina / 2, posY + 5 + grafico.alto / 2, { align: 'center' });
+                            // Si falla la captura, mostrar un mensaje de error formal
+                            doc.setDrawColor(colores.grisMedio[0], colores.grisMedio[1], colores.grisMedio[2]);
+                            doc.setLineWidth(0.2);
+                            doc.rect(areaGrafico.x, areaGrafico.y, areaGrafico.ancho, areaGrafico.alto, 'S');
+                            
+                            doc.setTextColor(colores.neutro[0], colores.neutro[1], colores.neutro[2]);
+                            doc.setFontSize(10);
+                            doc.text('No se pudo cargar el gráfico. Verifique que esté disponible en el sistema.', 
+                                areaGrafico.x + areaGrafico.ancho/2, 
+                                areaGrafico.y + areaGrafico.alto/2, 
+                                { align: 'center' });
                         }
+                        
+                        // Actualizar posición para el siguiente gráfico
+                        posY += altoGrafico + 5;
                     });
                 }
             } catch (error) {
