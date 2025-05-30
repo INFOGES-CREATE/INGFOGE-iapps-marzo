@@ -1319,7 +1319,8 @@ iaapsData = {
                                 { centro: 'obra', numerador: 0, denominador: 0, resultado: 100, cumplimiento: 100 }
                             ]
                         },
-                        {
+// 3) Tasa de consultas médicas de morbilidad por habitante año
+{
   codigo: '3',
   nombre: 'Tasa de consultas médicas de morbilidad por habitante año',
   tipo: 'tasa',
@@ -1327,27 +1328,29 @@ iaapsData = {
   importancia: 6,
   resultados: [
     // Centros principales AGREGADOS
-    { centro: 'comunal',    numerador: 43678, denominador: 150113, resultado: 0.29, cumplimiento: 35.48 },
-    { centro: 'curico',     numerador: 9581,  denominador: 41532,  resultado: 0.23, cumplimiento: 28.13 },
-    { centro: 'miguel',     numerador: 9218,  denominador: 28763,  resultado: 0.32, cumplimiento: 39.08 },
-    { centro: 'betty',      numerador: 7867,  denominador: 28461,  resultado: 0.28, cumplimiento: 33.71 },
-    { centro: 'colon',      numerador: 6892,  denominador: 23785,  resultado: 0.29, cumplimiento: 35.34 },
-    { centro: 'sarmiento',  numerador: 6342,  denominador: 13722,  resultado: 0.46, cumplimiento: 56.10 },
-    { centro: 'niches',     numerador: 3778,  denominador: 13850,  resultado: 0.27, cumplimiento: 33.02 },
+    { centro: 'comunal',       numerador: 43678, denominador: 150113, resultado: 0.29, cumplimiento: 35.48, },
+    { centro: 'curico',        numerador:  9581, denominador:  41532, resultado: 0.23, cumplimiento: 28.13, },
+    { centro: 'miguel',        numerador:  9218, denominador:  28763, resultado: 0.32, cumplimiento: 39.08, },
+    { centro: 'betty',         numerador:  7867, denominador:  28461, resultado: 0.28, cumplimiento: 33.71, },
+    { centro: 'colon',         numerador:  6892, denominador:  23785, resultado: 0.29, cumplimiento: 35.34, },
+    { centro: 'sarmiento',     numerador:  6342, denominador:  13722, resultado: 0.46, cumplimiento: 56.36, },
+    { centro: 'niches',        numerador:  3778, denominador:  13850, resultado: 0.27, cumplimiento: 33.27, },
 
     // Establecimientos (SIN CAMBIOS)
-    { centro: 'prosperidad',   numerador: 691, denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador: 84,  denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador: 202, denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador: 945, denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'potrero',       numerador: 35,  denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador: 47,  denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'upeo',          numerador: 55,  denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador: 21,  denominador: 0, resultado: 0, cumplimiento: 0 },
-    { centro: 'obra',          numerador: 19,  denominador: 0, resultado: 0, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',   numerador:   691, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'tutuquen',      numerador:    84, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'porvenir',      numerador:   202, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'dona_carmen',   numerador:   945, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'potrero',       numerador:    35, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'chequenlemu',   numerador:    47, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'upeo',          numerador:    55, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'cordillerilla', numerador:    21, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'obra',          numerador:    19, denominador:     0, resultado: 0.00, cumplimiento: 0.00, },
+  ],
 },
 
+
+// 4) Porcentaje de derivación al nivel secundario
 {
   codigo: '4',
   nombre: 'Porcentaje de derivación al nivel secundario',
@@ -1355,30 +1358,30 @@ iaapsData = {
   meta: 10,
   importancia: 5,
   resultados: [
-    // Centros principales — valores AGREGADOS
-    { centro: 'comunal',   numerador: 4158, denominador: 73188, resultado: 5.68, cumplimiento: 56.81 },
-    { centro: 'curico',    numerador: 1064, denominador: 16574, resultado: 6.42, cumplimiento: 64.20 },
-    { centro: 'miguel',    numerador: 880,  denominador: 15339, resultado: 5.74, cumplimiento: 57.37 },
-    { centro: 'betty',     numerador: 905,  denominador: 13480, resultado: 6.71, cumplimiento: 67.14 },
-    { centro: 'colon',     numerador: 524,  denominador: 10940, resultado: 4.79, cumplimiento: 47.90 },
-    { centro: 'sarmiento', numerador: 326,  denominador: 9452,  resultado: 3.45, cumplimiento: 34.47 },
-    { centro: 'niches',    numerador: 459,  denominador: 7403,  resultado: 6.20, cumplimiento: 61.99 },
+    { centro: 'comunal',      numerador: 4158, denominador: 73188, resultado:  5.68, cumplimiento: 56.83, },
+    { centro: 'curico',       numerador: 1064, denominador: 16574, resultado:  6.42, cumplimiento: 64.16, },
+    { centro: 'miguel',       numerador:  880, denominador: 15339, resultado:  5.74, cumplimiento: 57.38, },
+    { centro: 'betty',        numerador:  905, denominador: 13480, resultado:  6.71, cumplimiento: 67.14, },
+    { centro: 'colon',        numerador:  524, denominador: 10940, resultado:  4.79, cumplimiento: 47.91, },
+    { centro: 'sarmiento',    numerador:  326, denominador:  9452, resultado:  3.45, cumplimiento: 34.48, },
+    { centro: 'niches',       numerador:  459, denominador:  7403, resultado:  6.20, cumplimiento: 61.99, },
 
     // Establecimientos (SIN CAMBIOS)
-    { centro: 'prosperidad',   numerador:   0, denominador: 1337, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador:   3, denominador:  241, resultado: 1.24, cumplimiento: 12.45 },
-    { centro: 'porvenir',      numerador:  18, denominador:  366, resultado: 4.92, cumplimiento: 49.18 },
-    { centro: 'dona_carmen',   numerador:  14, denominador: 1447, resultado: 0.97, cumplimiento: 9.68 },
-    { centro: 'potrero',       numerador:   0, denominador:  154, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador:   0, denominador:  140, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador:   0, denominador:  133, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador:   0, denominador:  118, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador:   0, denominador:  167, resultado: 0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',   numerador:   0, denominador: 1337, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'tutuquen',      numerador:   3, denominador:  241, resultado: 1.24, cumplimiento: 12.45, },
+    { centro: 'porvenir',      numerador:  18, denominador:  366, resultado: 4.92, cumplimiento: 49.18, },
+    { centro: 'dona_carmen',   numerador:  14, denominador: 1447, resultado: 0.97, cumplimiento:  9.68, },
+    { centro: 'potrero',       numerador:   0, denominador:  154, resultado: 0.00, cumplimiento:  0, },
+    { centro: 'chequenlemu',   numerador:   0, denominador:  140, resultado: 0.00, cumplimiento:  0, },
+    { centro: 'upeo',          numerador:   0, denominador:  133, resultado: 0.00, cumplimiento:  0, },
+    { centro: 'cordillerilla', numerador:   0, denominador:  118, resultado: 0.00, cumplimiento:  0, },
+    { centro: 'obra',          numerador:   0, denominador:  167, resultado: 0.00, cumplimiento:  0, },
+  ],
 },
 
-                       // 5) Tasa de Visita Domiciliaria Integral
-                       {
+
+// 5) Tasa de Visita Domiciliaria Integral
+{
   codigo: '5',
   nombre: 'Tasa de Visita Domiciliaria Integral',
   tipo: 'tasa',
@@ -1386,25 +1389,25 @@ iaapsData = {
   importancia: 5,
   resultados: [
     // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',   numerador: 3525, denominador: 45489, resultado: 0.08, cumplimiento: 32.29 },
-    { centro: 'curico',    numerador:  794, denominador: 12585, resultado: 0.06, cumplimiento: 26.29 },
-    { centro: 'miguel',    numerador:  726, denominador:  8716, resultado: 0.08, cumplimiento: 34.71 },
-    { centro: 'betty',     numerador:  653, denominador:  8625, resultado: 0.08, cumplimiento: 31.55 },
-    { centro: 'colon',     numerador:  551, denominador:  7208, resultado: 0.08, cumplimiento: 31.85 },
-    { centro: 'sarmiento', numerador:  419, denominador:  4158, resultado: 0.1,  cumplimiento: 41.67 },
-    { centro: 'niches',    numerador:  382, denominador:  4197, resultado: 0.09, cumplimiento: 37.5 },
+    { centro: 'comunal',     numerador: 3525, denominador: 45489, resultado: 0.08, cumplimiento: 33.33, },
+    { centro: 'curico',      numerador:  794, denominador: 12585, resultado: 0.06, cumplimiento: 25.00, },
+    { centro: 'miguel',      numerador:  726, denominador:  8716, resultado: 0.08, cumplimiento: 33.33, },
+    { centro: 'betty',       numerador:  653, denominador:  8625, resultado: 0.08, cumplimiento: 33.33, },
+    { centro: 'colon',       numerador:  551, denominador:  7208, resultado: 0.08, cumplimiento: 33.33, },
+    { centro: 'sarmiento',   numerador:  419, denominador:  4158, resultado: 0.10, cumplimiento: 41.67, },
+    { centro: 'niches',      numerador:  382, denominador:  4197, resultado: 0.09, cumplimiento: 37.50, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 107, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador:  19, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador:   3, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador:  83, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'potrero',       numerador:  29, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador:   6, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador:  12, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador:   9, denominador:    0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador:  22, denominador:    0, resultado: 0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad', numerador: 107, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'tutuquen',    numerador:  19, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'porvenir',    numerador:   3, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'dona_carmen', numerador:  83, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'potrero',     numerador:  29, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'chequenlemu', numerador:   6, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'upeo',        numerador:  12, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'cordillerilla',numerador:   9, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+    { centro: 'obra',        numerador:  22, denominador:    0, resultado: 0.00, cumplimiento: 0.00, },
+  ],
 },
 
 
@@ -1416,29 +1419,29 @@ iaapsData = {
   meta: 23.89,
   importancia: 3,
   resultados: [
-    // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',   numerador:  6581, denominador: 49664, resultado:  13.33, cumplimiento: 55.52 },
-    { centro: 'curico',    numerador:  1329, denominador: 14597, resultado:  9.13, cumplimiento: 38.11 },
-    { centro: 'miguel',    numerador:  1582, denominador:  9158, resultado: 17.33, cumplimiento: 72.33 },
-    { centro: 'betty',     numerador:   1218, denominador:  9639, resultado:  12.61, cumplimiento: 38.14 },
-    { centro: 'colon',     numerador:   1032, denominador:  7738, resultado:  13.33, cumplimiento: 55.81 },
-    { centro: 'sarmiento', numerador:   640, denominador:  4343, resultado: 14.72, cumplimiento: 61.71 },
-    { centro: 'niches',    numerador:   780, denominador:  4192, resultado: 18.61, cumplimiento: 77.92 },
+    { centro: 'comunal',        numerador: 6581, denominador: 49664, resultado: 13.25, cumplimiento: 55.47, },
+    { centro: 'curico',         numerador: 1329, denominador: 14597, resultado:  9.10, cumplimiento: 38.11, },
+    { centro: 'miguel',         numerador: 1582, denominador:  9158, resultado: 17.27, cumplimiento: 72.31, },
+    { centro: 'betty',          numerador: 1218, denominador:  9639, resultado: 12.64, cumplimiento: 52.89, },
+    { centro: 'colon',          numerador: 1032, denominador:  7738, resultado: 13.34, cumplimiento: 55.83, },
+    { centro: 'sarmiento',      numerador:  640, denominador:  4343, resultado: 14.74, cumplimiento: 61.68, },
+    { centro: 'niches',         numerador:  780, denominador:  4192, resultado: 18.61, cumplimiento: 77.89, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador:  128, denominador:  -14, resultado: -914.29, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador:   51, denominador:    0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador:   40, denominador:   -3, resultado: -1333.33, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador:  153, denominador:   -9, resultado: -1700.00, cumplimiento: 0 },
-    { centro: 'potrero',       numerador:   11, denominador:   -2, resultado:  -550.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador:   12, denominador:    0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador:   15, denominador:    0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador:   11, denominador:   -1, resultado: -1100.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador:   30, denominador:   -2, resultado: -1500.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',    numerador:  128, denominador:   -14, resultado: -914.29, cumplimiento:  0, },
+    { centro: 'tutuquen',       numerador:   51, denominador:     0, resultado:    0.00, cumplimiento:  0, },
+    { centro: 'porvenir',       numerador:   40, denominador:    -3, resultado: -1333.33, cumplimiento:  0, },
+    { centro: 'dona_carmen',    numerador:  153, denominador:    -9, resultado: -1700.00, cumplimiento:  0, },
+    { centro: 'potrero',        numerador:   11, denominador:    -2, resultado:  -550.00, cumplimiento:  0, },
+    { centro: 'chequenlemu',    numerador:   12, denominador:     0, resultado:    0.00, cumplimiento:  0, },
+    { centro: 'upeo',           numerador:   15, denominador:     0, resultado:    0.00, cumplimiento:  0, },
+    { centro: 'cordillerilla',  numerador:   11, denominador:    -1, resultado: -1100.00, cumplimiento:  0, },
+    { centro: 'obra',           numerador:   30, denominador:    -2, resultado: -1500.00, cumplimiento:  0, },
+  ],
 },
-                      // 6.1.B) Cobertura EMP hombres (20-64 años)
-                      {
+                    // 6.1.B) Cobertura EMP hombres (20-64 años)
+// 6.1.B) Cobertura EMP hombres (20-64 años)
+{
   codigo: '6.1.B',
   nombre: 'Cobertura EMP hombres (20-64 años)',
   tipo: 'porcentaje',
@@ -1446,33 +1449,34 @@ iaapsData = {
   importancia: 4,
   resultados: [
     // Centros principales, sumado con sus establecimientos
-    { centro: 'comunal',        numerador: 3114, denominador: 41825, resultado:  7.45, cumplimiento: 33.37 },
-    { centro: 'curico',         numerador:  514, denominador: 10883, resultado:  4.72, cumplimiento: 21.17 },
-    { centro: 'miguel',         numerador:  818, denominador:  8935, resultado:  9.16, cumplimiento: 41.04 },
-    { centro: 'betty',          numerador:  552, denominador:  7094, resultado:  7.78, cumplimiento: 34.88 },
-    { centro: 'colon',          numerador:  444, denominador:  6471, resultado:  6.86, cumplimiento: 30.75 },
-    { centro: 'sarmiento',      numerador:  371, denominador:  4193, resultado:  8.85, cumplimiento: 39.66 },
-    { centro: 'niches',         numerador:  415, denominador:  4249, resultado:  9.77, cumplimiento: 43.78 },
+    { centro: 'comunal',        numerador: 3114, denominador: 41825, resultado:  7.45, cumplimiento: 33.37, },
+    { centro: 'curico',         numerador:  514, denominador: 10883, resultado:  4.72, cumplimiento: 21.17, },
+    { centro: 'miguel',         numerador:  818, denominador:  8935, resultado:  9.16, cumplimiento: 41.04, },
+    { centro: 'betty',          numerador:  552, denominador:  7094, resultado:  7.78, cumplimiento: 34.88, },
+    { centro: 'colon',          numerador:  444, denominador:  6471, resultado:  6.86, cumplimiento: 30.75, },
+    { centro: 'sarmiento',      numerador:  371, denominador:  4193, resultado:  8.85, cumplimiento: 39.66, },
+    { centro: 'niches',         numerador:  415, denominador:  4249, resultado:  9.77, cumplimiento: 43.78, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',    numerador:   56, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',       numerador:   50, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'porvenir',       numerador:   20, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',    numerador:   86, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'potrero',        numerador:   13, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',    numerador:    8, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'upeo',           numerador:   23, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla',  numerador:    6, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'obra',           numerador:   32, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 's_niches',       numerador:    0, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'sapu_curico',    numerador:    0, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'sar2',           numerador:    0, denominador:     0, resultado:    0.00, cumplimiento: 0 },
-    { centro: 'sar1',           numerador:    0, denominador:     0, resultado:    0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',    numerador:   56, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'tutuquen',       numerador:   50, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',       numerador:   20, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',    numerador:   86, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',        numerador:   13, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',    numerador:    8, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'upeo',           numerador:   23, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla',  numerador:    6, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',           numerador:   32, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 's_niches',       numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'sapu_curico',    numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'sar2',           numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'sar1',           numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+  ],
 },
 
 
 
+// 6.2) Cobertura EMPAM (65+ años)
 // 6.2) Cobertura EMPAM (65+ años)
 {
   codigo: '6.2',
@@ -1481,30 +1485,29 @@ iaapsData = {
   meta: 58.48,
   importancia: 5,
   resultados: [
-    // Centros principales, sumado con sus establecimientos
-    { centro: 'comunal',        numerador: 4623, denominador: 21097, resultado: 21.91, cumplimiento: 37.47 },
-    { centro: 'curico',         numerador: 1147, denominador:  6609, resultado: 17.36, cumplimiento: 29.68 },
-    { centro: 'miguel',         numerador:  885, denominador:  3659, resultado: 24.19, cumplimiento: 41.36 },
-    { centro: 'betty',          numerador:  601, denominador:  3772, resultado: 15.93, cumplimiento: 27.25 },
-    { centro: 'colon',          numerador:  914, denominador:  3331, resultado: 27.44, cumplimiento: 46.92 },
-    { centro: 'sarmiento',      numerador:  512, denominador:  1592, resultado: 32.16, cumplimiento: 54.99 },
-    { centro: 'niches',         numerador:  564, denominador:  2134, resultado: 26.43, cumplimiento: 45.20 },
+    { centro: 'comunal',        numerador: 4623, denominador: 21097, resultado: 21.91, cumplimiento: 37.47, },
+    { centro: 'curico',         numerador: 1147, denominador:  6609, resultado: 17.36, cumplimiento: 29.68, },
+    { centro: 'miguel',         numerador:  885, denominador:  3659, resultado: 24.19, cumplimiento: 41.36, },
+    { centro: 'betty',          numerador:  601, denominador:  3772, resultado: 15.93, cumplimiento: 27.25, },
+    { centro: 'colon',          numerador:  914, denominador:  3331, resultado: 27.44, cumplimiento: 46.92, },
+    { centro: 'sarmiento',      numerador:  512, denominador:  1592, resultado: 32.16, cumplimiento: 54.99, },
+    { centro: 'niches',         numerador:  564, denominador:  2134, resultado: 26.43, cumplimiento: 45.19, },
 
-    // Establecimientos (sin cambios)
-    { centro: 'prosperidad',    numerador: 161, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',       numerador:  23, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'porvenir',       numerador:  29, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',    numerador:  92, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'potrero',        numerador:  19, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',    numerador:   9, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',           numerador:  26, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla',  numerador:  21, denominador:     0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',           numerador:  28, denominador:     0, resultado: 0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',    numerador:  161, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'tutuquen',       numerador:   23, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',       numerador:   29, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',    numerador:   92, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',        numerador:   19, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',    numerador:    9, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'upeo',           numerador:   26, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla',  numerador:   21, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',           numerador:   28, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+  ],
 },
 
-   // 7) Cobertura evaluación desarrollo psicomotor (12-23 meses)
-   {
+
+// 7) Cobertura evaluación desarrollo psicomotor (12-23 meses)
+{
   codigo: '7',
   nombre: 'Cobertura evaluación desarrollo psicomotor (12-23 meses)',
   tipo: 'porcentaje',
@@ -1512,25 +1515,25 @@ iaapsData = {
   importancia: 5,
   resultados: [
     // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',    numerador: 375, denominador: 1190, resultado: 10.50, cumplimiento: 11.06 },
-    { centro: 'curico',     numerador:  61, denominador:  267, resultado: 7.62, cumplimiento: 8.02 },
-    { centro: 'miguel',     numerador:  89, denominador:  255, resultado: 11.63, cumplimiento: 12.25 },
-    { centro: 'betty',      numerador:  76, denominador:  292, resultado: 8.68, cumplimiento: 9.13 },
-    { centro: 'colon',      numerador:  54, denominador:  210, resultado: 8.57, cumplimiento: 9.02 },
-    { centro: 'sarmiento',  numerador:  105, denominador:  315, resultado: 12.06, cumplimiento: 12.69 },
-    { centro: 'niches',     numerador:  61, denominador:  183, resultado: 31.15, cumplimiento: 32.79 },
+    { centro: 'comunal',       numerador: 375, denominador: 1190, resultado: 31.51, cumplimiento: 33.17, },
+    { centro: 'curico',        numerador:  61, denominador:  267, resultado: 22.85, cumplimiento: 24.05, },
+    { centro: 'miguel',        numerador:  89, denominador:  255, resultado: 34.90, cumplimiento: 36.74, },
+    { centro: 'betty',         numerador:  76, denominador:  292, resultado: 26.03, cumplimiento: 27.40, },
+    { centro: 'colon',         numerador:  54, denominador:  210, resultado: 25.71, cumplimiento: 27.07, },
+    { centro: 'sarmiento',     numerador: 105, denominador:  315, resultado: 33.33, cumplimiento: 35.09, },
+    { centro: 'niches',        numerador:  61, denominador:  183, resultado: 33.33, cumplimiento: 35.09, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador:   7, denominador:  63, resultado: 11.11, cumplimiento: 11.70 },
-    { centro: 'tutuquen',      numerador:   0, denominador:   3, resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'porvenir',      numerador:   0, denominador:  18, resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'dona_carmen',   numerador:  11, denominador:  60, resultado: 18.33, cumplimiento: 19.30 },
-    { centro: 'potrero',       numerador:   3, denominador:  27, resultado: 11.11, cumplimiento: 11.70 },
-    { centro: 'chequenlemu',   numerador:   2, denominador:   3, resultado: 66.67, cumplimiento: 70.18 },
-    { centro: 'upeo',          numerador:   1, denominador:   6, resultado: 16.67, cumplimiento: 17.54 },
-    { centro: 'cordillerilla', numerador:   0, denominador:   0, resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'obra',          numerador:   4, denominador:  15, resultado: 26.67, cumplimiento: 28.07 }
-  ]
+    { centro: 'prosperidad',   numerador:   7, denominador:   63, resultado: 11.11, cumplimiento: 11.70, },
+    { centro: 'tutuquen',      numerador:   0, denominador:    3, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',      numerador:   0, denominador:   18, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',   numerador:  11, denominador:   60, resultado: 18.33, cumplimiento: 19.30, },
+    { centro: 'potrero',       numerador:   3, denominador:   27, resultado: 11.11, cumplimiento: 11.70, },
+    { centro: 'chequenlemu',   numerador:   2, denominador:    3, resultado: 66.67, cumplimiento: 70.18, },
+    { centro: 'upeo',          numerador:   1, denominador:    6, resultado: 16.67, cumplimiento: 17.54, },
+    { centro: 'cordillerilla', numerador:   0, denominador:    0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',          numerador:   4, denominador:   15, resultado: 26.67, cumplimiento: 28.07, },
+  ],
 },
 
 // 8) Cobertura control adolescentes (10-19 años)
@@ -1542,27 +1545,29 @@ iaapsData = {
   importancia: 6,
   resultados: [
     // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',    numerador: 1636, denominador: 20368, resultado: 8.03, cumplimiento: 33.23 },
-    { centro: 'curico',     numerador: 442,  denominador:  5444,  resultado: 8.12, cumplimiento: 33.59 },
-    { centro: 'miguel',     numerador: 253,  denominador:  3687,  resultado: 6.86, cumplimiento: 28.39 },
-    { centro: 'betty',      numerador: 292,  denominador:  4039,  resultado: 7.23, cumplimiento: 29.91 },
-    { centro: 'colon',      numerador: 331,  denominador:  3281,  resultado: 10.09, cumplimiento: 41.74 },
-    { centro: 'sarmiento',  numerador: 176,  denominador:  2078,  resultado: 8.47, cumplimiento: 35.07 },
-    { centro: 'niches',     numerador: 142,  denominador:  1839,  resultado: 7.72, cumplimiento: 31.96 },
+    { centro: 'comunal',       numerador: 1636, denominador: 20368, resultado:  8.03, cumplimiento: 33.22, },
+    { centro: 'curico',        numerador:  442, denominador:  5444, resultado:  8.12, cumplimiento: 33.60, },
+    { centro: 'miguel',        numerador:  253, denominador:  3687, resultado:  6.86, cumplimiento: 28.38, },
+    { centro: 'betty',         numerador:  292, denominador:  4039, resultado:  7.23, cumplimiento: 29.91, },
+    { centro: 'colon',         numerador:  331, denominador:  3281, resultado: 10.09, cumplimiento: 41.75, },
+    { centro: 'sarmiento',     numerador:  176, denominador:  2078, resultado:  8.47, cumplimiento: 35.04, },
+    { centro: 'niches',        numerador:  142, denominador:  1839, resultado:  7.72, cumplimiento: 31.94, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 42, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'tutuquen',      numerador:  8, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'porvenir',      numerador: 13, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'dona_carmen',   numerador: 44, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'potrero',       numerador:  8, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'chequenlemu',   numerador:  0, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'upeo',          numerador:  0, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'cordillerilla', numerador:  1, denominador: 0, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'obra',          numerador:  5, denominador: 0, resultado: 0.00, cumplimiento: 0.00 }
-  ]
+    { centro: 'prosperidad',   numerador:   42, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'tutuquen',      numerador:    8, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',      numerador:   13, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',   numerador:   44, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',       numerador:    8, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',   numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'upeo',          numerador:    0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla', numerador:    1, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',          numerador:    5, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+  ],
 },
 
+
+// 9.1) Cobertura atención salud mental
 {
   codigo: '9.1',
   nombre: 'Cobertura atención salud mental',
@@ -1570,27 +1575,26 @@ iaapsData = {
   meta: 27.11,
   importancia: 5.5,
   resultados: [
-    // Centros principales (agregados con establecimientos)
-    { centro: 'comunal',    numerador: 10960, denominador: 33025, resultado: 33.19, cumplimiento: 122.42 },
-    { centro: 'curico',     numerador:  2787, denominador:  9137, resultado: 30.50, cumplimiento: 112.51 },
-    { centro: 'miguel',     numerador:  1959, denominador:  6328, resultado: 30.96, cumplimiento: 114.19 },
-    { centro: 'betty',      numerador:  2317, denominador:  6261, resultado: 37.01, cumplimiento: 136.51 },
-    { centro: 'colon',      numerador:  1631, denominador:  5233, resultado: 31.17, cumplimiento: 114.97 },
-    { centro: 'sarmiento',  numerador:  1061, denominador:  3019, resultado: 35.15, cumplimiento: 129.64 },
-    { centro: 'niches',     numerador:  1205, denominador:  3047, resultado: 39.53, cumplimiento: 145.81 },
+    { centro: 'comunal',       numerador: 10960, denominador: 33025, resultado: 33.19, cumplimiento: 122.45, },
+    { centro: 'curico',        numerador:  2787, denominador:  9137, resultado: 30.50, cumplimiento: 112.55, },
+    { centro: 'miguel',        numerador:  1959, denominador:  6328, resultado: 30.96, cumplimiento: 114.20, },
+    { centro: 'betty',         numerador:  2317, denominador:  6261, resultado: 37.01, cumplimiento: 136.59, },
+    { centro: 'colon',         numerador:  1631, denominador:  5233, resultado: 31.17, cumplimiento: 114.99, },
+    { centro: 'sarmiento',     numerador:  1061, denominador:  3019, resultado: 35.15, cumplimiento: 129.68, },
+    { centro: 'niches',        numerador:  1205, denominador:  3047, resultado: 39.53, cumplimiento: 145.82, },
 
-    // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 153, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador:  23, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador:  67, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador: 225, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'potrero',       numerador:  57, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador:  16, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador:  23, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador:  37, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador:  74, denominador: 0, resultado: 0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',   numerador:   153, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'tutuquen',      numerador:    23, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'porvenir',      numerador:    67, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'dona_carmen',   numerador:   225, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'potrero',       numerador:    57, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'chequenlemu',   numerador:    16, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'upeo',          numerador:    23, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'cordillerilla', numerador:    37, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+    { centro: 'obra',          numerador:    74, denominador:     0, resultado:  0.00, cumplimiento:   0.00, },
+  ],
 },
+
 
 
 // 9.2) Tasa controles salud mental
@@ -1601,27 +1605,26 @@ iaapsData = {
   meta: 6.00,
   importancia: 3.3,
   resultados: [
-    // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',    numerador: 18065, denominador: 10960, resultado: 1.65, cumplimiento: 27.47 },
-    { centro: 'curico',     numerador:  4225, denominador:  2787, resultado: 1.52, cumplimiento: 25.27 },
-    { centro: 'miguel',     numerador:  3408, denominador:  1959, resultado: 1.74, cumplimiento: 28.99 },
-    { centro: 'betty',      numerador:  3729, denominador:  2317, resultado: 1.61, cumplimiento: 26.82 },
-    { centro: 'colon',      numerador:  2786, denominador:  1631, resultado: 1.71, cumplimiento: 28.47 },
-    { centro: 'sarmiento',  numerador:  2122, denominador:  1061, resultado: 2.00, cumplimiento: 33.38 },
-    { centro: 'niches',     numerador:  1795, denominador:  1405, resultado: 1.28, cumplimiento: 21.34 },
+    { centro: 'comunal',        numerador: 18065, denominador: 10960, resultado: 1.65, cumplimiento: 27.50, },
+    { centro: 'curico',         numerador:  4225, denominador:  2787, resultado: 1.52, cumplimiento: 25.33, },
+    { centro: 'miguel',         numerador:  3408, denominador:  1959, resultado: 1.74, cumplimiento: 29.00, },
+    { centro: 'betty',          numerador:  3729, denominador:  2317, resultado: 1.61, cumplimiento: 26.83, },
+    { centro: 'colon',          numerador:  2786, denominador:  1631, resultado: 1.71, cumplimiento: 28.50, },
+    { centro: 'sarmiento',      numerador:  2122, denominador:  1061, resultado: 2.00, cumplimiento: 33.33, },
+    { centro: 'niches',         numerador:  1795, denominador:  1405, resultado: 1.28, cumplimiento: 21.33, },
 
-    // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 251, denominador: 153, resultado: 1.64, cumplimiento: 27.34 },
-    { centro: 'tutuquen',      numerador:  34, denominador:  23, resultado: 1.48, cumplimiento: 24.64 },
-    { centro: 'porvenir',      numerador:  56, denominador:  67, resultado: 0.84, cumplimiento: 13.93 },
-    { centro: 'dona_carmen',   numerador: 416, denominador: 225, resultado: 1.85, cumplimiento: 30.81 },
-    { centro: 'potrero',       numerador:  65, denominador:  57, resultado: 1.14, cumplimiento: 19.01 },
-    { centro: 'chequenlemu',   numerador:  42, denominador:  16, resultado: 2.63, cumplimiento: 43.75 },
-    { centro: 'upeo',          numerador:  46, denominador:  23, resultado: 2.00, cumplimiento: 33.33 },
-    { centro: 'cordillerilla', numerador:  53, denominador:  37, resultado: 1.43, cumplimiento: 23.87 },
-    { centro: 'obra',          numerador:  79, denominador:  74, resultado: 1.07, cumplimiento: 17.79 }
-  ]
+    { centro: 'prosperidad',    numerador:   251, denominador:   153, resultado: 1.64, cumplimiento: 27.33, },
+    { centro: 'tutuquen',       numerador:    34, denominador:    23, resultado: 1.48, cumplimiento: 24.67, },
+    { centro: 'porvenir',       numerador:    56, denominador:    67, resultado: 0.84, cumplimiento: 14.00, },
+    { centro: 'dona_carmen',    numerador:   416, denominador:   225, resultado: 1.85, cumplimiento: 30.83, },
+    { centro: 'potrero',        numerador:    65, denominador:    57, resultado: 1.14, cumplimiento: 19.00, },
+    { centro: 'chequenlemu',    numerador:    42, denominador:    16, resultado: 2.62, cumplimiento: 43.67, },
+    { centro: 'upeo',           numerador:    46, denominador:    23, resultado: 2.00, cumplimiento: 33.33, },
+    { centro: 'cordillerilla',  numerador:    53, denominador:    37, resultado: 1.43, cumplimiento: 23.83, },
+    { centro: 'obra',           numerador:    79, denominador:    74, resultado: 1.07, cumplimiento: 17.83, },
+  ],
 },
+
 
 // 9.3) Personas egresadas por alta clínica
 {
@@ -1632,25 +1635,25 @@ iaapsData = {
   importancia: 2.2,
   resultados: [
     // Centros principales (agregados con sus establecimientos)
-    { centro: 'comunal',    numerador: 156, denominador: 10960, resultado: 1.42, cumplimiento: 0.11 },
-    { centro: 'curico',     numerador: 18,  denominador: 2787,  resultado: 0.65, cumplimiento: 0.05 },
-    { centro: 'miguel',     numerador: 48,  denominador: 1959,  resultado: 2.45, cumplimiento: 0.19 },
-    { centro: 'betty',      numerador: 38,  denominador: 2317,  resultado: 1.64, cumplimiento: 0.13 },
-    { centro: 'colon',      numerador: 12,  denominador: 1631,  resultado: 0.74, cumplimiento: 0.06 },
-    { centro: 'sarmiento',  numerador: 12,  denominador: 1061,  resultado: 1.13, cumplimiento: 0.09 },
-    { centro: 'niches',     numerador: 28,  denominador: 1205,  resultado: 2.32, cumplimiento: 0.18 },
+    { centro: 'comunal',       numerador: 156, denominador: 10960, resultado:  1.42, cumplimiento: 10.95, },
+    { centro: 'curico',        numerador:  18, denominador:  2787, resultado:  0.65, cumplimiento:  4.97, },
+    { centro: 'miguel',        numerador:  48, denominador:  1959, resultado:  2.45, cumplimiento: 18.85, },
+    { centro: 'betty',         numerador:  38, denominador:  2317, resultado:  1.64, cumplimiento: 12.62, },
+    { centro: 'colon',         numerador:  12, denominador:  1631, resultado:  0.74, cumplimiento:  5.66, },
+    { centro: 'sarmiento',     numerador:  12, denominador:  1061, resultado:  1.13, cumplimiento:  8.70, },
+    { centro: 'niches',        numerador:  28, denominador:  1205, resultado:  2.32, cumplimiento: 17.87, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 1, denominador: 153, resultado: 0.65, cumplimiento: 0.05 },
-    { centro: 'tutuquen',      numerador: 0, denominador: 23,  resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'porvenir',      numerador: 2, denominador: 67,  resultado: 2.99, cumplimiento: 0.23 },
-    { centro: 'dona_carmen',   numerador: 0, denominador: 225, resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'potrero',       numerador: 0, denominador: 57,  resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'chequenlemu',   numerador: 1, denominador: 16,  resultado: 6.25, cumplimiento: 0.48 },
-    { centro: 'upeo',          numerador: 0, denominador: 23,  resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'cordillerilla', numerador: 0, denominador: 37,  resultado: 0.00, cumplimiento: 0.00 },
-    { centro: 'obra',          numerador: 1, denominador: 74,  resultado: 1.35, cumplimiento: 0.10 }
-  ]
+    { centro: 'prosperidad',   numerador:   1, denominador:   153, resultado:  0.65, cumplimiento:  5.03, },
+    { centro: 'tutuquen',      numerador:   0, denominador:    23, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',      numerador:   2, denominador:    67, resultado:  2.99, cumplimiento: 22.96, },
+    { centro: 'dona_carmen',   numerador:   0, denominador:   225, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',       numerador:   0, denominador:    57, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',   numerador:   1, denominador:    16, resultado:  6.25, cumplimiento: 48.08, },
+    { centro: 'upeo',          numerador:   0, denominador:    23, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla', numerador:   0, denominador:    37, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',          numerador:   1, denominador:    74, resultado:  1.35, cumplimiento: 10.40, },
+  ],
 },
 
 
@@ -1684,34 +1687,32 @@ iaapsData = {
   ]
 },
 
-                      // 11) Cobertura vacunación anti-influenza
-                      {
+// 11) Cobertura vacunación anti-influenza
+{
   codigo: '11',
   nombre: 'Cobertura vacunación anti-influenza',
   tipo: 'porcentaje',
   meta: 85.00,
   importancia: 5,
   resultados: [
-    // Centros principales (con establecimientos agregados)
-    { centro: 'comunal',    numerador: 67226, denominador: 94867, resultado: 70.86, cumplimiento: 83.37 },
-    { centro: 'curico',     numerador: 16408, denominador: 22004, resultado: 74.57, cumplimiento: 87.73 },
-    { centro: 'miguel',     numerador: 10713, denominador: 16945, resultado: 63.22, cumplimiento: 74.38 },
-    { centro: 'betty',      numerador: 13622, denominador: 19910, resultado: 68.42, cumplimiento: 80.49 },
-    { centro: 'colon',      numerador: 10372, denominador: 13899, resultado: 74.62, cumplimiento: 87.79 },
-    { centro: 'sarmiento',  numerador: 9896,  denominador: 12852, resultado: 77.00, cumplimiento: 90.59 },
-    { centro: 'niches',     numerador: 6215,  denominador: 9258,  resultado: 67.13, cumplimiento: 78.98 },
+    { centro: 'comunal',       numerador: 67226, denominador: 94867, resultado: 70.86, cumplimiento: 83.36, },
+    { centro: 'curico',        numerador: 16408, denominador: 22004, resultado: 74.57, cumplimiento: 87.73, },
+    { centro: 'miguel',        numerador: 10713, denominador: 16945, resultado: 63.22, cumplimiento: 74.38, },
+    { centro: 'betty',         numerador: 13622, denominador: 19910, resultado: 68.42, cumplimiento: 80.49, },
+    { centro: 'colon',         numerador: 10372, denominador: 13899, resultado: 74.62, cumplimiento: 87.79, },
+    { centro: 'sarmiento',     numerador:  9896, denominador: 12852, resultado: 77.00, cumplimiento: 90.59, },
+    { centro: 'niches',        numerador:  6215, denominador:  9258, resultado: 67.13, cumplimiento: 78.98, },
 
-    // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'tutuquen',      numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'potrero',       numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'chequenlemu',   numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador: 0, denominador: 0, resultado: 0.00, cumplimiento: 0 }
-  ]
+    { centro: 'prosperidad',   numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'tutuquen',      numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',      numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',   numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',       numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',   numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'upeo',          numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla', numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',          numerador:     0, denominador:     0, resultado:  0.00, cumplimiento:  0.00, },
+  ],
 },
 
 // 12) Ingreso precoz a control de embarazo
@@ -1723,26 +1724,27 @@ iaapsData = {
   importancia: 6,
   resultados: [
     // Centros principales (sumados con sus establecimientos)
-    { centro: 'comunal',    numerador: 388, denominador: 426, resultado: 91.08, cumplimiento: 101.15 },
-    { centro: 'curico',     numerador:  87, denominador:  88, resultado: 98.86, cumplimiento: 109.80 },
-    { centro: 'miguel',     numerador:  76, denominador:  92, resultado: 82.61, cumplimiento: 91.75 },
-    { centro: 'betty',      numerador:  93, denominador: 107, resultado: 86.92, cumplimiento: 96.53 },
-    { centro: 'colon',      numerador:  61, denominador:  64, resultado: 95.31, cumplimiento: 105.86 },
-    { centro: 'sarmiento',  numerador:  29, denominador:  31, resultado: 93.55, cumplimiento: 103.90 },
-    { centro: 'niches',     numerador:  18, denominador:  18, resultado: 100.00, cumplimiento: 111.06 },
+    { centro: 'comunal',    numerador: 388, denominador: 426, resultado: 91.08, cumplimiento: 101.15, },
+    { centro: 'curico',     numerador:  87, denominador:  88, resultado: 98.86, cumplimiento: 109.80, },
+    { centro: 'miguel',     numerador:  76, denominador:  92, resultado: 82.61, cumplimiento: 91.75, },
+    { centro: 'betty',      numerador:  93, denominador: 107, resultado: 86.92, cumplimiento: 96.53, },
+    { centro: 'colon',      numerador:  61, denominador:  64, resultado: 95.31, cumplimiento: 105.86, },
+    { centro: 'sarmiento',  numerador:  29, denominador:  31, resultado: 93.55, cumplimiento: 103.90, },
+    { centro: 'niches',     numerador:  18, denominador:  18, resultado: 100.00, cumplimiento: 111.06, },
 
     // Establecimientos (sin cambios)
-    { centro: 'prosperidad',   numerador: 11, denominador: 13, resultado: 84.62, cumplimiento: 93.98 },
-    { centro: 'tutuquen',      numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'porvenir',      numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'dona_carmen',   numerador:  9, denominador:  9, resultado: 100.00, cumplimiento: 111.06 },
-    { centro: 'potrero',       numerador:  2, denominador:  2, resultado: 100.00, cumplimiento: 111.06 },
-    { centro: 'chequenlemu',   numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'upeo',          numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'cordillerilla', numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0 },
-    { centro: 'obra',          numerador:  2, denominador:  2, resultado: 100.00, cumplimiento: 111.06 }
-  ]
+    { centro: 'prosperidad',   numerador: 11, denominador: 13, resultado: 84.62, cumplimiento: 93.98, },
+    { centro: 'tutuquen',      numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'porvenir',      numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'dona_carmen',   numerador:  9, denominador:  9, resultado: 100.00, cumplimiento: 111.06, },
+    { centro: 'potrero',       numerador:  2, denominador:  2, resultado: 100.00, cumplimiento: 111.06, },
+    { centro: 'chequenlemu',   numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'upeo',          numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'cordillerilla', numerador:  0, denominador:  0, resultado: 0.00, cumplimiento: 0, },
+    { centro: 'obra',          numerador:  2, denominador:  2, resultado: 100.00, cumplimiento: 111.06, },
+  ],
 },
+
 
 {
   codigo: '13',
@@ -1751,25 +1753,26 @@ iaapsData = {
   meta: 25.91,
   importancia: 6,
   resultados: [
-    { centro: 'comunal',         numerador: 2460,  denominador: 9956,  resultado: 24.71, cumplimiento: 95.36 },
-    { centro: 'curico',          numerador: 740,   denominador: 2773,  resultado: 26.69, cumplimiento: 102.99 },
-    { centro: 'miguel',          numerador: 457,   denominador: 1746,  resultado: 26.17, cumplimiento: 101.02 },
-    { centro: 'betty',           numerador: 400,   denominador: 1891,  resultado: 21.15, cumplimiento: 81.64 },
-    { centro: 'colon',           numerador: 348,   denominador: 1579,  resultado: 22.04, cumplimiento: 85.06 },
-    { centro: 'sarmiento',       numerador: 283,   denominador: 1062,  resultado: 28.15, cumplimiento: 108.66 },
-    { centro: 'niches',          numerador: 232,   denominador: 905,   resultado: 23.87, cumplimiento: 92.12 },
-    { centro: 'prosperidad',     numerador: 84,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'tutuquen',        numerador: 5,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'porvenir',        numerador: 13,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'dona_carmen',     numerador: 91,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'potrero',         numerador: 9,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'chequenlemu',     numerador: 0,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'upeo',            numerador: 2,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'cordillerilla',   numerador: 5,     denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'obra',            numerador: 12,    denominador: 0,     resultado:  0.00, cumplimiento:  0.00 },
-    { centro: 'region_del_maule',numerador: 16809, denominador: 0,     resultado:  0.00, cumplimiento:  0.00 }
-  ]
+    { centro: 'comunal',         numerador: 2460,  denominador: 9956,  resultado: 24.71, cumplimiento: 95.36, },
+    { centro: 'curico',          numerador:  740,  denominador: 2773,  resultado: 26.69, cumplimiento:102.99, },
+    { centro: 'miguel',          numerador:  457,  denominador: 1746,  resultado: 26.17, cumplimiento:101.02, },
+    { centro: 'betty',           numerador:  400,  denominador: 1891,  resultado: 21.15, cumplimiento: 81.64, },
+    { centro: 'colon',           numerador:  348,  denominador: 1579,  resultado: 22.04, cumplimiento: 85.06, },
+    { centro: 'sarmiento',       numerador:  283,  denominador: 1062,  resultado: 26.65, cumplimiento:102.85, },
+    { centro: 'niches',          numerador:  232,  denominador:  905,  resultado: 25.64, cumplimiento: 98.94, },
+    { centro: 'prosperidad',     numerador:   84,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'tutuquen',        numerador:    5,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'porvenir',        numerador:   13,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'dona_carmen',     numerador:   91,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'potrero',         numerador:    9,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'chequenlemu',     numerador:    0,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'upeo',            numerador:    2,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'cordillerilla',   numerador:    5,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'obra',            numerador:   12,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+    { centro: 'region_del_maule',numerador:16809,  denominador:    0,  resultado:  0.00, cumplimiento:  0.00, },
+  ],
 },
+
 
 {
   codigo: '14',
