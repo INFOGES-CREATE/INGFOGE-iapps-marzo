@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Georeferencial Premium - INFOGES Curicó</title>
+    <link rel="stylesheet" href="../css/georef.css">
+
+    <!-- Librerías externas para el mapa y funcionalidades -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+  
+</head>
+<body>
+    <!-- =================================================================
+         HEADER PRINCIPAL CON INFORMACIÓN CLAVE
+         ================================================================= -->
+    <header class="header">
+      
+        <div class="header-content">
+            <div>
+                <div class="header-title">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Sistema Georeferencial INFOGES
+                </div>
+                <div class="header-subtitle">
+                    Análisis Territorial y Poblacional - Comuna de Curicó
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-value">150,113</div>
+                    <div class="stat-label">Población Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Centros de Salud</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1,328</div>
+                    <div class="stat-label">km² Territorio</div>
+                </div>
+
+                <div class="stat-item">
+                    <nav class="stat-value">
+                        <a href="../tablero/" class="btn-back">Volver</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- =================================================================
+         CONTENEDOR PRINCIPAL CON SIDEBAR Y MAPA
+         ================================================================= -->
+    <div class="main-container">
+        <!-- PANEL LATERAL CON CONTROLES Y DATOS -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Panel de Control</div>
+                <div class="sidebar-subtitle">Filtros y Análisis Avanzado</div>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- SECCIÓN DE FILTROS -->
+                <div class="filters-section">
+                    <div class="section-title">
+                        <i class="fas fa-filter"></i>
+                        Filtros de Visualización
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo de Análisis</label>
+                        <select class="filter-select" id="analysisType">
+                            <option value="population">Análisis Poblacional</option>
+                            <option value="gender">Distribución por Sexo</option>
+                            <option value="density">Densidad Territorial</option>
+                            <option value="accessibility">Accesibilidad</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">Vista del Mapa</label>
+                        <select class="filter-select" id="mapView">
+                            <option value="standard">Vista Estándar</option>
+                            <option value="satellite">Vista Satelital</option>
+                            <option value="terrain">Relieve</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-buttons">
+                        <button class="btn btn-primary" id="applyFilters">
+                            <i class="fas fa-search"></i>
+                            Aplicar
+                        </button>
+                        <button class="btn btn-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i>
+                            Resetear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LISTA DE CENTROS DE SALUD -->
+                <div class="filters-section">
+                    <div class="section-title">
+                        <i class="fas fa-hospital"></i>
+                        Centros de Salud
+                    </div>
+                    <div class="centers-list" id="centersList">
+                        <!-- Los centros se cargarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- PANEL DE RECOMENDACIONES -->
+                <div class="recommendations" id="recommendationsPanel">
+                    <div class="recommendations-title">
+                        <i class="fas fa-lightbulb"></i>
+                        Recomendaciones Inteligentes
+                    </div>
+                    <div id="recommendationsList">
+                        <!-- Las recomendaciones se generarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENEDOR PRINCIPAL DEL MAPA -->
+        <main class="map-container">
+            <div class="map-header">
+                <div class="map-title">
+                    <i class="fas fa-globe-americas"></i>
+                    Mapa Interactivo de Curicó
+                </div>
+                <div class="map-controls">
+                    <button class="map-control-btn active" data-layer="centers">Centros</button>
+                    <button class="map-control-btn" data-layer="population">Población</button>
+                    <button class="map-control-btn" data-layer="heatmap">Calor</button>
+                    <button class="map-control-btn" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- EL MAPA PRINCIPAL -->
+            <div id="map"></div>
+            
+            <!-- LEYENDA DEL MAPA -->
+            <div class="map-legend">
+                <div class="legend-title">Leyenda</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--primary);"></div>
+                    <span>CESFAM Principal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--secondary);"></div>
+                    <span>Centro Especializado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent);"></div>
+                    <span>Alta Demanda</span>
+                </div>
+            </div>
+            
+            <!-- OVERLAY DE CARGA -->
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Cargando datos georeferenciados...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- NOTIFICACIÓN FLOTANTE -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="notification-message" id="notificationMessage">
+                Sistema inicializado correctamente
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+         JAVASCRIPT PARA FUNCIONALIDAD COMPLETA
+         ================================================================= -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        /**
+         * SISTEMA GEOREFERENCIAL PREMIUM - CURICÓ INFOGES
+         * 
+         * Este sistema integra mapas interactivos con datos poblacionales
+         * y proporciona recomendaciones inteligentes para la toma de decisiones
+         * en salud pública basada en análisis territorial.
+         */
+
+        // =================================================================
+        // CONFIGURACIÓN Y DATOS BASE DEL SISTEMA
+        // =================================================================
+        
+        // Datos completos de los centros de salud con coordenadas aproximadas
+        const healthCenters = [
+            {
+                id: 'centro',
+                name: 'CESFAM Curicó Centro',
+                address: 'Avenida Freire N° 189',
+                phone: '800500704',
+                email: 'centro@salud.curico.cl',
+                lat: -34.9823,
+                lng: -71.2394,
+                type: 'CESFAM',
+                population: {
+                    total: 41532,
+                    male: 18111,
+                    female: 23421,
+                    coverage: '27.7%'
+                },
+                ageGroups: {
+                    infantil: 3878,
+                    adolescente: 5444,
+                    adulto: 25601,
+                    adultoMayor: 6609
+                },
+                indicators: {
+                    densidad: 312.5,
+                    accesibilidad: 95,
+                    demanda: 'Alta'
+                }
+            },
+            {
+                id: 'arenas',
+                name: 'CESFAM Miguel Ángel Arenas López',
+                address: 'Balmaceda 179, Curicó',
+                phone: '+56752317898',
+                email: 'arenas@salud.curico.cl',
+                lat: -34.9856,
+                lng: -71.2356,
+                type: 'CESFAM',
+                population: {
+                    total: 28763,
+                    male: 14094,
+                    female: 14669,
+                    coverage: '19.2%'
+                },
+                ageGroups: {
+                    infantil: 3199,
+                    adolescente: 3687,
+                    adulto: 18218,
+                    adultoMayor: 3659
+                },
+                indicators: {
+                    densidad: 285.3,
+                    accesibilidad: 88,
+                    demanda: 'Media'
+                }
+            },
+            {
+                id: 'betty',
+                name: 'CESFAM Betty Muñoz Arce',
+                address: 'Calle Piloto Marcelo Oxilia 1550, Curicó',
+                phone: '6003607777',
+                email: 'betty@salud.curico.cl',
+                lat: -34.9789,
+                lng: -71.2445,
+                type: 'CESFAM',
+                population: {
+                    total: 28461,
+                    male: 12604,
+                    female: 15857,
+                    coverage: '19.0%'
+                },
+                ageGroups: {
+                    infantil: 3782,
+                    adolescente: 4039,
+                    adulto: 16868,
+                    adultoMayor: 3772
+                },
+                indicators: {
+                    densidad: 278.1,
+                    accesibilidad: 92,
+                    demanda: 'Alta'
+                }
+            },
+            {
+                id: 'colon',
+                name: 'CESFAM Colón',
+                address: 'Balmaceda 1661, Curicó',
+                phone: '+56752317900',
+                email: 'colon@salud.curico.cl',
+                lat: -34.9867,
+                lng: -71.2378,
+                type: 'CESFAM',
+                population: {
+                    total: 23785,
+                    male: 11115,
+                    female: 12670,
+                    coverage: '15.8%'
+                },
+                ageGroups: {
+                    infantil: 2858,
+                    adolescente: 3281,
+                    adulto: 14315,
+                    adultoMayor: 3331
+                },
+                indicators: {
+                    densidad: 245.8,
+                    accesibilidad: 90,
+                    demanda: 'Media'
+                }
+            },
+            {
+                id: 'sarmiento',
+                name: 'CESFAM Sarmiento',
+                address: 'Calle Volcán Calbuco S/N',
+                phone: '752606247',
+                email: 'sarmiento@salud.curico.cl',
+                lat: -34.9945,
+                lng: -71.2512,
+                type: 'CESFAM',
+                population: {
+                    total: 13722,
+                    male: 6792,
+                    female: 6930,
+                    coverage: '9.1%'
+                },
+                ageGroups: {
+                    infantil: 1469,
+                    adolescente: 2078,
+                    adulto: 8583,
+                    adultoMayor: 1592
+                },
+                indicators: {
+                    densidad: 156.7,
+                    accesibilidad: 75,
+                    demanda: 'Baja'
+                }
+            },
+            {
+                id: 'niches',
+                name: 'CESFAM Los Niches',
+                address: 'Calle Villa Sta Elena N° S/N',
+                phone: '(75) 251 0646',
+                email: 'niches@salud.curico.cl',
+                lat: -35.0012,
+                lng: -71.2589,
+                type: 'CESFAM',
+                population: {
+                    total: 13850,
+                    male: 7013,
+                    female: 6837,
+                    coverage: '9.2%'
+                },
+                ageGroups: {
+                    infantil: 1393,
+                    adolescente: 1839,
+                    adulto: 8484,
+                    adultoMayor: 2134
+                },
+                indicators: {
+                    densidad: 148.2,
+                    accesibilidad: 78,
+                    demanda: 'Media'
+                }
+            },
+            {
+                id: 'cea',
+                name: 'CEA Centro Especializado',
+                address: 'Calle Valles del Maule, 728, Santa Fe, Curicó',
+                phone: '9 7160 9680 / 9 9074',
+                email: 'centroceacurico@gmail.com',
+                lat: -34.9756,
+                lng: -71.2289,
+                type: 'CEA',
+                population: {
+                    total: 0,
+                    male: 0,
+                    female: 0,
+                    coverage: '0.00%'
+                },
+                ageGroups: {
+                    infantil: 520,
+                    adolescente: 780,
+                    adulto: 3120,
+                    adultoMayor: 780
+                },
+                indicators: {
+                    densidad: 0.0,
+                    accesibilidad: 0,
+                    demanda: 'Especializada'
+                }
+            }
+        ];
+
+        // Variables globales del sistema
+        let map;
+        let markers = [];
+        let selectedCenter = null;
+        let currentAnalysis = 'population';
+
+        // =================================================================
+        // INICIALIZACIÓN DEL SISTEMA
+        // =================================================================
+        
+        /**
+         * Función principal de inicialización que configura todos los componentes
+         * del sistema georeferencial premium.
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar indicador de carga
+            showLoadingOverlay(true);
+            
+            // Inicializar componentes secuencialmente
+            setTimeout(() => {
+                initializeMap();
+                loadHealthCenters();
+                setupEventListeners();
+                generateRecommendations();
+                showLoadingOverlay(false);
+                showNotification('Sistema georeferencial inicializado correctamente', 'success');
+            }, 1500);
+        });
+
+        /**
+         * Inicializa el mapa principal usando Leaflet con configuración premium
+         * Establece la vista centrada en Curicó con múltiples capas de visualización
+         */
+        function initializeMap() {
+            // Coordenadas del centro de Curicó
+            const curicoCenter = [-34.9823, -71.2394];
+            
+            // Crear mapa con configuración avanzada
+            map = L.map('map', {
+                center: curicoCenter,
+                zoom: 13,
+                zoomControl: false,
+                attributionControl: false
+            });
+
+            // Agregar control de zoom personalizado
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+
+            // Configurar múltiples capas de mapas
+            const mapLayers = {
+                standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }),
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri'
+                }),
+                terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenTopoMap contributors'
+                })
+            };
+
+            // Establecer capa por defecto
+            mapLayers.standard.addTo(map);
+
+            // Configurar evento de cambio de vista
+            document.getElementById('mapView').addEventListener('change', function(e) {
+                const selectedView = e.target.value;
+                
+                // Remover todas las capas
+                Object.values(mapLayers).forEach(layer => {
+                    map.removeLayer(layer);
+                });
+                
+                // Agregar capa seleccionada
+                mapLayers[selectedView].addTo(map);
+                showNotification(`Vista cambiada a: ${selectedView}`, 'info');
+            });
+
+            console.log('🗺️ Mapa inicializado correctamente');
+        }
+
+        /**
+         * Carga y visualiza todos los centros de salud en el mapa
+         * Crea marcadores personalizados con información poblacional
+         */
+        function loadHealthCenters() {
+            // Limpiar marcadores existentes
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            // Crear marcadores para cada centro
+            healthCenters.forEach((center, index) => {
+                const markerColor = center.type === 'CEA' ? '#f59e0b' : 
+                    center.indicators.demanda === 'Alta' ? '#dc2626' :
+                    center.indicators.demanda === 'Media' ? '#0ea5e9' : '#059669';
+
+                // Crear marcador personalizado
+                const marker = L.circleMarker([center.lat, center.lng], {
+                    radius: getMarkerSize(center.population.total),
+                    fillColor: markerColor,
+                    color: '#ffffff',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                // Configurar popup con información detallada
+                marker.bindPopup(createPopupContent(center), {
+                    maxWidth: 350,
+                    className: 'custom-popup'
+                });
+
+                // Eventos del marcador
+                marker.on('click', () => selectCenter(center));
+                marker.on('mouseover', () => highlightMarker(marker));
+                marker.on('mouseout', () => resetMarkerHighlight(marker));
+
+                // Guardar referencia
+                marker.centerId = center.id;
+                markers.push(marker);
+            });
+
+            // Generar lista lateral de centros
+            updateCentersList();
+            
+            console.log(`📍 ${healthCenters.length} centros de salud cargados en el mapa`);
+        }
+
+        /**
+         * Calcula el tamaño del marcador basado en la población
+         * Proporciona representación visual proporcional de la demanda
+         */
+        function getMarkerSize(population) {
+            if (population > 30000) return 16;
+            if (population > 20000) return 14;
+            if (population > 10000) return 12;
+            return 10;
+        }
+
+        /**
+         * Crea el contenido HTML para los popups de los marcadores
+         * Incluye datos poblacionales, estadísticas y información de contacto
+         */
+        function createPopupContent(center) {
+            const malePercent = ((center.population.male / center.population.total) * 100).toFixed(1);
+            const femalePercent = ((center.population.female / center.population.total) * 100).toFixed(1);
+
+            return `
+                <div class="custom-popup">
+                    <div class="popup-header">
+                        <div class="popup-title">${center.name}</div>
+                        <div class="popup-subtitle">${center.type} - Cobertura: ${center.population.coverage}</div>
+                    </div>
+                    
+                    <div class="popup-content">
+                        <div class="popup-stats">
+                            <div class="popup-stat">
+                                <div class="popup-stat-value">${formatNumber(center.population.total)}</div>
+                                <div class="popup-stat-label">Población Total</div>
+                            </div>
+                            <div class="popup-stat">
+                                <div class="popup-stat-value">${formatNumber(center.population.male)}</div>
+                                <div class="popup-stat-label">Hombres (${malePercent}%)</div>
+                            </div>
+                            <div class="popup-stat">
+                                <div class="popup-stat-value">${formatNumber(center.population.female)}</div>
+                                <div class="popup-stat-label">Mujeres (${femalePercent}%)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="popup-info">
+                            <div class="popup-info-item">
+                                <i class="fas fa-map-marker-alt popup-info-icon"></i>
+                                <span>${center.address}</span>
+                            </div>
+                            <div class="popup-info-item">
+                                <i class="fas fa-phone popup-info-icon"></i>
+                                <span>${center.phone}</span>
+                            </div>
+                            <div class="popup-info-item">
+                                <i class="fas fa-envelope popup-info-icon"></i>
+                                <span>${center.email}</span>
+                            </div>
+                            <div class="popup-info-item">
+                                <i class="fas fa-users popup-info-icon"></i>
+                                <span>Densidad: ${center.indicators.densidad} hab/km²</span>
+                            </div>
+                            <div class="popup-info-item">
+                                <i class="fas fa-chart-line popup-info-icon"></i>
+                                <span>Accesibilidad: ${center.indicators.accesibilidad}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Actualiza la lista lateral de centros de salud
+         * Proporciona navegación alternativa al mapa
+         */
+        function updateCentersList() {
+            const container = document.getElementById('centersList');
+            container.innerHTML = '';
+
+            healthCenters.forEach(center => {
+                const centerElement = document.createElement('div');
+                centerElement.className = 'center-item';
+                centerElement.onclick = () => {
+                    selectCenter(center);
+                    // Centrar mapa en el centro seleccionado
+                    map.setView([center.lat, center.lng], 15);
+                };
+
+                centerElement.innerHTML = `
+                    <div class="center-name">${center.name}</div>
+                    <div class="center-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${center.address}
+                    </div>
+                    <div class="center-stats">
+                        <div class="center-stat">
+                            <div class="center-stat-value">${formatNumber(center.population.total)}</div>
+                            <div class="center-stat-label">Total</div>
+                        </div>
+                        <div class="center-stat">
+                            <div class="center-stat-value">${formatNumber(center.population.male)}</div>
+                            <div class="center-stat-label">Hombres</div>
+                        </div>
+                        <div class="center-stat">
+                            <div class="center-stat-value">${formatNumber(center.population.female)}</div>
+                            <div class="center-stat-label">Mujeres</div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(centerElement);
+            });
+        }
+
+        /**
+         * Selecciona un centro específico y actualiza la interfaz
+         * Resalta el marcador seleccionado y actualiza recomendaciones
+         */
+        function selectCenter(center) {
+            selectedCenter = center;
+
+            // Actualizar interfaz visual
+            document.querySelectorAll('.center-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Encontrar y activar el elemento correspondiente
+            const centerElements = document.querySelectorAll('.center-item');
+            centerElements.forEach((element, index) => {
+                if (healthCenters[index].id === center.id) {
+                    element.classList.add('active');
+                }
+            });
+
+            // Resaltar marcador en el mapa
+            markers.forEach(marker => {
+                marker.setStyle({
+                    weight: marker.centerId === center.id ? 5 : 3,
+                    color: marker.centerId === center.id ? '#ff6b35' : '#ffffff'
+                });
+            });
+
+            // Generar recomendaciones específicas
+            generateRecommendations(center);
+            
+            showNotification(`Centro seleccionado: ${center.name}`, 'info');
+        }
+
+        /**
+         * Sistema de recomendaciones inteligentes basado en datos
+         * Analiza patrones poblacionales y genera sugerencias para optimización
+         */
+        function generateRecommendations(selectedCenter = null) {
+            const container = document.getElementById('recommendationsList');
+            const recommendations = [];
+
+            if (selectedCenter) {
+                // Recomendaciones específicas del centro
+                analyzeSpecificCenter(selectedCenter, recommendations);
+            } else {
+                // Recomendaciones generales del sistema
+                analyzeGeneralSystem(recommendations);
+            }
+
+            // Renderizar recomendaciones
+            container.innerHTML = recommendations.map(rec => `
+                <div class="recommendation-item">
+                    <div class="recommendation-text">${rec.text}</div>
+                    <div class="recommendation-impact">Impacto: ${rec.impact}</div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Analiza un centro específico y genera recomendaciones personalizadas
+         */
+        function analyzeSpecificCenter(center, recommendations) {
+            const totalPopulation = center.population.total;
+            const maleRatio = center.population.male / totalPopulation;
+            const femaleRatio = center.population.female / totalPopulation;
+            const density = center.indicators.densidad;
+            const accessibility = center.indicators.accesibilidad;
+
+            // Análisis de distribución por sexo
+            if (Math.abs(maleRatio - 0.5) > 0.1) {
+                const predominantGender = maleRatio > femaleRatio ? 'masculina' : 'femenina';
+                recommendations.push({
+                    text: `Hay un desbalance significativo hacia población ${predominantGender}. Considerar programas específicos de salud.`,
+                    impact: 'Alto'
+                });
+            }
+
+            // Análisis de densidad poblacional
+            if (density > 300) {
+                recommendations.push({
+                    text: 'Alta densidad poblacional detectada. Evaluar ampliación de horarios de atención o recursos adicionales.',
+                    impact: 'Alto'
+                });
+            } else if (density < 150) {
+                recommendations.push({
+                    text: 'Baja densidad poblacional. Considerar programas de atención domiciliaria o telemedicina.',
+                    impact: 'Medio'
+                });
+            }
+
+            // Análisis de accesibilidad
+            if (accessibility < 80) {
+                recommendations.push({
+                    text: 'Accesibilidad por debajo del promedio. Revisar rutas de transporte público y barreras geográficas.',
+                    impact: 'Alto'
+                });
+            }
+
+            // Análisis de grupos etarios
+            const adultMayorRatio = center.ageGroups.adultoMayor / totalPopulation;
+            if (adultMayorRatio > 0.15) {
+                recommendations.push({
+                    text: 'Alto porcentaje de adultos mayores. Fortalecer programas geriátricos y prevención de enfermedades crónicas.',
+                    impact: 'Alto'
+                });
+            }
+
+            const infantilRatio = center.ageGroups.infantil / totalPopulation;
+            if (infantilRatio > 0.15) {
+                recommendations.push({
+                    text: 'Alta proporción de población infantil. Reforzar programas de vacunación y control del niño sano.',
+                    impact: 'Medio'
+                });
+            }
+        }
+
+        /**
+         * Analiza el sistema completo y genera recomendaciones generales
+         */
+        function analyzeGeneralSystem(recommendations) {
+            const totalPopulation = healthCenters.reduce((sum, center) => sum + center.population.total, 0);
+            const averageDensity = healthCenters.reduce((sum, center) => sum + center.indicators.densidad, 0) / healthCenters.length;
+            
+            // Identificar centros con mayor y menor carga
+            const highLoadCenters = healthCenters.filter(center => center.population.total > 25000);
+            const lowLoadCenters = healthCenters.filter(center => center.population.total < 15000);
+
+            if (highLoadCenters.length > 0) {
+                recommendations.push({
+                    text: `${highLoadCenters.length} centros con alta demanda identificados. Considerar redistribución de recursos o ampliación de servicios.`,
+                    impact: 'Alto'
+                });
+            }
+
+            if (lowLoadCenters.length > 0) {
+                recommendations.push({
+                    text: `${lowLoadCenters.length} centros con baja demanda. Evaluar oportunidades de especialización o programas comunitarios.`,
+                    impact: 'Medio'
+                });
+            }
+
+            // Análisis de cobertura territorial
+            recommendations.push({
+                text: 'Cobertura territorial del 100% alcanzada. Evaluar tiempos de traslado para optimizar accesibilidad.',
+                impact: 'Medio'
+            });
+
+            // Recomendación de análisis predictivo
+            recommendations.push({
+                text: 'Implementar sistema de análisis predictivo para anticipar demanda estacional y picos de atención.',
+                impact: 'Alto'
+            });
+        }
+
+        /**
+         * Configura todos los event listeners del sistema
+         * Maneja interacciones del usuario con controles y filtros
+         */
+        function setupEventListeners() {
+            // Filtros de análisis
+            document.getElementById('analysisType').addEventListener('change', function(e) {
+                currentAnalysis = e.target.value;
+                updateMapVisualization();
+                showNotification(`Análisis cambiado a: ${e.target.value}`, 'info');
+            });
+
+            // Botones de acción
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+
+            // Controles de capas del mapa
+            document.querySelectorAll('.map-control-btn[data-layer]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover clase active de todos los botones
+                    document.querySelectorAll('.map-control-btn[data-layer]').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    // Activar botón seleccionado
+                    this.classList.add('active');
+                    
+                    // Cambiar visualización según la capa
+                    const layer = this.dataset.layer;
+                    updateMapLayer(layer);
+                });
+            });
+
+            console.log('🎮 Event listeners configurados correctamente');
+        }
+
+        /**
+         * Actualiza la visualización del mapa según el tipo de análisis seleccionado
+         */
+        function updateMapVisualization() {
+            markers.forEach(marker => {
+                const centerId = marker.centerId;
+                const center = healthCenters.find(c => c.id === centerId);
+                
+                let color, size;
+                
+                switch(currentAnalysis) {
+                    case 'population':
+                        color = getPopulationColor(center.population.total);
+                        size = getMarkerSize(center.population.total);
+                        break;
+                    case 'gender':
+                        const maleRatio = center.population.male / center.population.total;
+                        color = maleRatio > 0.5 ? '#3b82f6' : '#ec4899';
+                        size = 12;
+                        break;
+                    case 'density':
+                        color = getDensityColor(center.indicators.densidad);
+                        size = Math.max(8, Math.min(18, center.indicators.densidad / 20));
+                        break;
+                    case 'accessibility':
+                        color = getAccessibilityColor(center.indicators.accesibilidad);
+                        size = 12;
+                        break;
+                    default:
+                        color = '#00695c';
+                        size = 12;
+                }
+                
+                marker.setStyle({
+                    fillColor: color,
+                    radius: size
+                });
+            });
+        }
+
+        /**
+         * Funciones auxiliares para colorear marcadores según diferentes métricas
+         */
+        function getPopulationColor(population) {
+            if (population > 35000) return '#dc2626';
+            if (population > 25000) return '#f59e0b';
+            if (population > 15000) return '#0ea5e9';
+            return '#059669';
+        }
+
+        function getDensityColor(density) {
+            if (density > 300) return '#dc2626';
+            if (density > 200) return '#f59e0b';
+            if (density > 150) return '#0ea5e9';
+            return '#059669';
+        }
+
+        function getAccessibilityColor(accessibility) {
+            if (accessibility > 90) return '#059669';
+            if (accessibility > 80) return '#0ea5e9';
+            if (accessibility > 70) return '#f59e0b';
+            return '#dc2626';
+        }
+
+        /**
+         * Aplica filtros seleccionados y actualiza visualización
+         */
+        function applyFilters() {
+            const analysisType = document.getElementById('analysisType').value;
+            const mapView = document.getElementById('mapView').value;
+            
+            updateMapVisualization();
+            generateRecommendations(selectedCenter);
+            
+            showNotification('Filtros aplicados correctamente', 'success');
+        }
+
+        /**
+         * Resetea todos los filtros a valores por defecto
+         */
+        function resetFilters() {
+            document.getElementById('analysisType').value = 'population';
+            document.getElementById('mapView').value = 'standard';
+            
+            currentAnalysis = 'population';
+            selectedCenter = null;
+            
+            // Resetear estilos de marcadores
+            markers.forEach(marker => {
+                marker.setStyle({
+                    weight: 3,
+                    color: '#ffffff'
+                });
+            });
+            
+            // Resetear lista de centros
+            document.querySelectorAll('.center-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            updateMapVisualization();
+            generateRecommendations();
+            
+            showNotification('Filtros reseteados', 'info');
+        }
+
+        /**
+         * Alterna modo pantalla completa para el mapa
+         */
+        function toggleFullscreen() {
+            const mapContainer = document.querySelector('.map-container');
+            
+            if (!document.fullscreenElement) {
+                mapContainer.requestFullscreen().then(() => {
+                    document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-compress"></i>';
+                    setTimeout(() => map.invalidateSize(), 100);
+                }).catch(err => {
+                    showNotification('No se pudo activar pantalla completa', 'error');
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand"></i>';
+                    setTimeout(() => map.invalidateSize(), 100);
+                });
+            }
+        }
+
+        /**
+         * Actualiza la capa del mapa según selección del usuario
+         */
+        function updateMapLayer(layer) {
+            switch(layer) {
+                case 'centers':
+                    // Mostrar solo marcadores de centros
+                    markers.forEach(marker => marker.setStyle({ fillOpacity: 0.8 }));
+                    break;
+                case 'population':
+                    // Enfoque en datos poblacionales
+                    updateMapVisualization();
+                    break;
+                case 'heatmap':
+                    // Simular mapa de calor (se puede implementar con plugins adicionales)
+                    markers.forEach(marker => {
+                        const center = healthCenters.find(c => c.id === marker.centerId);
+                        const intensity = center.population.total / 50000;
+                        marker.setStyle({ 
+                            fillOpacity: Math.min(1, intensity),
+                            radius: getMarkerSize(center.population.total) * 1.5
+                        });
+                    });
+                    break;
+            }
+        }
+
+        /**
+         * Resalta un marcador cuando el mouse pasa sobre él
+         */
+        function highlightMarker(marker) {
+            marker.setStyle({
+                weight: 5,
+                color: '#ff6b35',
+                fillOpacity: 1
+            });
+        }
+
+        /**
+         * Restaura el estilo normal del marcador
+         */
+        function resetMarkerHighlight(marker) {
+            const isSelected = selectedCenter && marker.centerId === selectedCenter.id;
+            marker.setStyle({
+                weight: isSelected ? 5 : 3,
+                color: isSelected ? '#ff6b35' : '#ffffff',
+                fillOpacity: 0.8
+            });
+        }
+
+        /**
+         * Muestra u oculta el overlay de carga
+         */
+        function showLoadingOverlay(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        /**
+         * Sistema de notificaciones del usuario
+         */
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            const iconEl = notification.querySelector('.notification-icon i');
+            
+            // Configurar mensaje
+            messageEl.textContent = message;
+            
+            // Configurar icono según tipo
+            const icons = {
+                info: 'fa-info-circle',
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+            
+            iconEl.className = `fas ${icons[type] || icons.info}`;
+            
+            // Mostrar notificación
+            notification.classList.add('show');
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        /**
+         * Formatea números con separadores de miles
+         */
+        function formatNumber(number) {
+            return new Intl.NumberFormat('es-CL').format(number);
+        }
+
+        // =================================================================
+        // LOG DE INICIALIZACIÓN
+        // =================================================================
+        console.log('🌟 Sistema Georeferencial Premium INFOGES - Curicó inicializado');
+        console.log('📊 Datos cargados:', {
+            centros: healthCenters.length,
+            poblacionTotal: healthCenters.reduce((sum, center) => sum + center.population.total, 0),
+            coberturaTerritorial: '100%'
+        });
+
+        
+    </script>
+</body>
+</html>

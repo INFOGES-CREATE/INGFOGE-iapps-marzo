@@ -1,0 +1,706 @@
+   /* =================================================================
+           VARIABLES CSS PREMIUM PARA TEMA CONSISTENTE
+           ================================================================= */
+        :root {
+            --primary: #00695c;
+            --primary-light: #48a999;
+            --primary-dark: #003d33;
+            --secondary: #1e3a8a;
+            --secondary-light: #3b82f6;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0ea5e9;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --surface-dark: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.25);
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-surface: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        /* =================================================================
+           RESET Y CONFIGURACIÓN BASE
+           ================================================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--gradient-surface);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* =================================================================
+           HEADER PREMIUM CON GRADIENTE Y EFECTOS
+           ================================================================= */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 8px 32px var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            z-index: 1;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title i {
+            font-size: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+            color:white;
+            text-decoration: none;
+            transition: prop time;
+        }
+        .btn-back {
+            font-size: 1.4rem;
+            font-weight: 800;
+            line-height: 1;
+            color:rgb(37, 189, 20);
+            text-decoration: none;
+            transition: prop time;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        /* =================================================================
+           CONTENEDOR PRINCIPAL CON LAYOUT FLEXÍVEL
+           ================================================================= */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            min-height: calc(100vh - 140px);
+        }
+
+        /* =================================================================
+           PANEL LATERAL CON CONTROLES Y INFORMACIÓN
+           ================================================================= */
+        .sidebar {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow);
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        .sidebar-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sidebar-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        /* =================================================================
+           SECCIÓN DE FILTROS Y CONTROLES
+           ================================================================= */
+        .filters-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: var(--surface);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 105, 92, 0.1);
+        }
+
+        .filter-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 105, 92, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface-alt);
+            color: var(--text-secondary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-light);
+            color: var(--text-primary);
+        }
+
+        /* =================================================================
+           LISTA DE CENTROS DE SALUD
+           ================================================================= */
+        .centers-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .center-item {
+            background: var(--surface-alt);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .center-item:hover, .center-item.active {
+            background: var(--surface);
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .center-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .center-address {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .center-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .center-stat {
+            text-align: center;
+            background: var(--surface);
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .center-stat-value {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .center-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* =================================================================
+           PANEL DE RECOMENDACIONES INTELIGENTES
+           ================================================================= */
+        .recommendations {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--info);
+            margin-top: 20px;
+        }
+
+        .recommendations-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: var(--info);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recommendation-item {
+            background: white;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--info);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+        }
+
+        .recommendation-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .recommendation-impact {
+            font-size: 0.8rem;
+            color: var(--info);
+            font-weight: 600;
+        }
+
+        /* =================================================================
+           CONTENEDOR DEL MAPA PRINCIPAL
+           ================================================================= */
+        .map-container {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .map-header {
+            background: var(--surface);
+            padding: 20px;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .map-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .map-control-btn {
+            padding: 8px 12px;
+            background: var(--surface-alt);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .map-control-btn:hover, .map-control-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+
+        /* =================================================================
+           POPUP PERSONALIZADO PARA MARCADORES
+           ================================================================= */
+        .custom-popup {
+            min-width: 300px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .popup-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 16px;
+            margin: -10px -10px 16px -10px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .popup-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .popup-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .popup-content {
+            padding: 0 10px;
+        }
+
+        .popup-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .popup-stat {
+            text-align: center;
+            background: var(--surface-alt);
+            padding: 12px 8px;
+            border-radius: 8px;
+        }
+
+        .popup-stat-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .popup-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .popup-info {
+            background: var(--surface-alt);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .popup-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .popup-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .popup-info-icon {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        /* =================================================================
+           INDICADOR DE CARGA PREMIUM
+           ================================================================= */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* =================================================================
+           NOTIFICACIONES DEL SISTEMA
+           ================================================================= */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 12px 32px var(--shadow-lg);
+            z-index: 2000;
+            max-width: 400px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.4s ease;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .notification-message {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* =================================================================
+           RESPONSIVE DESIGN PARA DISPOSITIVOS MÓVILES
+           ================================================================= */
+        @media (max-width: 968px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-stats {
+                gap: 15px;
+            }
+
+            .stat-item {
+                padding: 8px 12px;
+            }
+
+            .map-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .map-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            #map {
+                height: 400px;
+            }
+
+            .sidebar {
+                order: 2;
+            }
+
+            .map-container {
+                order: 1;
+            }
+        }
+
+        /* =================================================================
+           MARCADORES PERSONALIZADOS DEL MAPA
+           ================================================================= */
+        .custom-marker {
+            background: var(--gradient-primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .custom-marker.selected {
+            width: 32px;
+            height: 32px;
+            box-shadow: 0 8px 24px rgba(0, 105, 92, 0.4);
+        }
+
+        /* =================================================================
+           LEYENDA DEL MAPA
+           ================================================================= */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px var(--shadow);
+            z-index: 1000;
+            max-width: 250px;
+        }
+
+        .legend-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
