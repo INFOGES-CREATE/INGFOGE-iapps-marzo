@@ -28,6 +28,11 @@
                     <span><i class="fas fa-hospital"></i> 6 centros de salud</span>
                 </div>
                 <div class="header-actions">
+                    <a href="../" class="nav-btn" style="background-color: green;">
+                        <i class="fas fa-arrow-left" ></i>
+                        Volver
+                     
+                    </a>
                     <a href="#" class="header-btn">
                         <i class="fas fa-question-circle"></i> Ayuda
                     </a>
@@ -2608,100 +2613,101 @@
                     -Math.round(adultoMayor.femenino * 0.23)
                 ];
             }
-            
-            return new Chart(ctx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Hombres',
-                            data: maleData,
-                            backgroundColor: chartColors.maleColor,
-                            borderColor: '#ffffff',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false
-                        },
-                        {
-                            label: 'Mujeres',
-                            data: femaleData,
-                            backgroundColor: chartColors.femaleColor,
-                            borderColor: '#ffffff',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false
-                        }
-                    ]
+           return new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Hombres',
+                data: maleData,
+                backgroundColor: chartColors.maleColor,
+                borderColor: '#ffffff',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            },
+            {
+                label: 'Mujeres',
+                data: femaleData,
+                backgroundColor: chartColors.femaleColor,
+                borderColor: '#ffffff',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        scales: {
+            x: {
+                stacked: false,
+                title: {
+                    display: true,
+                    text: 'Población',
+                    font: { weight: 700, size: 13 }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
+                ticks: {
+                    callback: function(value) {
+                        return formatNumber(Math.abs(value));
                     },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            title: {
-                                display: true,
-                                text: 'Población',
-                                font: { weight: 700, size: 13 }
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return formatNumber(Math.abs(value));
-                                },
-                                font: { size: 11, weight: 600 }
-                            },
-                            grid: { color: '#f1f5f9' }
-                        },
-                        y: {
-                            stacked: true,
-                            title: {
-                                display: true,
-                                text: 'Grupos de Edad',
-                                font: { weight: 700, size: 13 }
-                            },
-                            ticks: { font: { size: 11, weight: 600 } },
-                            grid: { color: '#f1f5f9' }
-                        }
+                    font: { size: 11, weight: 600 }
+                },
+                grid: { color: '#f1f5f9' }
+            },
+            y: {
+                stacked: true,
+                reverse: true,       // ← invierte el orden: 0-4 abajo, 80+ arriba
+                title: {
+                    display: true,
+                    text: 'Grupos de Edad',
+                    font: { weight: 700, size: 13 }
+                },
+                ticks: { font: { size: 11, weight: 600 } },
+                grid: { color: '#f1f5f9' }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 20,
+                    font: { size: 12, weight: 600 }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.dataset.label || '';
+                        const value = Math.abs(context.raw);
+                        const percentage = getPercentage(value, centro.poblacionTotal);
+                        return [
+                            `${label}: ${formatNumber(value)}`,
+                            `${percentage}% de la población total`
+                        ];
                     },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                padding: 20,
-                                font: { size: 12, weight: 600 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.dataset.label || '';
-                                    const value = Math.abs(context.raw);
-                                    const percentage = getPercentage(value, centro.poblacionTotal);
-                                    return [
-                                        `${label}: ${formatNumber(value)}`,
-                                        `${percentage}% de la población total`
-                                    ];
-                                },
-                                title: function(context) {
-                                    return `Grupo de edad: ${context[0].label}`;
-                                }
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeInOutQuart'
+                    title: function(context) {
+                        return `Grupo de edad: ${context[0].label}`;
                     }
                 }
-            });
+            }
+        },
+        animation: {
+            duration: 1500,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+
         }
 
         function createPopulationTrendChart(centroId, chartType = 'line') {
